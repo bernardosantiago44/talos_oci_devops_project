@@ -1,5 +1,5 @@
 import type { AssignmentRole } from '../enums/assignment-role.enum';
-import type { UserSummary } from '../../../shared/models/user-summary.model';
+import type { UserSummary } from '@/shared/models/user-summary.model';
 
 export type WorkItemAssignee = {
     id: string;

@@ -1,5 +1,5 @@
-import type { Tag } from '../../../shared/models/tag.model';
-import type { UserSummary } from '../../../shared/models/user-summary.model';
+import type { Tag } from '@/shared/models/tag.model';
+import type { UserSummary } from '@/shared/models/user-summary.model';
 import type { WorkItemPriority } from '../enums/work-item-priority.enum';
 import type { WorkItemStatus } from '../enums/work-item-status.enum';
 import type { WorkItemType } from '../enums/work-item-type.enum';

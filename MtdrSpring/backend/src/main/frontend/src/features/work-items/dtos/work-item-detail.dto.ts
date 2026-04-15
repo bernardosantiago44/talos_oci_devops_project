@@ -1,5 +1,5 @@
-import type { TagDto } from '../../../shared/dtos/tag.dto';
-import type { UserSummaryDto } from '../../../shared/dtos/user-summary.dto';
+import type { TagDto } from '@/shared/dtos/tag.dto';
+import type { UserSummaryDto } from '@/shared/dtos/user-summary.dto';
 import type { BugSeverity } from '../enums/bug-severity.enum';
 import type { AssignmentRole } from '../enums/assignment-role.enum';
 import type { WorkItemPriority } from '../enums/work-item-priority.enum';
