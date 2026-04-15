@@ -87,6 +87,16 @@ export function getTypeBadgeClasses(type: WorkItemType): string {
     }
 }
 
+export function getStatusTextColor(status: WorkItemStatus): string {
+    switch (status) {
+        case 'DONE': return 'text-emerald-300';
+        case 'BLOCKED': return 'text-rose-300';
+        case 'IN_PROGRESS': return 'text-sky-300';
+        case 'TODO': return 'text-zinc-400';
+        default: return 'text-zinc-300';
+    }
+}
+
 export function getStatusDotColor(status: WorkItemStatus): string {
     switch (status) {
         case 'DONE': return 'bg-emerald-400';
@@ -104,7 +114,8 @@ export function calcProgress(logged: number, estimated?: number): number {
 
 export function isOverdue(dueDate?: string, status?: WorkItemStatus): boolean {
     if (!dueDate || status === 'DONE') return false;
-    return new Date(dueDate) < new Date(new Date().toDateString());
+    const today = new Date().toISOString().slice(0, 10);
+    return dueDate < today;
 }
 
 export function formatDate(dateStr?: string): string {

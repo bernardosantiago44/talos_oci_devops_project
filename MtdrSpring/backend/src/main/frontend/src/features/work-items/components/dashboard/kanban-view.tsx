@@ -6,10 +6,10 @@ import {
     formatStatusLabel,
     formatTypeLabel,
     formatPriorityLabel,
-    getStatusBadgeClasses,
     getPriorityBadgeClasses,
     getTypeBadgeClasses,
     getStatusDotColor,
+    getStatusTextColor,
     calcProgress,
     isOverdue,
     formatDate,
@@ -159,12 +159,7 @@ export function KanbanView({ items, onEdit, onComplete, onViewDetail }: KanbanVi
                         {/* Column header */}
                         <div className="flex items-center gap-2 border-b border-zinc-800 px-3 py-2.5">
                             <span className={cx('h-2.5 w-2.5 rounded-full', getStatusDotColor(status))} />
-                            <span
-                                className={cx(
-                                    'text-sm font-semibold',
-                                    getStatusBadgeClasses(status).split(' ').find((c) => c.startsWith('text-')) ?? 'text-zinc-300',
-                                )}
-                            >
+                            <span className={cx('text-sm font-semibold', getStatusTextColor(status))}>
                                 {formatStatusLabel(status)}
                             </span>
                             <span className="ml-auto rounded-full bg-zinc-700/60 px-2 py-0.5 text-xs font-semibold text-zinc-400">

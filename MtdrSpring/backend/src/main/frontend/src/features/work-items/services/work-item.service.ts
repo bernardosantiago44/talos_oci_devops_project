@@ -17,7 +17,7 @@ function resolveAssignees(userIds?: string[]): Assignee[] {
         .map((uid) => mockUsers.find((u) => u.id === uid))
         .filter((u): u is UserSummaryDto => !!u)
         .map((user, i) => ({
-            id: `asg-${crypto.randomUUID()}`,
+            id: `asg-${user.id}-${i}`,
             user,
             role: i === 0 ? 'OWNER' : 'ASSIGNEE',
             assignedAt: new Date().toISOString(),
