@@ -17,10 +17,7 @@ Prioritize:
 ## Read first
 Before making changes, check:
 
-1. `.github/copilot-instructions.md`
-2. `.github/context/project-overview.md`
-3. `.github/context/frontend-boundaries.md`
-4. `.github/context/ui-conventions.md`
+1. `.github/context/project-overview.md`
 
 ## Scope
 You may:
