@@ -111,6 +111,8 @@ function App() {
               <TaskAltIcon />
             </div>
             <h1>My Tasks</h1>
+            <div className="test-tailwind">Is this orange?</div>
+            <div className="bg-red-500">Is this orange?</div>
             <p className="subtitle">Stay organized, stay focused</p>
             <div className="stats-row">
               <div className="stat-chip">
