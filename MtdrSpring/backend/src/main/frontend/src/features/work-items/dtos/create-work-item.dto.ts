@@ -1,7 +1,7 @@
 import type { WorkItemPriority } from '../enums/work-item-priority.enum';
 import type { WorkItemStatus } from '../enums/work-item-status.enum';
 import type { WorkItemType } from '../enums/work-item-type.enum';
-import type { BugSeverity } from '../enums/bug-severity.enum';
+import { BugDetails } from "../model/bug-details.model";
 
 export type CreateWorkItemDto = {
     sprintId?: string;
@@ -23,10 +23,5 @@ export type CreateWorkItemDto = {
         environment?: string;
         reproductionSteps?: string;
     };
-    bugDetails?: {
-        severity?: BugSeverity;
-        environment?: string;
-        isReproducible?: boolean;
-        steps?: string;
-    };
+    bugDetails?: BugDetails;
 };

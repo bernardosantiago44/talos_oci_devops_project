@@ -22,14 +22,7 @@ export type WorkItemDetailDto = {
     updatedAt: string;
     completedAt?: string;
     createdBy: UserSummaryDto;
-    assignees: Array<{
-        id: string;
-        user: UserSummaryDto;
-        role: AssignmentRole;
-        assignedAt: string;
-        unassignedAt?: string;
-        assignedByUserId?: string;
-    }>;
+    assignees: Array<Assignee>;
     tags: TagDto[];
     featureDetails?: {
         businessValue?: string;
@@ -46,3 +39,12 @@ export type WorkItemDetailDto = {
         steps?: string;
     };
 };
+
+export type Assignee = {
+    id: string;
+    user: UserSummaryDto;
+    role: AssignmentRole;
+    assignedAt: string;
+    unassignedAt?: string;
+    assignedByUserId?: string;
+}
