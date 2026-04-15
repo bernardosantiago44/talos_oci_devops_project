@@ -1,240 +1,250 @@
-          /*
-## MyToDoReact version 1.0.
-##
-## Copyright (c) 2022 Oracle, Inc.
-## Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl/
-*/
-/*
- * This is the application main React component. We're using "function"
- * components in this application. No "class" components should be used for
- * consistency.
- * @author  jean.de.lavarene@oracle.com
- */
 import React, { useState, useEffect } from 'react';
 import NewItem from './NewItem';
+import Dashboard from './Dashboard';
 import API_LIST from './API';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { Button, TableBody, CircularProgress } from '@mui/material';
+import TaskAltIcon from '@mui/icons-material/TaskAlt';
+import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
+import BarChartIcon from '@mui/icons-material/BarChart';
+import { CircularProgress } from '@mui/material';
 import Moment from 'react-moment';
 
-/* In this application we're using Function Components with the State Hooks
- * to manage the states. See the doc: https://reactjs.org/docs/hooks-state.html
- * This App component represents the entire app. It renders a NewItem component
- * and two tables: one that lists the todo items that are to be done and another
- * one with the items that are already done.
- */
-function App() {
-    // isLoading is true while waiting for the backend to return the list
-    // of items. We use this state to display a spinning circle:
-    const [isLoading, setLoading] = useState(false);
-    // Similar to isLoading, isInserting is true while waiting for the backend
-    // to insert a new item:
-    const [isInserting, setInserting] = useState(false);
-    // The list of todo items is stored in this state. It includes the "done"
-    // "not-done" items:
-    const [items, setItems] = useState([]);
-    // In case of an error during the API call:
-    const [error, setError] = useState();
+const CARD_COLORS = ['#7C3AED', '#F59E0B', '#14B8A6', '#EC4899', '#3B82F6', '#EF4444'];
 
-    function deleteItem(deleteId) {
-      // console.log("deleteItem("+deleteId+")")
-      fetch(API_LIST+"/"+deleteId, {
-        method: 'DELETE',
-      })
+function App() {
+  const [activeTab, setActiveTab] = useState('tasks');
+  const [isLoading] = useState(false);
+  const [isInserting, setInserting] = useState(false);
+  const [items, setItems] = useState([]);
+  const [, setError] = useState();
+
+  function deleteItem(deleteId) {
+    fetch(API_LIST + "/" + deleteId, { method: 'DELETE' })
       .then(response => {
-        // console.log("response=");
-        // console.log(response);
-        if (response.ok) {
-          // console.log("deleteItem FETCH call is ok");
-          return response;
-        } else {
-          throw new Error('Something went wrong ...');
-        }
+        if (response.ok) return response;
+        throw new Error('Something went wrong ...');
+      })
+      .then(
+        () => { setItems(prev => prev.filter(item => item.id !== deleteId)); },
+        (err) => { setError(err); }
+      );
+  }
+
+  function toggleDone(event, id, description, done) {
+    event.preventDefault();
+    modifyItem(id, description, done).then(
+      () => { reloadOneItem(id); },
+      (err) => { setError(err); }
+    );
+  }
+
+  function reloadOneItem(id) {
+    fetch(API_LIST + "/" + id)
+      .then(response => {
+        if (response.ok) return response.json();
+        throw new Error('Something went wrong ...');
       })
       .then(
         (result) => {
-          const remainingItems = items.filter(item => item.id !== deleteId);
-          setItems(remainingItems);
+          setItems(prev => prev.map(x =>
+            x.id === id ? { ...x, description: result.description, done: result.done } : x
+          ));
         },
-        (error) => {
-          setError(error);
-        }
+        (err) => { setError(err); }
       );
-    }
-    function toggleDone(event, id, description, done) {
-      event.preventDefault();
-      modifyItem(id, description, done).then(
-        (result) => { reloadOneIteam(id); },
-        (error) => { setError(error); }
-      );
-    }
-    function reloadOneIteam(id){
-      fetch(API_LIST+"/"+id)
-        .then(response => {
-          if (response.ok) {
-            return response.json();
-          } else {
-            throw new Error('Something went wrong ...');
-          }
-        })
-        .then(
-          (result) => {
-            const items2 = items.map(
-              x => (x.id === id ? {
-                 ...x,
-                 'description':result.description,
-                 'done': result.done
-                } : x));
-            setItems(items2);
-          },
-          (error) => {
-            setError(error);
-          });
-    }
-    function modifyItem(id, description, done) {
-      // console.log("deleteItem("+deleteId+")")
-      var data = {"description": description, "done": done};
-      return fetch(API_LIST+"/"+id, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
-      })
+  }
+
+  function modifyItem(id, description, done) {
+    return fetch(API_LIST + "/" + id, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ description, done }),
+    }).then(response => {
+      if (response.ok) return response;
+      throw new Error('Something went wrong ...');
+    });
+  }
+
+  useEffect(() => {
+    setItems([
+      { id: 1, description: 'Design new dashboard layout', createdAt: '2026-04-14T09:00:00', done: false },
+      { id: 2, description: 'Fix login bug on mobile', createdAt: '2026-04-14T10:30:00', done: false },
+      { id: 3, description: 'Write unit tests for API', createdAt: '2026-04-13T15:00:00', done: false },
+      { id: 4, description: 'Deploy to staging environment', createdAt: '2026-04-13T11:00:00', done: true },
+      { id: 5, description: 'Review pull request #42', createdAt: '2026-04-12T08:00:00', done: true },
+    ]);
+  }, []);
+
+  function addItem(text) {
+    setInserting(true);
+    fetch(API_LIST, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ description: text }),
+    })
       .then(response => {
-        // console.log("response=");
-        // console.log(response);
-        if (response.ok) {
-          // console.log("deleteItem FETCH call is ok");
-          return response;
-        } else {
-          throw new Error('Something went wrong ...');
-        }
-      });
-    }
-    /*
-    To simulate slow network, call sleep before making API calls.
-    const sleep = (milliseconds) => {
-      return new Promise(resolve => setTimeout(resolve, milliseconds))
-    }
-    */
-    useEffect(() => {
-      setLoading(true);
-      // sleep(5000).then(() => {
-      fetch(API_LIST)
-        .then(response => {
-          if (response.ok) {
-            return response.json();
-          } else {
-            throw new Error('Something went wrong ...');
-          }
-        })
-        .then(
-          (result) => {
-            setLoading(false);
-            setItems(result);
-          },
-          (error) => {
-            setLoading(false);
-            setError(error);
-          });
-
-      //})
-    },
-    // https://en.reactjs.org/docs/faq-ajax.html
-    [] // empty deps array [] means
-       // this useEffect will run once
-       // similar to componentDidMount()
-    );
-    function addItem(text){
-      console.log("addItem("+text+")")
-      setInserting(true);
-      var data = {};
-      console.log(data);
-      data.description = text;
-      fetch(API_LIST, {
-        method: 'POST',
-        // We convert the React state to JSON and send it as the POST body
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data),
-      }).then((response) => {
-        // This API doens't return a JSON document
-        console.log(response);
-        console.log();
-        console.log(response.headers.location);
-        // return response.json();
-        if (response.ok) {
-          return response;
-        } else {
-          throw new Error('Something went wrong ...');
-        }
-      }).then(
+        if (response.ok) return response;
+        throw new Error('Something went wrong ...');
+      })
+      .then(
         (result) => {
-          var id = result.headers.get('location');
-          var newItem = {"id": id, "description": text}
-          setItems([newItem, ...items]);
+          const id = result.headers.get('location');
+          setItems(prev => [{ id, description: text }, ...prev]);
           setInserting(false);
         },
-        (error) => {
-          setInserting(false);
-          setError(error);
-        }
+        (err) => { setInserting(false); setError(err); }
       );
-    }
-    return (
-      <div className="App">
-        <h1>MY TODO LIST</h1>
-        <NewItem addItem={addItem} isInserting={isInserting}/>
-        { error &&
-          <p>Error: {error.message}</p>
-        }
-        { isLoading &&
-          <CircularProgress />
-        }
-        { !isLoading &&
-        <div id="maincontent">
-        <table id="itemlistNotDone" className="itemlist">
-          <TableBody>
-          {items.map(item => (
-            !item.done && (
-            <tr key={item.id}>
-              <td className="description">{item.description}</td>
-              { /*<td>{JSON.stringify(item, null, 2) }</td>*/ }
-              <td className="date"><Moment format="MMM Do hh:mm:ss">{item.createdAt}</Moment></td>
-              <td><Button variant="contained" className="DoneButton" onClick={(event) => toggleDone(event, item.id, item.description, !item.done)} size="small">
-                    Done
-                  </Button></td>
-            </tr>
-          )))}
-          </TableBody>
-        </table>
-        <h2 id="donelist">
-          Done items
-        </h2>
-        <table id="itemlistDone" className="itemlist">
-          <TableBody>
-          {items.map(item => (
-            item.done && (
+  }
 
-            <tr key={item.id}>
-              <td className="description">{item.description}</td>
-              <td className="date"><Moment format="MMM Do hh:mm:ss">{item.createdAt}</Moment></td>
-              <td><Button variant="contained" className="DoneButton" onClick={(event) => toggleDone(event, item.id, item.description, !item.done)} size="small">
-                    Undo
-                  </Button></td>
-              <td><Button startIcon={<DeleteIcon />} variant="contained" className="DeleteButton" onClick={() => deleteItem(item.id)} size="small">
-                    Delete
-                  </Button></td>
-            </tr>
-          )))}
-          </TableBody>
-        </table>
+  const todoItems = items.filter(item => !item.done);
+  const doneItems = items.filter(item => item.done);
+  const donePercent = items.length > 0 ? Math.round((doneItems.length / items.length) * 100) : 0;
+
+  return (
+    <div className="app-wrapper">
+      <div className="layout">
+
+        {/* Left panel — header + stats */}
+        <div className="left-panel">
+          <header className="app-header">
+            <div className="header-logo">
+              <TaskAltIcon />
+            </div>
+            <h1>My Tasks</h1>
+            <p className="subtitle">Stay organized, stay focused</p>
+            <div className="stats-row">
+              <div className="stat-chip">
+                <span className="dot dot-pending" />
+                {todoItems.length} pending
+              </div>
+              <div className="stat-chip">
+                <span className="dot dot-done" />
+                {doneItems.length} completed
+              </div>
+            </div>
+          </header>
+
+          {items.length > 0 && (
+            <div className="progress-wrap">
+              <div className="progress-label">
+                <span>{doneItems.length} of {items.length} tasks completed</span>
+                <span className="pct">{donePercent}%</span>
+              </div>
+              <div className="progress-track">
+                <div className="progress-fill" style={{ width: `${donePercent}%` }} />
+              </div>
+            </div>
+          )}
         </div>
-        }
+
+        {/* Right panel — tasks */}
+        <div className="right-panel">
+          <div className="tabs">
+            <button
+              className={`tab-btn ${activeTab === 'tasks' ? 'active' : ''}`}
+              onClick={() => setActiveTab('tasks')}
+            >
+              <FormatListBulletedIcon style={{ fontSize: 16 }} />
+              Tasks
+            </button>
+            <button
+              className={`tab-btn ${activeTab === 'analytics' ? 'active' : ''}`}
+              onClick={() => setActiveTab('analytics')}
+            >
+              <BarChartIcon style={{ fontSize: 16 }} />
+              Analytics
+            </button>
+          </div>
+
+          {activeTab === 'analytics' ? (
+            <Dashboard />
+          ) : (
+          <div className="app-body">
+            <NewItem addItem={addItem} isInserting={isInserting} />
+
+            {isLoading ? (
+              <div className="loading-wrap">
+                <CircularProgress size={28} style={{ color: '#7C3AED' }} />
+              </div>
+            ) : (
+              <>
+                <section className="tasks-section">
+                  <div className="section-header">
+                    <h2>To Do</h2>
+
+                    <span className="count-badge">{todoItems.length}</span>
+                  </div>
+
+                  {todoItems.length === 0 ? (
+                    <div className="empty-state">All caught up — nothing left to do!</div>
+                  ) : (
+                    todoItems.map((item, i) => (
+                      <div
+                        key={item.id}
+                        className="task-card"
+                        style={{ '--card-accent': CARD_COLORS[i % CARD_COLORS.length] }}
+                      >
+                        <button
+                          className="task-checkbox"
+                          onClick={(e) => toggleDone(e, item.id, item.description, true)}
+                          title="Mark as done"
+                        />
+                        <div className="task-body">
+                          <span className="task-description">{item.description}</span>
+                          {item.createdAt && (
+                            <span className="task-date">
+                              <Moment format="MMM D, h:mm a">{item.createdAt}</Moment>
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </section>
+
+                {doneItems.length > 0 && (
+                  <section className="tasks-section">
+                    <div className="section-header">
+                      <h2>Completed</h2>
+                      <span className="count-badge">{doneItems.length}</span>
+                    </div>
+                    {doneItems.map((item) => (
+                      <div key={item.id} className="task-card is-done">
+                        <button
+                          className="task-checkbox checked"
+                          onClick={(e) => toggleDone(e, item.id, item.description, false)}
+                          title="Mark as to do"
+                        />
+                        <div className="task-body">
+                          <span className="task-description">{item.description}</span>
+                          {item.createdAt && (
+                            <span className="task-date">
+                              <Moment format="MMM D, h:mm a">{item.createdAt}</Moment>
+                            </span>
+                          )}
+                        </div>
+                        <div className="task-actions">
+                          <button
+                            className="action-btn delete"
+                            onClick={() => deleteItem(item.id)}
+                            title="Delete task"
+                          >
+                            <DeleteIcon style={{ fontSize: 16 }} />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </section>
+                )}
+              </>
+            )}
+          </div>
+          )}
+        </div>
 
       </div>
-    );
+    </div>
+  );
 }
+
 export default App;
