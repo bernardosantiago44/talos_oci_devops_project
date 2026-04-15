@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 
-function NewItem(props) {
+function NewItem(props: { isInserting: boolean, addItem: (item: any) => void }) {
   const [item, setItem] = useState('');
 
-  function handleSubmit(e) {
+  function handleSubmit(e: any) {
     e.preventDefault();
     if (!item.trim()) return;
     props.addItem(item);
