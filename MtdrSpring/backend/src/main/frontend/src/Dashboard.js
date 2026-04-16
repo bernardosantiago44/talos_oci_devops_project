@@ -1,136 +1,13 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid,
   Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
+import { CircularProgress } from '@mui/material';
 
-// ── Mock data (swap for real API when backend is ready) ──────────────────────
-const SPRINT_DATA = [
-  { dev: 'Ana G.',    s1: 5, s2: 6, s3: 4, h1: 14, h2: 16, h3: 12 },
-  { dev: 'Carlos L.', s1: 3, s2: 5, s3: 6, h1: 11, h2: 14, h3: 13 },
-  { dev: 'Maria R.',  s1: 7, s2: 4, s3: 5, h1: 18, h2: 15, h3: 18 },
-  { dev: 'Jorge M.',  s1: 4, s2: 7, s3: 3, h1: 10, h2: 16, h3:  9 },
-  { dev: 'Sofia C.',  s1: 6, s2: 5, s3: 8, h1: 15, h2: 14, h3: 17 },
-];
+const SPRINT_COLORS = ['#7C3AED', '#F59E0B', '#14B8A6', '#EC4899', '#3B82F6'];
 
-// ── Derived KPIs ─────────────────────────────────────────────────────────────
-const totalTasks = SPRINT_DATA.reduce((acc, d) => acc + d.s1 + d.s2 + d.s3, 0);
-const totalHours = SPRINT_DATA.reduce((acc, d) => acc + d.h1 + d.h2 + d.h3, 0);
-const avgTasksDev = (totalTasks / SPRINT_DATA.length).toFixed(1);
-const avgHoursDev = (totalHours / SPRINT_DATA.length).toFixed(1);
-
-const KPI_CARDS = [
-  { label: '# Tasks',       value: totalTasks,       color: '#7C3AED', bg: '#EDE9FE' },
-  { label: 'Real Hours',    value: `${totalHours}h`, color: '#F59E0B', bg: '#FEF3C7' },
-  { label: 'Tasks / Dev',   value: avgTasksDev,       color: '#14B8A6', bg: '#CCFBF1' },
-  { label: 'Hours / Dev',   value: `${avgHoursDev}h`,color: '#EC4899', bg: '#FCE7F3' },
-];
-
-// ── Auto-generated insights from data ────────────────────────────────────────
-function generateInsights() {
-  const withTotals = SPRINT_DATA.map(d => ({
-    ...d,
-    totalTasks: d.s1 + d.s2 + d.s3,
-    totalHours: d.h1 + d.h2 + d.h3,
-    efficiency: (d.s1 + d.s2 + d.s3) / (d.h1 + d.h2 + d.h3),
-    trend: d.s3 - d.s1,
-  }));
-
-  const topTasks     = [...withTotals].sort((a, b) => b.totalTasks - a.totalTasks)[0];
-  const topEff       = [...withTotals].sort((a, b) => b.efficiency - a.efficiency)[0];
-  const lowEff       = [...withTotals].sort((a, b) => a.efficiency - b.efficiency)[0];
-  const mostImproved = [...withTotals].sort((a, b) => b.trend - a.trend)[0];
-  const declining    = [...withTotals].sort((a, b) => a.trend - b.trend)[0];
-  const mostHours    = [...withTotals].sort((a, b) => b.totalHours - a.totalHours)[0];
-  const leastHours   = [...withTotals].sort((a, b) => a.totalHours - b.totalHours)[0];
-
-  const taskVariance = Math.max(...withTotals.map(d => d.totalTasks)) -
-                       Math.min(...withTotals.map(d => d.totalTasks));
-
-  const insights = [
-    {
-      type: 'success',
-      tag: 'Top Performer',
-      title: `${topTasks.dev} leads in productivity`,
-      body: `Completed ${topTasks.totalTasks} tasks in total — the highest count on the team.`,
-    },
-    {
-      type: 'info',
-      tag: 'Efficiency',
-      title: `${topEff.dev} is the most efficient`,
-      body: `Achieves ${topEff.efficiency.toFixed(2)} tasks/hour — the best output-to-time ratio on the team.`,
-    },
-    {
-      type: 'warning',
-      tag: 'Watch',
-      title: `${lowEff.dev} has the lowest efficiency`,
-      body: `Only ${lowEff.efficiency.toFixed(2)} tasks/hour. May be facing technical blockers or handling higher-complexity work.`,
-    },
-    mostImproved.trend > 0 ? {
-      type: 'success',
-      tag: 'Positive Trend',
-      title: `${mostImproved.dev} is improving sprint over sprint`,
-      body: `Increased by ${mostImproved.trend} tasks from Sprint 1 to Sprint 3 — a strong learning curve.`,
-    } : null,
-    declining.trend < 0 ? {
-      type: 'danger',
-      tag: 'Declining Trend',
-      title: `${declining.dev} shows a drop in output`,
-      body: `Down ${Math.abs(declining.trend)} tasks from Sprint 1 to Sprint 3. Needs follow-up.`,
-    } : null,
-    taskVariance >= 4 ? {
-      type: 'warning',
-      tag: 'Imbalance',
-      title: `High variance across developers`,
-      body: `There is a ${taskVariance}-task gap between the highest and lowest contributor. Workload may not be evenly distributed.`,
-    } : null,
-    {
-      type: 'info',
-      tag: 'Workload',
-      title: `${mostHours.dev} is logging the most hours`,
-      body: `${mostHours.totalHours}h total vs ${leastHours.totalHours}h for ${leastHours.dev} — a ${mostHours.totalHours - leastHours.totalHours}h gap that may signal uneven task assignment.`,
-    },
-  ].filter(Boolean);
-
-  const actions = [
-    {
-      priority: 'High',
-      color: '#EF4444',
-      bg: '#FEF2F2',
-      text: `Set up pair programming sessions between ${topEff.dev} and ${lowEff.dev} to share best practices and unblock bottlenecks.`,
-    },
-    {
-      priority: 'High',
-      color: '#EF4444',
-      bg: '#FEF2F2',
-      text: declining.trend < 0
-        ? `Schedule a 1-on-1 with ${declining.dev} to identify what caused the drop from Sprint 1 to Sprint 3 before the next sprint begins.`
-        : `Review task distribution — ensure no developer is assigned more than 130% of the team average.`,
-    },
-    {
-      priority: 'Medium',
-      color: '#F59E0B',
-      bg: '#FEF3C7',
-      text: `Rebalance workload between ${mostHours.dev} and ${leastHours.dev} in the next sprint — the ${mostHours.totalHours - leastHours.totalHours}h difference is a burnout risk.`,
-    },
-    {
-      priority: 'Medium',
-      color: '#F59E0B',
-      bg: '#FEF3C7',
-      text: `Use ${topTasks.dev}'s estimates as a baseline reference when assigning story points to the team.`,
-    },
-    {
-      priority: 'Low',
-      color: '#14B8A6',
-      bg: '#CCFBF1',
-      text: `Publicly acknowledge ${mostImproved.dev}'s progress in the retrospective — reinforces a culture of continuous improvement.`,
-    },
-  ];
-
-  return { insights, actions };
-}
-
-// ── Tooltips ─────────────────────────────────────────────────────────────────
+// ── Tooltips ──────────────────────────────────────────────────────────────────
 const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
   return (
@@ -162,10 +39,189 @@ const INSIGHT_STYLES = {
   danger:  { border: '#EF4444', bg: '#FEF2F2', tag: '#B91C1C' },
 };
 
+// ── Transform flat API rows → chart-ready data ────────────────────────────────
+// API rows: [{ DEVELOPER, SPRINT_NAME, TASKS_COMPLETED, REAL_HOURS }, ...]
+// Output:   { sprints: ['Sprint 1', ...], chartData: [{ dev, 'Sprint 1_tasks', ... }] }
+function transformData(rows) {
+  const sprintOrder = [];
+  rows.forEach(r => {
+    if (!sprintOrder.includes(r.SPRINT_NAME)) sprintOrder.push(r.SPRINT_NAME);
+  });
+
+  const devMap = {};
+  rows.forEach(r => {
+    if (!devMap[r.DEVELOPER]) devMap[r.DEVELOPER] = { dev: r.DEVELOPER };
+    devMap[r.DEVELOPER][r.SPRINT_NAME + '_tasks'] = Number(r.TASKS_COMPLETED);
+    devMap[r.DEVELOPER][r.SPRINT_NAME + '_hours'] = parseFloat(Number(r.REAL_HOURS).toFixed(1));
+  });
+
+  return { sprints: sprintOrder, chartData: Object.values(devMap) };
+}
+
+// ── Auto-generated insights ───────────────────────────────────────────────────
+function generateInsights(chartData, sprints) {
+  if (!chartData.length || !sprints.length) return { insights: [], actions: [] };
+
+  const withTotals = chartData.map(d => {
+    const totalTasks = sprints.reduce((s, sp) => s + (d[sp + '_tasks'] || 0), 0);
+    const totalHours = sprints.reduce((s, sp) => s + (d[sp + '_hours'] || 0), 0);
+    const first = sprints[0], last = sprints[sprints.length - 1];
+    return {
+      ...d, totalTasks, totalHours,
+      efficiency: totalHours > 0 ? totalTasks / totalHours : 0,
+      trend: (d[last + '_tasks'] || 0) - (d[first + '_tasks'] || 0),
+    };
+  });
+
+  const topTasks     = [...withTotals].sort((a, b) => b.totalTasks - a.totalTasks)[0];
+  const topEff       = [...withTotals].sort((a, b) => b.efficiency - a.efficiency)[0];
+  const lowEff       = [...withTotals].sort((a, b) => a.efficiency - b.efficiency)[0];
+  const mostImproved = [...withTotals].sort((a, b) => b.trend - a.trend)[0];
+  const declining    = [...withTotals].sort((a, b) => a.trend - b.trend)[0];
+  const mostHours    = [...withTotals].sort((a, b) => b.totalHours - a.totalHours)[0];
+  const leastHours   = [...withTotals].sort((a, b) => a.totalHours - b.totalHours)[0];
+  const taskVariance = Math.max(...withTotals.map(d => d.totalTasks)) -
+                       Math.min(...withTotals.map(d => d.totalTasks));
+  const many = withTotals.length > 1;
+
+  const insights = [
+    {
+      type: 'success', tag: 'Top Performer',
+      title: `${topTasks.dev} leads in productivity`,
+      body: `Completed ${topTasks.totalTasks} tasks in total — the highest count on the team.`,
+    },
+    many && {
+      type: 'info', tag: 'Efficiency',
+      title: `${topEff.dev} is the most efficient`,
+      body: `Achieves ${topEff.efficiency.toFixed(2)} tasks/hour — the best output-to-time ratio on the team.`,
+    },
+    many && lowEff.dev !== topEff.dev && {
+      type: 'warning', tag: 'Watch',
+      title: `${lowEff.dev} has the lowest efficiency`,
+      body: `Only ${lowEff.efficiency.toFixed(2)} tasks/hour. May be facing blockers or handling more complex work.`,
+    },
+    sprints.length > 1 && mostImproved.trend > 0 && {
+      type: 'success', tag: 'Positive Trend',
+      title: `${mostImproved.dev} is improving sprint over sprint`,
+      body: `Increased by ${mostImproved.trend} tasks from ${sprints[0]} to ${sprints[sprints.length - 1]}.`,
+    },
+    sprints.length > 1 && declining.trend < 0 && {
+      type: 'danger', tag: 'Declining Trend',
+      title: `${declining.dev} shows a drop in output`,
+      body: `Down ${Math.abs(declining.trend)} tasks from ${sprints[0]} to ${sprints[sprints.length - 1]}. Needs follow-up.`,
+    },
+    taskVariance >= 4 && {
+      type: 'warning', tag: 'Imbalance',
+      title: 'High variance across developers',
+      body: `There is a ${taskVariance}-task gap between the highest and lowest contributor. Workload may not be evenly distributed.`,
+    },
+    many && {
+      type: 'info', tag: 'Workload',
+      title: `${mostHours.dev} is logging the most hours`,
+      body: `${mostHours.totalHours.toFixed(1)}h vs ${leastHours.totalHours.toFixed(1)}h for ${leastHours.dev} — a ${(mostHours.totalHours - leastHours.totalHours).toFixed(1)}h gap.`,
+    },
+  ].filter(Boolean);
+
+  const actions = [
+    many && {
+      priority: 'High', color: '#EF4444', bg: '#FEF2F2',
+      text: `Set up pair programming sessions between ${topEff.dev} and ${lowEff.dev} to share best practices and unblock bottlenecks.`,
+    },
+    sprints.length > 1 && declining.trend < 0 && {
+      priority: 'High', color: '#EF4444', bg: '#FEF2F2',
+      text: `Schedule a 1-on-1 with ${declining.dev} to identify what caused the drop before the next sprint begins.`,
+    },
+    many && {
+      priority: 'Medium', color: '#F59E0B', bg: '#FEF3C7',
+      text: `Rebalance workload between ${mostHours.dev} and ${leastHours.dev} — the ${(mostHours.totalHours - leastHours.totalHours).toFixed(1)}h difference is a burnout risk.`,
+    },
+    {
+      priority: 'Low', color: '#14B8A6', bg: '#CCFBF1',
+      text: sprints.length > 1 && mostImproved.trend > 0
+        ? `Publicly acknowledge ${mostImproved.dev}'s progress in the retrospective — reinforces a culture of continuous improvement.`
+        : `Use ${topTasks.dev}'s estimates as a baseline reference when assigning story points to the team.`,
+    },
+  ].filter(Boolean);
+
+  return { insights, actions };
+}
+
 // ── Component ─────────────────────────────────────────────────────────────────
 function Dashboard() {
-  const { insights, actions } = generateInsights();
+  const [loading, setLoading] = useState(true);
+  const [error,   setError]   = useState(null);
+  const [kpis, setKpis] = useState({ totalTasks: 0, totalHours: 0, avgTasksPerDev: 0, avgHoursPerDev: 0 });
+  const [chartData, setChartData] = useState([]);
+  const [sprints,   setSprints]   = useState([]);
 
+  useEffect(() => {
+    fetch('/analytics/dashboard')
+      .then(res => {
+        if (!res.ok) throw new Error(`Server error ${res.status}`);
+        return res.json();
+      })
+      .then(data => {
+        setKpis(data.kpis);
+        const { sprints: sp, chartData: cd } = transformData(data.chartData);
+        setSprints(sp);
+        setChartData(cd);
+        setLoading(false);
+      })
+      .catch(err => {
+        setError(err.message);
+        setLoading(false);
+      });
+  }, []);
+
+  const KPI_CARDS = [
+    { label: '# Tasks',      value: kpis.totalTasks,              color: '#7C3AED', bg: '#EDE9FE' },
+    { label: 'Real Hours',   value: `${kpis.totalHours}h`,        color: '#F59E0B', bg: '#FEF3C7' },
+    { label: 'Tasks / Dev',  value: kpis.avgTasksPerDev,          color: '#14B8A6', bg: '#CCFBF1' },
+    { label: 'Hours / Dev',  value: `${kpis.avgHoursPerDev}h`,   color: '#EC4899', bg: '#FCE7F3' },
+  ];
+
+  const { insights, actions } = generateInsights(chartData, sprints);
+
+  // ── Loading ────────────────────────────────────────────────────────────────
+  if (loading) {
+    return (
+      <div className="loading-wrap" style={{ paddingTop: 60 }}>
+        <CircularProgress size={32} style={{ color: '#7C3AED' }} />
+      </div>
+    );
+  }
+
+  // ── Error ──────────────────────────────────────────────────────────────────
+  if (error) {
+    return (
+      <div className="empty-state" style={{ paddingTop: 40 }}>
+        <p style={{ color: '#EF4444', fontWeight: 600 }}>Could not load analytics</p>
+        <p style={{ fontSize: 13, marginTop: 8, color: '#9CA3AF' }}>{error}</p>
+      </div>
+    );
+  }
+
+  // ── No data yet ────────────────────────────────────────────────────────────
+  if (chartData.length === 0) {
+    return (
+      <>
+        <div className="kpi-grid">
+          {KPI_CARDS.map(card => (
+            <div className="kpi-card" key={card.label}
+              style={{ '--kpi-color': card.color, '--kpi-bg': card.bg }}>
+              <span className="kpi-value">{card.value}</span>
+              <span className="kpi-label">{card.label}</span>
+            </div>
+          ))}
+        </div>
+        <div className="empty-state" style={{ paddingTop: 32 }}>
+          No completed tasks found yet. Complete tasks and log hours to see analytics.
+        </div>
+      </>
+    );
+  }
+
+  // ── Dashboard ──────────────────────────────────────────────────────────────
   return (
     <div className="dashboard">
 
@@ -180,7 +236,7 @@ function Dashboard() {
         ))}
       </div>
 
-      {/* Chart 1 — Tasks by developer/sprint */}
+      {/* Chart 1 — Tasks completadas por developer/sprint */}
       <div className="chart-card">
         <div className="chart-header">
           <h3>Completed Tasks by Developer</h3>
@@ -188,21 +244,23 @@ function Dashboard() {
         </div>
         <div className="chart-wrap">
           <ResponsiveContainer width="100%" height={260}>
-            <BarChart data={SPRINT_DATA} margin={{ top: 10, right: 8, left: -24, bottom: 0 }} barGap={3} barCategoryGap="28%">
+            <BarChart data={chartData} margin={{ top: 10, right: 8, left: -24, bottom: 0 }} barGap={3} barCategoryGap="28%">
               <CartesianGrid strokeDasharray="3 3" stroke="#EDE9FE" vertical={false} />
               <XAxis dataKey="dev" tick={{ fontSize: 11, fontFamily: 'Poppins', fill: '#6B7280' }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fontSize: 10, fontFamily: 'Poppins', fill: '#9CA3AF' }} axisLine={false} tickLine={false} />
               <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(124,58,237,0.04)' }} />
               <Legend wrapperStyle={{ fontFamily: 'Poppins', fontSize: '11px', paddingTop: '12px' }} />
-              <Bar dataKey="s1" name="Sprint 1" fill="#7C3AED" radius={[6, 6, 0, 0]} maxBarSize={22} />
-              <Bar dataKey="s2" name="Sprint 2" fill="#F59E0B" radius={[6, 6, 0, 0]} maxBarSize={22} />
-              <Bar dataKey="s3" name="Sprint 3" fill="#14B8A6" radius={[6, 6, 0, 0]} maxBarSize={22} />
+              {sprints.map((sprint, i) => (
+                <Bar key={sprint} dataKey={`${sprint}_tasks`} name={sprint}
+                  fill={SPRINT_COLORS[i % SPRINT_COLORS.length]}
+                  radius={[6, 6, 0, 0]} maxBarSize={22} />
+              ))}
             </BarChart>
           </ResponsiveContainer>
         </div>
       </div>
 
-      {/* Chart 2 — Real hours by developer/sprint */}
+      {/* Chart 2 — Horas reales por developer/sprint */}
       <div className="chart-card">
         <div className="chart-header">
           <h3>Real Hours by Developer</h3>
@@ -210,57 +268,63 @@ function Dashboard() {
         </div>
         <div className="chart-wrap">
           <ResponsiveContainer width="100%" height={280}>
-            <BarChart data={SPRINT_DATA} margin={{ top: 10, right: 10, left: -20, bottom: 0 }} barGap={4} barCategoryGap="30%">
+            <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }} barGap={4} barCategoryGap="30%">
               <CartesianGrid strokeDasharray="3 3" stroke="#EDE9FE" vertical={false} />
               <XAxis dataKey="dev" tick={{ fontSize: 12, fontFamily: 'Poppins', fill: '#6B7280' }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fontSize: 11, fontFamily: 'Poppins', fill: '#9CA3AF' }} axisLine={false} tickLine={false} unit="h" />
               <Tooltip content={<HoursTooltip />} cursor={{ fill: 'rgba(124,58,237,0.04)' }} />
               <Legend wrapperStyle={{ fontFamily: 'Poppins', fontSize: '12px', paddingTop: '16px' }} />
-              <Bar dataKey="h1" name="Sprint 1" fill="#7C3AED" radius={[6, 6, 0, 0]} maxBarSize={24} />
-              <Bar dataKey="h2" name="Sprint 2" fill="#F59E0B" radius={[6, 6, 0, 0]} maxBarSize={24} />
-              <Bar dataKey="h3" name="Sprint 3" fill="#14B8A6" radius={[6, 6, 0, 0]} maxBarSize={24} />
+              {sprints.map((sprint, i) => (
+                <Bar key={sprint} dataKey={`${sprint}_hours`} name={sprint}
+                  fill={SPRINT_COLORS[i % SPRINT_COLORS.length]}
+                  radius={[6, 6, 0, 0]} maxBarSize={24} />
+              ))}
             </BarChart>
           </ResponsiveContainer>
         </div>
       </div>
 
       {/* Insights */}
-      <div className="insights-section">
-        <div className="insights-header">
-          <h3>Insights</h3>
-          <p>Patterns automatically detected from the data</p>
+      {insights.length > 0 && (
+        <div className="insights-section">
+          <div className="insights-header">
+            <h3>Insights</h3>
+            <p>Patterns automatically detected from the data</p>
+          </div>
+          <div className="insights-grid">
+            {insights.map((ins, i) => {
+              const s = INSIGHT_STYLES[ins.type];
+              return (
+                <div className="insight-card" key={i}
+                  style={{ '--ins-border': s.border, '--ins-bg': s.bg, '--ins-tag': s.tag }}>
+                  <span className="insight-tag">{ins.tag}</span>
+                  <p className="insight-title">{ins.title}</p>
+                  <p className="insight-body">{ins.body}</p>
+                </div>
+              );
+            })}
+          </div>
         </div>
-        <div className="insights-grid">
-          {insights.map((ins, i) => {
-            const s = INSIGHT_STYLES[ins.type];
-            return (
-              <div className="insight-card" key={i}
-                style={{ '--ins-border': s.border, '--ins-bg': s.bg, '--ins-tag': s.tag }}>
-                <span className="insight-tag">{ins.tag}</span>
-                <p className="insight-title">{ins.title}</p>
-                <p className="insight-body">{ins.body}</p>
-              </div>
-            );
-          })}
-        </div>
-      </div>
+      )}
 
       {/* Improvement Actions */}
-      <div className="insights-section">
-        <div className="insights-header">
-          <h3>Improvement Actions</h3>
-          <p>Concrete recommendations for the next sprint</p>
+      {actions.length > 0 && (
+        <div className="insights-section">
+          <div className="insights-header">
+            <h3>Improvement Actions</h3>
+            <p>Concrete recommendations for the next sprint</p>
+          </div>
+          <div className="actions-list">
+            {actions.map((action, i) => (
+              <div className="action-item" key={i}
+                style={{ '--act-color': action.color, '--act-bg': action.bg }}>
+                <span className="action-priority">{action.priority}</span>
+                <p className="action-text">{action.text}</p>
+              </div>
+            ))}
+          </div>
         </div>
-        <div className="actions-list">
-          {actions.map((action, i) => (
-            <div className="action-item" key={i}
-              style={{ '--act-color': action.color, '--act-bg': action.bg }}>
-              <span className="action-priority">{action.priority}</span>
-              <p className="action-text">{action.text}</p>
-            </div>
-          ))}
-        </div>
-      </div>
+      )}
 
     </div>
   );
