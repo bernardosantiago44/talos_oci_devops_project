@@ -1,10 +1,12 @@
 import type { TagDto } from '@/shared/dtos/tag.dto';
 import type { UserSummaryDto } from '@/shared/dtos/user-summary.dto';
-import type { BugSeverity } from '../enums/bug-severity.enum';
 import type { AssignmentRole } from '../enums/assignment-role.enum';
 import type { WorkItemPriority } from '../enums/work-item-priority.enum';
 import type { WorkItemStatus } from '../enums/work-item-status.enum';
 import type { WorkItemType } from '../enums/work-item-type.enum';
+import type { FeatureDetails } from "@/features/work-items/model/feature-details.model";
+import type { IssueDetails } from "@/features/work-items/model/issue-details.model";
+import type { BugDetails } from "@/features/work-items/model/bug-details.model";
 
 export type WorkItemDetailDto = {
     id: string;
@@ -22,22 +24,11 @@ export type WorkItemDetailDto = {
     updatedAt: string;
     completedAt?: string;
     createdBy: UserSummaryDto;
-    assignees: Array<Assignee>;
+    assignees: Assignee[];
     tags: TagDto[];
-    featureDetails?: {
-        businessValue?: string;
-        acceptanceCriteria?: string;
-    };
-    issueDetails?: {
-        environment?: string;
-        reproductionSteps?: string;
-    };
-    bugDetails?: {
-        severity?: BugSeverity;
-        environment?: string;
-        isReproducible?: boolean;
-        steps?: string;
-    };
+    featureDetails?: FeatureDetails;
+    issueDetails?: IssueDetails;
+    bugDetails?: BugDetails;
 };
 
 export type Assignee = {
