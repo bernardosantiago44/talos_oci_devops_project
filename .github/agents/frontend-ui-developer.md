@@ -46,6 +46,7 @@ You must not:
 - Support loading, empty, error, and populated states where relevant.
 - Keep accessibility in mind: semantic HTML, labels, keyboard navigation, and sensible contrast.
 - Keep styling consistent with the project’s Tailwind and design patterns.
+- For complex pages or heavy state-based interfaces, prefer to use a viewModel in a separate file to avoid big useState soups.
 
 ## UI expectations
 - Design for clarity first, then polish.

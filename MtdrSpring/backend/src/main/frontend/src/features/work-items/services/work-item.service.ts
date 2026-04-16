@@ -2,12 +2,34 @@ import type { ApiResult } from '@/shared/dtos/api-result.dto';
 import type { PagedResult } from '@/shared/dtos/paged-result.dto';
 import { mockApi } from '@/shared/services/mock-api';
 import { mockWorkItems } from '../mock/work-items.mock';
+import { mockUsers } from '@/shared/mock/users.mock';
+import { mockTags } from '@/shared/mock/tags.mock';
 import type { CreateWorkItemDto } from '../dtos/create-work-item.dto';
 import type { UpdateWorkItemDto } from '../dtos/update-work-item.dto';
 import type { Assignee, WorkItemDetailDto } from '../dtos/work-item-detail.dto';
 import type { WorkItemFiltersDto } from '../dtos/work-item-filters.dto';
 import type { WorkItemListItemDto } from '../dtos/work-item-list-item.dto';
-import { UserSummaryDto } from "@/shared/dtos/user-summary.dto";
+import type { UserSummaryDto } from "@/shared/dtos/user-summary.dto";
+
+function resolveAssignees(userIds?: string[]): Assignee[] {
+    if (!userIds?.length) return [];
+    return userIds
+        .map((uid) => mockUsers.find((u) => u.id === uid))
+        .filter((u): u is UserSummaryDto => !!u)
+        .map((user, i) => ({
+            id: `asg-${user.id}-${i}`,
+            user,
+            role: i === 0 ? 'OWNER' : 'ASSIGNEE',
+            assignedAt: new Date().toISOString(),
+        } as Assignee));
+}
+
+function resolveTags(tagIds?: string[]): Array<(typeof mockTags)[number]> {
+    if (!tagIds?.length) return [];
+    return tagIds
+        .map((tid) => mockTags.find((t) => t.id === tid))
+        .filter((tag): tag is (typeof mockTags)[number] => !!tag);
+}
 
 function toListItemDto(item: WorkItemDetailDto): WorkItemListItemDto {
     return {
@@ -121,8 +143,8 @@ export const workItemService = {
                 email: 'bernardo.manager@demo.com',
                 telegramUserId: 'tg_bernardo_manager'
             },
-            assignees: [],
-            tags: [],
+            assignees: resolveAssignees(input.assigneeUserIds),
+            tags: resolveTags(input.tagIds),
             featureDetails: input.featureDetails,
             issueDetails: input.issueDetails,
             bugDetails: input.bugDetails
@@ -145,9 +167,13 @@ export const workItemService = {
 
         const current: WorkItemDetailDto = mockWorkItems[index];
 
+        const { assigneeUserIds, tagIds, ...rest } = input;
+
         const updated: WorkItemDetailDto = {
             ...current,
-            ...input,
+            ...rest,
+            assignees: assigneeUserIds !== undefined ? resolveAssignees(assigneeUserIds) : current.assignees,
+            tags: tagIds !== undefined ? resolveTags(tagIds) : current.tags,
             updatedAt: new Date().toISOString(),
             featureDetails: input.featureDetails ?? current.featureDetails,
             issueDetails: input.issueDetails ?? current.issueDetails,
