@@ -116,7 +116,7 @@ export const useWorkItemsViewModel = () => {
   const handleCompleteFromDetail = useCallback(async (item: WorkItemDetailDto) => {
     await handleComplete(item);
     closeAll();
-  }, [handleEdit, closeAll]);
+  }, [handleComplete, closeAll]);
   
   // --- Final API ---
   return {
