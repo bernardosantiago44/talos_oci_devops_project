@@ -9,7 +9,7 @@ import type { UpdateWorkItemDto } from '../dtos/update-work-item.dto';
 import type { Assignee, WorkItemDetailDto } from '../dtos/work-item-detail.dto';
 import type { WorkItemFiltersDto } from '../dtos/work-item-filters.dto';
 import type { WorkItemListItemDto } from '../dtos/work-item-list-item.dto';
-import { UserSummaryDto } from "@/shared/dtos/user-summary.dto";
+import type { UserSummaryDto } from "@/shared/dtos/user-summary.dto";
 
 function resolveAssignees(userIds?: string[]): Assignee[] {
     if (!userIds?.length) return [];

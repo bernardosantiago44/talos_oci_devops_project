@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import { workItemService } from '../services/work-item.service';
-import { ViewMode } from "@/features/work-items/components/dashboard/dashboard-toolbar";
+import type { ViewMode } from "@/features/work-items/components/dashboard/dashboard-toolbar";
 import type { WorkItemDetailDto } from '../dtos/work-item-detail.dto';
 import type { CreateWorkItemDto } from '../dtos/create-work-item.dto';
 import type { UpdateWorkItemDto } from '../dtos/update-work-item.dto';

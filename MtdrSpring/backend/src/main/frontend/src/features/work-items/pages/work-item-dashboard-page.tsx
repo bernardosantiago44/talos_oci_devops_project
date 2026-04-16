@@ -7,7 +7,8 @@ import { WorkItemListView } from '../components/dashboard/work-item-list-view';
 import { KanbanView } from '../components/dashboard/kanban-view';
 import { WorkItemFormModal } from '../components/dashboard/work-item-form-modal';
 import { WorkItemDetailModal } from '../components/dashboard/work-item-detail-modal';
-import { useWorkItemsViewModel, IWorkItemsViewModel } from "@/features/work-items/viewModels/useWorkItemsViewModel";
+import { useWorkItemsViewModel } from "@/features/work-items/viewModels/useWorkItemsViewModel";
+import type { IWorkItemsViewModel } from "@/features/work-items/viewModels/useWorkItemsViewModel";
 
 export function WorkItemDashboardPage() {
   const viewModel: IWorkItemsViewModel = useWorkItemsViewModel();
