@@ -81,11 +81,11 @@ export const useWorkItemsViewModel = () => {
 
   const handleEdit = useCallback((item: WorkItemDetailDto) => {
     setModals({
-      formOpen: true, 
-      detailOpen: true, 
-      editingItem: item, 
-      detailItem: null // Perhaps this needs to be the item?
-    })
+      formOpen: true,
+      detailOpen: false,
+      editingItem: item,
+      detailItem: null,
+    });
   }, []);
 
   const handleComplete = async (item: WorkItemDetailDto) => {
