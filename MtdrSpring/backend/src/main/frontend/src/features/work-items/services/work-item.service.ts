@@ -24,11 +24,11 @@ function resolveAssignees(userIds?: string[]): Assignee[] {
         } as Assignee));
 }
 
-function resolveTags(tagIds?: string[]) {
+function resolveTags(tagIds?: string[]): Array<(typeof mockTags)[number]> {
     if (!tagIds?.length) return [];
     return tagIds
         .map((tid) => mockTags.find((t) => t.id === tid))
-        .filter(Boolean) as typeof mockTags;
+        .filter((tag): tag is (typeof mockTags)[number] => !!tag);
 }
 
 function toListItemDto(item: WorkItemDetailDto): WorkItemListItemDto {
