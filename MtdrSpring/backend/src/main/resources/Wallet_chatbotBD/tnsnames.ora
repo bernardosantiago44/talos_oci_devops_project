@@ -1,0 +1,10 @@
+chatbotbd_high = (description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.mx-queretaro-1.oraclecloud.com))(connect_data=(service_name=g4bc0d0968a8b72_chatbotbd_high.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))
+
+chatbotbd_medium = (description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.mx-queretaro-1.oraclecloud.com))(connect_data=(service_name=g4bc0d0968a8b72_chatbotbd_medium.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))
+
+chatbotbd_low = (description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.mx-queretaro-1.oraclecloud.com))(connect_data=(service_name=g4bc0d0968a8b72_chatbotbd_low.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))
+
+chatbotbd_tp = (description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.mx-queretaro-1.oraclecloud.com))(connect_data=(service_name=g4bc0d0968a8b72_chatbotbd_tp.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))
+
+chatbotbd_tpurgent = (description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.mx-queretaro-1.oraclecloud.com))(connect_data=(service_name=g4bc0d0968a8b72_chatbotbd_tpurgent.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))
+

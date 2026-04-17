@@ -1,0 +1,11 @@
+{
+	"folders": [
+		{
+			"path": "../../talos_oci_devops_project"
+		},
+		{
+			"path": "."
+		}
+	],
+	"settings": {}
+}
