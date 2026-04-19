@@ -49,3 +49,6 @@ frontend/npm-debug.log*
 frontend/yarn-debug.log*
 frontend/yarn-error.log*
 /MtdrSpring/backend/wallet
+/MtdrSpring/backend/src/main/resources/Wallet_chatbotBD/
+*.gz
+/MtdrSpring/backend/*.log*
