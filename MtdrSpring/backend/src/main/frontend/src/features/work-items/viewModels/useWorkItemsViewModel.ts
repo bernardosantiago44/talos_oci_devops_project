@@ -1,15 +1,20 @@
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import { workItemService } from '../services/work-item.service';
+import { foundationService } from '@/shared/services/foundation.service';
+import type { SprintDto } from '@/shared/services/foundation.service';
 import type { ViewMode } from "@/features/work-items/components/dashboard/dashboard-toolbar";
 import type { WorkItemDetailDto } from '../dtos/work-item-detail.dto';
 import type { CreateWorkItemDto } from '../dtos/create-work-item.dto';
 import type { UpdateWorkItemDto } from '../dtos/update-work-item.dto';
 import type { WorkItemStatus } from '../enums/work-item-status.enum';
+import type { UserSummaryDto } from '@/shared/dtos/user-summary.dto';
 
 export const useWorkItemsViewModel = () => {
   // 1. Data State
   const [items, setItems] = useState<WorkItemDetailDto[]>([]);
   const [loading, setLoading] = useState(true);
+  const [users, setUsers] = useState<UserSummaryDto[]>([]);
+  const [sprints, setSprints] = useState<SprintDto[]>([]);
 
   // 2. UI State (Grouped logically)
   const [filters, setFilters] = useState({
@@ -32,8 +37,10 @@ export const useWorkItemsViewModel = () => {
   const loadItems = useCallback(async () => {
     setLoading(true);
     try {
+      // Single API call — the service maps backend rows to WorkItemDetailDto
       const result = await workItemService.getWorkItems({ page: 1, pageSize: 100 });
       if (result.success) {
+        // getWorkItems now returns mapped DTOs directly; fetch full detail set
         const ids = result.data.items.map((i) => i.id);
         const details = await Promise.all(ids.map((id) => workItemService.getWorkItemById(id)));
         const fullItems = details
@@ -46,7 +53,19 @@ export const useWorkItemsViewModel = () => {
     }
   }, []);
 
-  useEffect(() => { loadItems().then(); }, [loadItems]);
+  const loadFoundationData = useCallback(async () => {
+    const [usersResult, sprintsResult] = await Promise.all([
+      foundationService.getUsers(),
+      foundationService.getSprints(),
+    ]);
+    if (usersResult.success) setUsers(usersResult.data);
+    if (sprintsResult.success) setSprints(sprintsResult.data);
+  }, []);
+
+  useEffect(() => {
+    loadFoundationData().then();
+    loadItems().then();
+  }, [loadItems, loadFoundationData]);
 
   // Derived State (SwiftUI "Computed Properties")
   const filteredItems = useMemo(() => {
@@ -126,6 +145,8 @@ export const useWorkItemsViewModel = () => {
     loading,
     viewMode,
     setViewMode,
+    users,
+    sprints,
 
     // UI State
     search: filters.search,

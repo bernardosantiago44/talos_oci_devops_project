@@ -1,5 +1,4 @@
 import { Layers } from 'lucide-react';
-import { mockUsers } from '@/shared/mock/users.mock';
 import { mockTags } from '@/shared/mock/tags.mock';
 import { DashboardSummaryCards } from '../components/dashboard/dashboard-summary-cards';
 import { DashboardToolbar } from '../components/dashboard/dashboard-toolbar';
@@ -47,7 +46,7 @@ export function WorkItemDashboardPage() {
             viewMode={viewModel.viewMode}
             onViewModeChange={viewModel.setViewMode}
             onCreateClick={viewModel.actions.openNew}
-            users={mockUsers}
+            users={viewModel.users}
           />
         </div>
 
@@ -84,7 +83,7 @@ export function WorkItemDashboardPage() {
       <WorkItemFormModal
         isOpen={viewModel.formOpen}
         item={viewModel.editingItem}
-        users={mockUsers}
+        users={viewModel.users}
         tags={mockTags}
         onClose={viewModel.actions.closeAll}
         onCreate={viewModel.actions.handleCreate}

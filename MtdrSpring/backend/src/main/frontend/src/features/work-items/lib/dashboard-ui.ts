@@ -18,6 +18,7 @@ export function getInitials(name: string): string {
 export function formatStatusLabel(status: WorkItemStatus): string {
     switch (status) {
         case 'TODO': return 'Todo';
+        case 'NEW': return 'Todo';
         case 'IN_PROGRESS': return 'In Progress';
         case 'BLOCKED': return 'Blocked';
         case 'DONE': return 'Done';
@@ -124,12 +125,8 @@ export function formatDate(dateStr?: string): string {
     return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
-export function getSprintLabel(sprintId?: string): string {
+export function getSprintLabel(sprintId?: string, sprintMap?: Record<string, string>): string {
     if (!sprintId) return '—';
-    const map: Record<string, string> = {
-        'spr-001': 'Sprint 1',
-        'spr-002': 'Sprint 2',
-        'spr-003': 'Sprint 3',
-    };
-    return map[sprintId] ?? sprintId;
+    if (sprintMap && sprintMap[sprintId]) return sprintMap[sprintId];
+    return sprintId;
 }
