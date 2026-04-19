@@ -18,6 +18,7 @@
         "react-scripts": "5.0.0",
         "recharts": "^2.1.16"
     },
+    "proxy": "http://localhost:8080",
     "scripts": {
         "start": "craco start",
         "build": "craco build"
