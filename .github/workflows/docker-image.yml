@@ -7,9 +7,6 @@ on:
     branches: [ "cicd-setup" ]
     paths: ["MtdrSpring/backend/src/main/java/**"]
 
-env:
-  DOCKER_REGISTRY: ${{ vars.OCI_REGION }}/${{ vars.OCI_TENANCY }}
-
 jobs:
 
   build:
@@ -30,6 +27,7 @@ jobs:
     - name: Build the Docker image
       working-directory: MtdrSpring/backend
       run: |
+        export DOCKER_REGISTRY=${{ vars.OCI_REGION }}/${{ vars.OCI_TENANCY }}
         chmod +x build.sh
         ./build.sh
         echo $DOCKER_REGISTRY
