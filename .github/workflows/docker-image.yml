@@ -37,4 +37,7 @@ jobs:
         DB_URL: ${{ vars.DB_URL }}
         DB_USERNAME: ${{ vars.DB_USERNAME }}
         DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+    
+    - name: Debug file system
+      run: ls -R
         
