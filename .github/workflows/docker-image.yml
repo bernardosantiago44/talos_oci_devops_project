@@ -27,7 +27,7 @@ jobs:
     - name: Build the Docker image
       working-directory: MtdrSpring/backend
       run: |
-        export DOCKER_REGISTRY=${{ vars.OCI_REGION }}/${{ vars.OCI_TENANCY_NAMESPACE }}/${{ OCI_CONTAINER_REGISTRY }}
+        export DOCKER_REGISTRY=${{ vars.OCI_REGION }}/${{ vars.OCI_TENANCY_NAMESPACE }}/${{ vars.OCI_CONTAINER_REGISTRY }}
         chmod +x build.sh
         ./build.sh
         echo $DOCKER_REGISTRY
