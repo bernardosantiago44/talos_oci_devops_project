@@ -8,7 +8,7 @@ on:
     paths: ["MtdrSpring/backend/src/main/java/**"]
 
 env:
-  env_var: ${{ vars.OCI_REGION }}/${{ vars.OCI_TENANCY }}
+  DOCKER_REGISTRY: ${{ vars.OCI_REGION }}/${{ vars.OCI_TENANCY }}
 
 jobs:
 
