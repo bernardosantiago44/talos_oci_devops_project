@@ -39,5 +39,6 @@ jobs:
         DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
     
     - name: Debug file system
+      working-directory: MtdrSpring/backend
       run: ls -R
         
