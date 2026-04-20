@@ -27,16 +27,10 @@ jobs:
     - name: Build the Docker image
       working-directory: MtdrSpring/backend
       run: |
-        export IMAGE_NAME=todolistapp-springboot
-        export IMAGE_VERSION=0.1
         export DOCKER_REGISTRY=${{ vars.OCI_REGION }}/${{ vars.OCI_TENANCY_NAMESPACE }}/${{ vars.OCI_CONTAINER_REGISTRY }}
-        export IMAGE=${DOCKER_REGISTRY}/${IMAGE_NAME}:${IMAGE_VERSION}
-        
-        mvn clean package spring-boot:repackage
-        ls target
-        docker build -f Dockerfile -t $IMAGE .
-        docker push $IMAGE
-        
+        chmod +x build.sh
+        export CI=false
+        ./build.sh
         
       env:
         TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
