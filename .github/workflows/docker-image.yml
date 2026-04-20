@@ -27,18 +27,16 @@ jobs:
         username: ${{ vars.OCI_USERNAME }}
         password: ${{ secrets.OCI_TOKEN }}
 
-    - name: List files for debugging
-      run: ls -R
     - name: Build the Docker image
       working-directory: MtdrSpring/backend
       run: |
         chmod +x build.sh
         ./build.sh
+        echo $DOCKER_REGISTRY
       env:
         TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
         TELEGRAM_BOT_NAME: ${{ vars.TELEGRAM_BOT_NAME }}
         DB_URL: ${{ vars.DB_URL }}
         DB_USERNAME: ${{ vars.DB_USERNAME }}
         DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-        DOCKER_REGISTRY: ${{ vars.DOCKER_REGISTRY }}
         
