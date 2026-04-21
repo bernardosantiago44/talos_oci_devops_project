@@ -86,17 +86,24 @@ export const useWorkItemsViewModel = () => {
     const result = await workItemService.createWorkItem(dto);
     if (result.success) setItems((prev) => [result.data, ...prev]);
   };
-
-  const handleUpdate = async (id: string, dto: UpdateWorkItemDto) => {
+  
+  const handleUpdate = useCallback(async (id: string, dto: UpdateWorkItemDto) => {
     const result = await workItemService.updateWorkItem(id, dto);
+    
     if (result.success && result.data) {
       const updated = result.data;
-      setItems((prev) => prev.map((item) => (item.id === id ? updated : item)));
-      if (modals.detailItem?.id === id) {
-        setModals(m => ({ ...m, detailItem: updated }));
-      }
+      setItems((prev) =>
+        prev.map((item) => (item.id === id ? updated : item))
+      );
+      
+      setModals((prevModals) => {
+        if (prevModals.detailItem?.id === id) {
+          return { ...prevModals, detailItem: updated };
+        }
+        return prevModals;
+      });
     }
-  };
+  }, []);
 
   const handleEdit = useCallback((item: WorkItemDetailDto) => {
     setModals({
@@ -106,13 +113,13 @@ export const useWorkItemsViewModel = () => {
       detailItem: null,
     });
   }, []);
-
-  const handleComplete = async (item: WorkItemDetailDto) => {
+  
+  const handleComplete = useCallback(async (item: WorkItemDetailDto) => {
     await handleUpdate(item.id, {
       status: 'DONE',
       completedAt: new Date().toISOString()
     });
-  };
+  }, [handleUpdate]);
 
   // UI Navigation / Modal Handlers
   const openNew = () =>
@@ -123,9 +130,12 @@ export const useWorkItemsViewModel = () => {
 
   const openDetail = (item: WorkItemDetailDto) =>
     setModals({ ...modals, detailItem: item, detailOpen: true });
-
-  const closeAll = () =>
-    setModals({ ...modals, formOpen: false, detailOpen: false, editingItem: null, detailItem: null });
+  
+  const closeAll = useCallback(() => {
+    setModals(prev => ({
+      ...prev, formOpen: false, detailOpen: false, editingItem: null, detailItem: null
+    }));
+  }, []);
 
   const handleEditFromDetail = useCallback((item: WorkItemDetailDto) => {
     closeAll();
