@@ -1,0 +1,47 @@
+{
+    "name": "todolistapp-react",
+    "version": "0.1.0",
+    "private": true,
+    "dependencies": {
+        "@craco/craco": "^7.1.0",
+        "@emotion/react": "^11.9.0",
+        "@emotion/styled": "^11.8.1",
+        "@mui/icons-material": "^5.8.0",
+        "@mui/material": "^5.8.0",
+        "@mui/styles": "^5.7.0",
+        "lucide-react": "^1.8.0",
+        "moment": "^2.29.3",
+        "react": "^17.0.2",
+        "react-dom": "^17.0.2",
+        "react-moment": "^1.1.2",
+        "react-scripts": "5.0.0",
+        "recharts": "^2.1.16"
+    },
+    "proxy": "http://localhost:8080",
+    "scripts": {
+        "start": "craco start",
+        "build": "craco build"
+    },
+    "eslintConfig": {
+        "extends": "react-app"
+    },
+    "browserslist": [
+        "last 5 versions"
+    ],
+    "homepage": ".",
+    "devDependencies": {
+        "autoprefixer": "^10.5.0",
+        "postcss": "^8.5.10",
+        "tailwindcss": "^3.4.19",
+        "typescript": "~4.9.5"
+    },
+    "overrides": {
+        "nth-check": ">=2.0.1",
+        "resolve-url-loader": {
+            "postcss": ">=8.4.31"
+        },
+        "serialize-javascript": ">=7.0.5",
+        "@tootallnate/once": ">=3.0.1",
+        "underscore": ">=1.13.8"
+    }
+}
