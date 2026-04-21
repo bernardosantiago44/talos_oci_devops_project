@@ -18,22 +18,28 @@ function sed_i(){
 export -f sed_i
 
 # Java Home
-# -d true if file is a directory, so it's testing if this directory exists, if it does
-# we are on Mac doing local dev
 function set_javahome(){
-  if test -d ~/graalvm-community-openjdk-22.0.2+9.1/bin; then
-    # We are on Linux
-    export JAVA_HOME=~/graalvm-community-openjdk-22.0.2+9.1;
+  if [[ "$OSTYPE" == "darwin"* ]]; then
+    # MacOS
+    export JAVA_HOME=$(/usr/libexec/java_home -v 17 2>/dev/null || /usr/libexec/java_home)
   else
-    # Assume MacOS
-    export JAVA_HOME=~/graalvm-community-openjdk-22.0.2+9.1/Contents/Home
+    # Linux/Others - keep current logic if directory exists
+    if test -d ~/graalvm-community-openjdk-22.0.2+9.1/bin; then
+      export JAVA_HOME=~/graalvm-community-openjdk-22.0.2+9.1
+    fi
   fi
   export PATH=$JAVA_HOME/bin:$PATH
 }
 
 #set mtdrworkshop_location
-export MTDRWORKSHOP_LOCATION="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
-cd $MTDRWORKSHOP_LOCATION
+if [ -n "$BASH_VERSION" ]; then
+    DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+elif [ -n "$ZSH_VERSION" ]; then
+    DIR="$( cd "$( dirname "${(%):-%x}" )" &> /dev/null && pwd )"
+else
+    DIR="$( cd "$( dirname "$0" )" &> /dev/null && pwd )"
+fi
+export MTDRWORKSHOP_LOCATION="$DIR"
 echo "MTDRWORKSHOP_LOCATION: $MTDRWORKSHOP_LOCATION"
 
 
@@ -69,7 +75,7 @@ alias ingresssecret='kubectl get secrets --all-namespaces | grep istio-ingressga
 alias virtualservices='kubectl get virtualservices --all-namespaces'
 alias deployments='kubectl get deployments --all-namespaces'
 alias mtdrworkshop='echo deployments... ; deployments|grep mtdrworkshop ; echo pods... ; pods|grep mtdrworkshop ; echo services... ; services | grep mtdrworkshop ; echo secrets... ; secrets|grep mtdrworkshop ; echo "other shortcut commands... most can take partial podname as argument, such as [logpod front] or [deletepod order]...  pods  services secrets deployments " ; ls $MTDRWORKSHOP_LOCATION/utils/'
-alias sshpod1='kubectl exec -i -t $(kubectl get pod --namespace mtdrworkshop --selector='app=hud' --output jsonpath='{.items[0].metadata.name}') -n mtdrworkshop -- /bin/bash'
+alias sshpod1='kubectl exec -i -t $(kubectl get pod --namespace mtdrworkshop --selector="app=hud" --output jsonpath="{.items[0].metadata.name}") -n mtdrworkshop -- /bin/bash'
 
 
 export PATH=$PATH:$MTDRWORKSHOP_LOCATION/utils/
