@@ -61,7 +61,7 @@ jobs:
       - name: Deploy to OKE
         working-directory: MtdrSpring/backend
         run: |
-          cp ./resources/todolistapp-springboot.yaml ./ready-to-deploy.yaml
+          cp ./src/main/resources/todolistapp-springboot.yaml ./ready-to-deploy.yaml
           sed -i "s|%DOCKER_REGISTRY%|${{ env.DOCKER_REGISTRY }}|g" ./ready-to-deploy.yaml
           sed -i "s|%OCI_REGION%|${{ vars.OCI_CLI_REGION }}|g" ./ready-to-deploy.yaml
           sed -i "s|%TODO_PDB_NAME%|${{ vars.TODO_PDB_NAME }}|g" ./ready-to-deploy.yaml
