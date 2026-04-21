@@ -56,7 +56,7 @@ jobs:
           OCI_CLI_TENANCY: ${{ vars.OCI_CLI_TENANCY }}
           OCI_CLI_FINGERPRINT: ${{ secrets.OCI_CLI_FINGERPRINT }}
           OCI_CLI_KEY_CONTENT: ${{ secrets.OCI_CLI_KEY_CONTENT }}
-          OCI_CLI_REGION: ${{ vars.OCI_REGION }}
+          OCI_CLI_REGION: ${{ vars.OCI_CLI_REGION }}
 
       - name: Deploy to OKE
         working-directory: MtdrSpring/backend
