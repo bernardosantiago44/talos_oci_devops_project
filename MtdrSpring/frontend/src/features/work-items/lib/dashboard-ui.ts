@@ -49,62 +49,62 @@ export function formatPriorityLabel(priority: WorkItemPriority): string {
 export function getStatusBadgeClasses(status: WorkItemStatus): string {
     switch (status) {
         case 'DONE':
-            return 'border-emerald-400/30 bg-emerald-500/15 text-emerald-300';
+            return 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-400/30 dark:bg-emerald-500/15 dark:text-emerald-300';
         case 'BLOCKED':
-            return 'border-rose-400/30 bg-rose-500/15 text-rose-300';
+            return 'border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-400/30 dark:bg-rose-500/15 dark:text-rose-300';
         case 'IN_PROGRESS':
-            return 'border-sky-400/30 bg-sky-500/15 text-sky-300';
+            return 'border-sky-200 bg-sky-50 text-sky-700 dark:border-sky-400/30 dark:bg-sky-500/15 dark:text-sky-300';
         case 'TODO':
         default:
-            return 'border-zinc-400/30 bg-zinc-500/15 text-zinc-400';
+            return 'border-zinc-200 bg-zinc-100 text-zinc-600 dark:border-zinc-400/30 dark:bg-zinc-500/15 dark:text-zinc-400';
     }
 }
 
 export function getPriorityBadgeClasses(priority: WorkItemPriority): string {
     switch (priority) {
         case 'CRITICAL':
-            return 'border-rose-400/30 bg-rose-500/15 text-rose-300';
+            return 'border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-400/30 dark:bg-rose-500/15 dark:text-rose-300';
         case 'HIGH':
-            return 'border-amber-400/30 bg-amber-500/15 text-amber-300';
+            return 'border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-400/30 dark:bg-amber-500/15 dark:text-amber-300';
         case 'MEDIUM':
-            return 'border-violet-400/30 bg-violet-500/15 text-violet-300';
+            return 'border-violet-200 bg-violet-50 text-violet-700 dark:border-violet-400/30 dark:bg-violet-500/15 dark:text-violet-300';
         case 'LOW':
         default:
-            return 'border-zinc-400/30 bg-zinc-500/15 text-zinc-400';
+            return 'border-zinc-200 bg-zinc-100 text-zinc-500 dark:border-zinc-400/30 dark:bg-zinc-500/15 dark:text-zinc-400';
     }
 }
 
 export function getTypeBadgeClasses(type: WorkItemType): string {
     switch (type) {
         case 'FEATURE':
-            return 'border-cyan-400/30 bg-cyan-500/15 text-cyan-300';
+            return 'border-cyan-200 bg-cyan-50 text-cyan-700 dark:border-cyan-400/30 dark:bg-cyan-500/15 dark:text-cyan-300';
         case 'BUG':
-            return 'border-rose-400/30 bg-rose-500/15 text-rose-300';
+            return 'border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-400/30 dark:bg-rose-500/15 dark:text-rose-300';
         case 'ISSUE':
-            return 'border-orange-400/30 bg-orange-500/15 text-orange-300';
+            return 'border-orange-200 bg-orange-50 text-orange-700 dark:border-orange-400/30 dark:bg-orange-500/15 dark:text-orange-300';
         case 'TASK':
         default:
-            return 'border-indigo-400/30 bg-indigo-500/15 text-indigo-300';
+            return 'border-indigo-200 bg-indigo-50 text-indigo-700 dark:border-indigo-400/30 dark:bg-indigo-500/15 dark:text-indigo-300';
     }
 }
 
 export function getStatusTextColor(status: WorkItemStatus): string {
     switch (status) {
-        case 'DONE': return 'text-emerald-300';
-        case 'BLOCKED': return 'text-rose-300';
-        case 'IN_PROGRESS': return 'text-sky-300';
-        case 'TODO': return 'text-zinc-400';
-        default: return 'text-zinc-300';
+        case 'DONE': return 'text-emerald-600 dark:text-emerald-300';
+        case 'BLOCKED': return 'text-rose-600 dark:text-rose-300';
+        case 'IN_PROGRESS': return 'text-sky-600 dark:text-sky-300';
+        case 'TODO': return 'text-zinc-500 dark:text-zinc-400';
+        default: return 'text-zinc-500 dark:text-zinc-300';
     }
 }
 
 export function getStatusDotColor(status: WorkItemStatus): string {
     switch (status) {
-        case 'DONE': return 'bg-emerald-400';
-        case 'BLOCKED': return 'bg-rose-400';
-        case 'IN_PROGRESS': return 'bg-sky-400';
-        case 'TODO': return 'bg-zinc-500';
-        default: return 'bg-zinc-500';
+        case 'DONE': return 'bg-emerald-500 dark:bg-emerald-400';
+        case 'BLOCKED': return 'bg-rose-500 dark:bg-rose-400';
+        case 'IN_PROGRESS': return 'bg-sky-500 dark:bg-sky-400';
+        case 'TODO': return 'bg-zinc-400 dark:bg-zinc-500';
+        default: return 'bg-zinc-400 dark:bg-zinc-500';
     }
 }
 

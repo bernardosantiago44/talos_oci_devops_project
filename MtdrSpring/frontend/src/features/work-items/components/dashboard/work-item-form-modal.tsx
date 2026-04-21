@@ -61,7 +61,7 @@ const SPRINT_OPTIONS = [
 ];
 
 function Label({ children }: { children: React.ReactNode }) {
-    return <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-zinc-400">{children}</label>;
+    return <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">{children}</label>;
 }
 
 function Input({ value, onChange, placeholder, type = 'text' }: {
@@ -76,7 +76,7 @@ function Input({ value, onChange, placeholder, type = 'text' }: {
             value={value}
             onChange={(e) => onChange(e.target.value)}
             placeholder={placeholder}
-            className="w-full rounded-xl border border-zinc-700/60 bg-zinc-800/60 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-600 outline-none focus:border-sky-500/60 focus:ring-1 focus:ring-sky-500/30"
+            className="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-800 placeholder-zinc-400 outline-none focus:border-sky-400/60 focus:ring-1 focus:ring-sky-400/30 dark:border-zinc-700/60 dark:bg-zinc-800/60 dark:text-zinc-200 dark:placeholder-zinc-600 dark:focus:border-sky-500/60 dark:focus:ring-sky-500/30"
         />
     );
 }
@@ -90,7 +90,7 @@ function Select({ value, onChange, children }: {
         <select
             value={value}
             onChange={(e) => onChange(e.target.value)}
-            className="w-full rounded-xl border border-zinc-700/60 bg-zinc-800/60 px-3 py-2 text-sm text-zinc-200 outline-none focus:border-sky-500/60 focus:ring-1 focus:ring-sky-500/30"
+            className="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-800 outline-none focus:border-sky-400/60 focus:ring-1 focus:ring-sky-400/30 dark:border-zinc-700/60 dark:bg-zinc-800/60 dark:text-zinc-200 dark:focus:border-sky-500/60 dark:focus:ring-sky-500/30"
         >
             {children}
         </select>
@@ -202,21 +202,21 @@ export function WorkItemFormModal({
         >
             {/* Overlay */}
             <div
-                className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+                className="absolute inset-0 bg-black/50 backdrop-blur-sm dark:bg-black/70"
                 onClick={onClose}
             />
 
             {/* Panel */}
-            <div className="relative z-10 w-full max-w-2xl rounded-2xl border border-zinc-700 bg-zinc-900 shadow-2xl">
+            <div className="relative z-10 w-full max-w-2xl rounded-2xl border border-zinc-200 bg-white shadow-xl dark:border-zinc-700 dark:bg-zinc-900 dark:shadow-2xl">
                 {/* Header */}
-                <div className="flex items-center justify-between border-b border-zinc-800 px-6 py-4">
-                    <h2 className="text-base font-semibold text-zinc-100">
+                <div className="flex items-center justify-between border-b border-zinc-100 px-6 py-4 dark:border-zinc-800">
+                    <h2 className="text-base font-semibold text-zinc-900 dark:text-zinc-100">
                         {isEditing ? 'Edit Task' : 'New Task'}
                     </h2>
                     <button
                         type="button"
                         onClick={onClose}
-                        className="rounded-lg p-1.5 text-zinc-500 transition-colors hover:bg-zinc-800 hover:text-zinc-200"
+                        className="rounded-lg p-1.5 text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-700 dark:text-zinc-500 dark:hover:bg-zinc-800 dark:hover:text-zinc-200"
                         aria-label="Close"
                     >
                         <X className="h-4 w-4" />
@@ -226,7 +226,7 @@ export function WorkItemFormModal({
                 {/* Form */}
                 <form onSubmit={handleSubmit} className="max-h-[80vh] overflow-y-auto p-6">
                     {error && (
-                        <p className="mb-4 rounded-xl bg-rose-500/10 border border-rose-500/20 px-4 py-2.5 text-sm text-rose-400">
+                        <p className="mb-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm text-rose-600 dark:border-rose-500/20 dark:bg-rose-500/10 dark:text-rose-400">
                             {error}
                         </p>
                     )}
@@ -250,7 +250,7 @@ export function WorkItemFormModal({
                                 onChange={(e) => set('description', e.target.value)}
                                 placeholder="Describe the task…"
                                 rows={3}
-                                className="w-full resize-none rounded-xl border border-zinc-700/60 bg-zinc-800/60 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-600 outline-none focus:border-sky-500/60 focus:ring-1 focus:ring-sky-500/30"
+                                className="w-full resize-none rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-800 placeholder-zinc-400 outline-none focus:border-sky-400/60 focus:ring-1 focus:ring-sky-400/30 dark:border-zinc-700/60 dark:bg-zinc-800/60 dark:text-zinc-200 dark:placeholder-zinc-600 dark:focus:border-sky-500/60 dark:focus:ring-sky-500/30"
                             />
                         </div>
 
@@ -324,8 +324,8 @@ export function WorkItemFormModal({
                                             onClick={() => toggleArrayItem('assigneeUserIds', u.id)}
                                             className={`rounded-xl border px-3 py-1.5 text-sm font-medium transition-colors ${
                                                 selected
-                                                    ? 'border-sky-500/50 bg-sky-500/15 text-sky-300'
-                                                    : 'border-zinc-700/60 bg-zinc-800/60 text-zinc-400 hover:border-zinc-600 hover:text-zinc-200'
+                                                    ? 'border-sky-300 bg-sky-50 text-sky-700 dark:border-sky-500/50 dark:bg-sky-500/15 dark:text-sky-300'
+                                                    : 'border-zinc-200 bg-zinc-50 text-zinc-600 hover:border-zinc-300 hover:text-zinc-800 dark:border-zinc-700/60 dark:bg-zinc-800/60 dark:text-zinc-400 dark:hover:border-zinc-600 dark:hover:text-zinc-200'
                                             }`}
                                         >
                                             {u.name}
@@ -348,8 +348,8 @@ export function WorkItemFormModal({
                                             onClick={() => toggleArrayItem('tagIds', tag.id)}
                                             className={`rounded-xl border px-3 py-1.5 text-sm font-medium transition-colors ${
                                                 selected
-                                                    ? 'border-violet-500/50 bg-violet-500/15 text-violet-300'
-                                                    : 'border-zinc-700/60 bg-zinc-800/60 text-zinc-400 hover:border-zinc-600 hover:text-zinc-200'
+                                                    ? 'border-violet-300 bg-violet-50 text-violet-700 dark:border-violet-500/50 dark:bg-violet-500/15 dark:text-violet-300'
+                                                    : 'border-zinc-200 bg-zinc-50 text-zinc-600 hover:border-zinc-300 hover:text-zinc-800 dark:border-zinc-700/60 dark:bg-zinc-800/60 dark:text-zinc-400 dark:hover:border-zinc-600 dark:hover:text-zinc-200'
                                             }`}
                                         >
                                             #{tag.name}
@@ -365,14 +365,14 @@ export function WorkItemFormModal({
                         <button
                             type="button"
                             onClick={onClose}
-                            className="rounded-xl border border-zinc-700/60 bg-zinc-800/60 px-4 py-2 text-sm font-medium text-zinc-300 transition-colors hover:bg-zinc-700 hover:text-zinc-100"
+                            className="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:border-zinc-700/60 dark:bg-zinc-800/60 dark:text-zinc-300 dark:hover:bg-zinc-700 dark:hover:text-zinc-100"
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
                             disabled={saving}
-                            className="rounded-xl bg-sky-500 px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-sky-400 disabled:opacity-50"
+                            className="rounded-xl bg-sky-500 px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-sky-600 disabled:opacity-50 dark:hover:bg-sky-400"
                         >
                             {saving ? 'Saving…' : isEditing ? 'Save Changes' : 'Create Task'}
                         </button>

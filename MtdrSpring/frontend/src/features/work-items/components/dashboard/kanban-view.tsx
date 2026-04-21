@@ -47,7 +47,7 @@ function KanbanCard({
     const isDone = item.status === 'DONE';
 
     return (
-        <div className="group rounded-xl border border-zinc-800 bg-zinc-900 p-3 transition-all hover:border-zinc-700 hover:shadow-lg hover:shadow-black/20">
+        <div className="group rounded-xl border border-zinc-200 bg-white p-3 transition-all hover:border-zinc-300 hover:shadow-sm dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700 dark:hover:shadow-lg dark:hover:shadow-black/20">
             {/* Type + Priority badges */}
             <div className="flex items-center gap-1.5 flex-wrap">
                 <span
@@ -73,8 +73,8 @@ function KanbanCard({
                 type="button"
                 onClick={() => onViewDetail(item)}
                 className={cx(
-                    'mt-2 block w-full text-left text-sm font-medium leading-snug transition-colors hover:text-sky-300',
-                    isDone ? 'text-zinc-500 line-through' : 'text-zinc-100',
+                    'mt-2 block w-full text-left text-sm font-medium leading-snug transition-colors hover:text-sky-600 dark:hover:text-sky-300',
+                    isDone ? 'text-zinc-400 line-through dark:text-zinc-500' : 'text-zinc-800 dark:text-zinc-100',
                 )}
             >
                 {item.title}
@@ -82,7 +82,7 @@ function KanbanCard({
 
             {/* Due date */}
             {item.dueDate && (
-                <p className={cx('mt-1.5 text-xs', overdue ? 'text-rose-400' : 'text-zinc-500')}>
+                <p className={cx('mt-1.5 text-xs', overdue ? 'text-rose-500 dark:text-rose-400' : 'text-zinc-400 dark:text-zinc-500')}>
                     Due {formatDate(item.dueDate)}
                 </p>
             )}
@@ -90,7 +90,7 @@ function KanbanCard({
             {/* Progress bar */}
             {item.estimatedMinutes && item.estimatedMinutes > 0 && (
                 <div className="mt-2.5">
-                    <div className="h-1 overflow-hidden rounded-full bg-zinc-700/60">
+                    <div className="h-1 overflow-hidden rounded-full bg-zinc-200/60 dark:bg-zinc-700/60">
                         <div
                             className="h-full rounded-full bg-gradient-to-r from-cyan-400 to-sky-500"
                             style={{ width: `${progress}%` }}
@@ -103,13 +103,13 @@ function KanbanCard({
             <div className="mt-3 flex items-center justify-between">
                 <div className="flex -space-x-1.5">
                     {item.assignees.length === 0 && (
-                        <span className="text-xs text-zinc-600">Unassigned</span>
+                        <span className="text-xs text-zinc-400 dark:text-zinc-600">Unassigned</span>
                     )}
                     {item.assignees.slice(0, 3).map((a, i) => (
                         <div
                             key={i}
                             title={a.user.name}
-                            className="flex h-6 w-6 items-center justify-center rounded-full border border-zinc-900 bg-zinc-700 text-[10px] font-semibold text-zinc-200"
+                            className="flex h-6 w-6 items-center justify-center rounded-full border border-white bg-zinc-200 text-[10px] font-semibold text-zinc-700 dark:border-zinc-900 dark:bg-zinc-700 dark:text-zinc-200"
                         >
                             {getInitials(a.user.name)}
                         </div>
@@ -121,7 +121,7 @@ function KanbanCard({
                         type="button"
                         onClick={() => onViewDetail(item)}
                         title="View detail"
-                        className="rounded-md p-1 text-zinc-500 hover:bg-zinc-700 hover:text-zinc-200"
+                        className="rounded-md p-1 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700 dark:text-zinc-500 dark:hover:bg-zinc-700 dark:hover:text-zinc-200"
                     >
                         <Eye className="h-3.5 w-3.5" />
                     </button>
@@ -129,7 +129,7 @@ function KanbanCard({
                         type="button"
                         onClick={() => onEdit(item)}
                         title="Edit"
-                        className="rounded-md p-1 text-zinc-500 hover:bg-zinc-700 hover:text-zinc-200"
+                        className="rounded-md p-1 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700 dark:text-zinc-500 dark:hover:bg-zinc-700 dark:hover:text-zinc-200"
                     >
                         <Pencil className="h-3.5 w-3.5" />
                     </button>
@@ -138,7 +138,7 @@ function KanbanCard({
                             type="button"
                             onClick={() => onComplete(item)}
                             title="Mark done"
-                            className="rounded-md p-1 text-zinc-500 hover:bg-emerald-500/20 hover:text-emerald-400"
+                            className="rounded-md p-1 text-zinc-400 hover:bg-emerald-50 hover:text-emerald-600 dark:text-zinc-500 dark:hover:bg-emerald-500/20 dark:hover:text-emerald-400"
                         >
                             <CheckCircle2 className="h-3.5 w-3.5" />
                         </button>
@@ -155,14 +155,14 @@ export function KanbanView({ items, onEdit, onComplete, onViewDetail }: KanbanVi
             {COLUMNS.map(({ status, label }) => {
                 const colItems = items.filter((i) => i.status === status);
                 return (
-                    <div key={status} className="flex flex-col rounded-2xl border border-zinc-800 bg-zinc-900/30">
+                    <div key={status} className="flex flex-col rounded-2xl border border-zinc-200 bg-zinc-50/50 dark:border-zinc-800 dark:bg-zinc-900/30">
                         {/* Column header */}
-                        <div className="flex items-center gap-2 border-b border-zinc-800 px-3 py-2.5">
+                        <div className="flex items-center gap-2 border-b border-zinc-200 px-3 py-2.5 dark:border-zinc-800">
                             <span className={cx('h-2.5 w-2.5 rounded-full', getStatusDotColor(status))} />
                             <span className={cx('text-sm font-semibold', getStatusTextColor(status))}>
                                 {formatStatusLabel(status)}
                             </span>
-                            <span className="ml-auto rounded-full bg-zinc-700/60 px-2 py-0.5 text-xs font-semibold text-zinc-400">
+                            <span className="ml-auto rounded-full bg-zinc-200/60 px-2 py-0.5 text-xs font-semibold text-zinc-500 dark:bg-zinc-700/60 dark:text-zinc-400">
                                 {colItems.length}
                             </span>
                         </div>
@@ -171,7 +171,7 @@ export function KanbanView({ items, onEdit, onComplete, onViewDetail }: KanbanVi
                         <div className="flex flex-1 flex-col gap-2 p-2 overflow-y-auto max-h-[calc(100vh-320px)]">
                             {colItems.length === 0 && (
                                 <div className="flex flex-1 items-center justify-center py-8">
-                                    <p className="text-xs text-zinc-600">No items</p>
+                                    <p className="text-xs text-zinc-400 dark:text-zinc-600">No items</p>
                                 </div>
                             )}
                             {colItems.map((item) => (

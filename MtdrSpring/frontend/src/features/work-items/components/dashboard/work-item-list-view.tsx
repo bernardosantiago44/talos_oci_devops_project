@@ -38,7 +38,7 @@ function Pill({ children, className }: { children: React.ReactNode; className?: 
 
 function AvatarStack({ names }: { names: string[] }) {
     if (names.length === 0) {
-        return <span className="text-xs text-zinc-500">Unassigned</span>;
+        return <span className="text-xs text-zinc-400 dark:text-zinc-500">Unassigned</span>;
     }
     return (
         <div className="flex -space-x-2">
@@ -46,13 +46,13 @@ function AvatarStack({ names }: { names: string[] }) {
                 <div
                     key={i}
                     title={name}
-                    className="flex h-6 w-6 items-center justify-center rounded-full border border-zinc-900 bg-zinc-700 text-[10px] font-semibold text-zinc-200"
+                    className="flex h-6 w-6 items-center justify-center rounded-full border border-white bg-zinc-200 text-[10px] font-semibold text-zinc-700 dark:border-zinc-900 dark:bg-zinc-700 dark:text-zinc-200"
                 >
                     {getInitials(name)}
                 </div>
             ))}
             {names.length > 3 && (
-                <div className="flex h-6 w-6 items-center justify-center rounded-full border border-zinc-900 bg-zinc-700 text-[10px] font-semibold text-zinc-400">
+                <div className="flex h-6 w-6 items-center justify-center rounded-full border border-white bg-zinc-200 text-[10px] font-semibold text-zinc-500 dark:border-zinc-900 dark:bg-zinc-700 dark:text-zinc-400">
                     +{names.length - 3}
                 </div>
             )}
@@ -63,13 +63,13 @@ function AvatarStack({ names }: { names: string[] }) {
 function ProgressBar({ value }: { value: number }) {
     return (
         <div className="flex items-center gap-2">
-            <div className="h-1.5 w-20 overflow-hidden rounded-full bg-zinc-700">
+            <div className="h-1.5 w-20 overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-700">
                 <div
                     className="h-full rounded-full bg-gradient-to-r from-cyan-400 to-sky-500"
                     style={{ width: `${value}%` }}
                 />
             </div>
-            <span className="text-xs tabular-nums text-zinc-400">{value}%</span>
+            <span className="text-xs tabular-nums text-zinc-500 dark:text-zinc-400">{value}%</span>
         </div>
     );
 }
@@ -77,18 +77,18 @@ function ProgressBar({ value }: { value: number }) {
 export function WorkItemListView({ items, onEdit, onComplete, onViewDetail }: WorkItemListViewProps) {
     if (items.length === 0) {
         return (
-            <div className="flex flex-col items-center justify-center rounded-2xl border border-zinc-800 bg-zinc-900/40 py-16 text-center">
-                <CheckCircle2 className="mb-3 h-10 w-10 text-zinc-600" />
-                <p className="text-base font-medium text-zinc-400">No tasks found</p>
-                <p className="mt-1 text-sm text-zinc-600">Try adjusting your filters or create a new task.</p>
+            <div className="flex flex-col items-center justify-center rounded-2xl border border-zinc-200 bg-zinc-50 py-16 text-center dark:border-zinc-800 dark:bg-zinc-900/40">
+                <CheckCircle2 className="mb-3 h-10 w-10 text-zinc-300 dark:text-zinc-600" />
+                <p className="text-base font-medium text-zinc-500 dark:text-zinc-400">No tasks found</p>
+                <p className="mt-1 text-sm text-zinc-400 dark:text-zinc-600">Try adjusting your filters or create a new task.</p>
             </div>
         );
     }
 
     return (
-        <div className="overflow-hidden rounded-2xl border border-zinc-800">
+        <div className="overflow-hidden rounded-2xl border border-zinc-200 dark:border-zinc-800">
             {/* Table header */}
-            <div className="hidden grid-cols-[minmax(0,3fr)_100px_110px_90px_90px_100px_80px_90px_80px] gap-4 border-b border-zinc-800 bg-zinc-900/60 px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-zinc-500 lg:grid">
+            <div className="hidden grid-cols-[minmax(0,3fr)_100px_110px_90px_90px_100px_80px_90px_80px] gap-4 border-b border-zinc-200 bg-zinc-50 px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-zinc-400 dark:border-zinc-800 dark:bg-zinc-900/60 dark:text-zinc-500 lg:grid">
                 <span>Title</span>
                 <span>Type</span>
                 <span>Status</span>
@@ -100,7 +100,7 @@ export function WorkItemListView({ items, onEdit, onComplete, onViewDetail }: Wo
                 <span className="text-right">Actions</span>
             </div>
 
-            <div className="divide-y divide-zinc-800/80">
+            <div className="divide-y divide-zinc-200/80 dark:divide-zinc-800/80">
                 {items.map((item) => {
                     const progress = calcProgress(item.totalLoggedMinutes, item.estimatedMinutes);
                     const overdue = isOverdue(item.dueDate, item.status);
@@ -110,7 +110,7 @@ export function WorkItemListView({ items, onEdit, onComplete, onViewDetail }: Wo
                     return (
                         <div
                             key={item.id}
-                            className="group flex flex-col gap-3 px-4 py-3 transition-colors hover:bg-zinc-800/40 lg:grid lg:grid-cols-[minmax(0,3fr)_100px_110px_90px_90px_100px_80px_90px_80px] lg:items-center lg:gap-4"
+                            className="group flex flex-col gap-3 px-4 py-3 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/40 lg:grid lg:grid-cols-[minmax(0,3fr)_100px_110px_90px_90px_100px_80px_90px_80px] lg:items-center lg:gap-4"
                         >
                             {/* Title */}
                             <div className="flex min-w-0 flex-col gap-0.5">
@@ -118,14 +118,14 @@ export function WorkItemListView({ items, onEdit, onComplete, onViewDetail }: Wo
                                     type="button"
                                     onClick={() => onViewDetail(item)}
                                     className={cx(
-                                        'truncate text-left text-sm font-medium hover:text-sky-300 transition-colors',
-                                        isDone ? 'text-zinc-500 line-through' : 'text-zinc-100',
+                                        'truncate text-left text-sm font-medium hover:text-sky-600 dark:hover:text-sky-300 transition-colors',
+                                        isDone ? 'text-zinc-400 line-through dark:text-zinc-500' : 'text-zinc-800 dark:text-zinc-100',
                                     )}
                                     title={item.title}
                                 >
                                     {item.title}
                                 </button>
-                                <span className="text-xs text-zinc-600">{item.id}</span>
+                                <span className="text-xs text-zinc-400 dark:text-zinc-600">{item.id}</span>
                             </div>
 
                             {/* Type */}
@@ -150,14 +150,14 @@ export function WorkItemListView({ items, onEdit, onComplete, onViewDetail }: Wo
                             <span
                                 className={cx(
                                     'text-xs',
-                                    overdue ? 'font-medium text-rose-400' : 'text-zinc-400',
+                                    overdue ? 'font-medium text-rose-500 dark:text-rose-400' : 'text-zinc-500 dark:text-zinc-400',
                                 )}
                             >
                                 {formatDate(item.dueDate)}
                             </span>
 
                             {/* Sprint */}
-                            <span className="text-xs text-zinc-500">
+                            <span className="text-xs text-zinc-400 dark:text-zinc-500">
                                 {getSprintLabel(item.sprintId)}
                             </span>
 
@@ -170,7 +170,7 @@ export function WorkItemListView({ items, onEdit, onComplete, onViewDetail }: Wo
                                     type="button"
                                     onClick={() => onViewDetail(item)}
                                     title="View detail"
-                                    className="rounded-lg p-1.5 text-zinc-500 transition-colors hover:bg-zinc-700 hover:text-zinc-200"
+                                    className="rounded-lg p-1.5 text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-700 dark:text-zinc-500 dark:hover:bg-zinc-700 dark:hover:text-zinc-200"
                                 >
                                     <Eye className="h-3.5 w-3.5" />
                                 </button>
@@ -178,7 +178,7 @@ export function WorkItemListView({ items, onEdit, onComplete, onViewDetail }: Wo
                                     type="button"
                                     onClick={() => onEdit(item)}
                                     title="Edit task"
-                                    className="rounded-lg p-1.5 text-zinc-500 transition-colors hover:bg-zinc-700 hover:text-zinc-200"
+                                    className="rounded-lg p-1.5 text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-700 dark:text-zinc-500 dark:hover:bg-zinc-700 dark:hover:text-zinc-200"
                                 >
                                     <Pencil className="h-3.5 w-3.5" />
                                 </button>
@@ -187,7 +187,7 @@ export function WorkItemListView({ items, onEdit, onComplete, onViewDetail }: Wo
                                         type="button"
                                         onClick={() => onComplete(item)}
                                         title="Mark as done"
-                                        className="rounded-lg p-1.5 text-zinc-500 transition-colors hover:bg-emerald-500/20 hover:text-emerald-400"
+                                        className="rounded-lg p-1.5 text-zinc-400 transition-colors hover:bg-emerald-50 hover:text-emerald-600 dark:text-zinc-500 dark:hover:bg-emerald-500/20 dark:hover:text-emerald-400"
                                     >
                                         <CheckCircle2 className="h-3.5 w-3.5" />
                                     </button>

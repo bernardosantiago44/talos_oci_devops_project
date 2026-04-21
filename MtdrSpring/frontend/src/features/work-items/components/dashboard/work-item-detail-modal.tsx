@@ -31,7 +31,7 @@ function DetailRow({ icon, label, children }: {
 }) {
     return (
         <div className="flex items-start gap-3">
-            <div className="mt-0.5 shrink-0 text-zinc-500">{icon}</div>
+            <div className="mt-0.5 shrink-0 text-zinc-400 dark:text-zinc-500">{icon}</div>
             <div className="min-w-0 flex-1">
                 <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">{label}</p>
                 <div className="mt-0.5">{children}</div>
@@ -62,14 +62,14 @@ export function WorkItemDetailModal({
         >
             {/* Overlay */}
             <div
-                className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+                className="absolute inset-0 bg-black/50 backdrop-blur-sm dark:bg-black/70"
                 onClick={onClose}
             />
 
             {/* Panel */}
-            <div className="relative z-10 w-full max-w-xl rounded-2xl border border-zinc-700 bg-zinc-900 shadow-2xl">
+            <div className="relative z-10 w-full max-w-xl rounded-2xl border border-zinc-200 bg-white shadow-xl dark:border-zinc-700 dark:bg-zinc-900 dark:shadow-2xl">
                 {/* Header */}
-                <div className="border-b border-zinc-800 px-6 py-4">
+                <div className="border-b border-zinc-100 px-6 py-4 dark:border-zinc-800">
                     <div className="flex items-start gap-3">
                         <div className="min-w-0 flex-1">
                             <div className="flex flex-wrap gap-1.5">
@@ -98,15 +98,15 @@ export function WorkItemDetailModal({
                                     {formatPriorityLabel(item.priority)}
                                 </span>
                             </div>
-                            <h2 className="mt-2 text-base font-semibold leading-snug text-zinc-100">
+                            <h2 className="mt-2 text-base font-semibold leading-snug text-zinc-900 dark:text-zinc-100">
                                 {item.title}
                             </h2>
-                            <p className="mt-0.5 text-xs text-zinc-600">{item.id}</p>
+                            <p className="mt-0.5 text-xs text-zinc-400 dark:text-zinc-600">{item.id}</p>
                         </div>
                         <button
                             type="button"
                             onClick={onClose}
-                            className="shrink-0 rounded-lg p-1.5 text-zinc-500 transition-colors hover:bg-zinc-800 hover:text-zinc-200"
+                            className="shrink-0 rounded-lg p-1.5 text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-700 dark:text-zinc-500 dark:hover:bg-zinc-800 dark:hover:text-zinc-200"
                             aria-label="Close"
                         >
                             <X className="h-4 w-4" />
@@ -121,19 +121,19 @@ export function WorkItemDetailModal({
                         {item.description && (
                             <div>
                                 <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">Description</p>
-                                <p className="mt-1.5 text-sm leading-relaxed text-zinc-300">
+                                <p className="mt-1.5 text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
                                     {item.description}
                                 </p>
                             </div>
                         )}
 
                         {/* Meta grid */}
-                        <div className="grid gap-4 border-t border-zinc-800 pt-4 sm:grid-cols-2">
+                        <div className="grid gap-4 border-t border-zinc-100 pt-4 dark:border-zinc-800 sm:grid-cols-2">
                             <DetailRow icon={<Calendar className="h-4 w-4" />} label="Due Date">
                                 <span
                                     className={cx(
                                         'text-sm',
-                                        overdue ? 'font-medium text-rose-400' : 'text-zinc-300',
+                                        overdue ? 'font-medium text-rose-500 dark:text-rose-400' : 'text-zinc-700 dark:text-zinc-300',
                                     )}
                                 >
                                     {formatDate(item.dueDate)}
@@ -142,11 +142,11 @@ export function WorkItemDetailModal({
                             </DetailRow>
 
                             <DetailRow icon={<Flag className="h-4 w-4" />} label="Sprint">
-                                <span className="text-sm text-zinc-300">{getSprintLabel(item.sprintId)}</span>
+                                <span className="text-sm text-zinc-700 dark:text-zinc-300">{getSprintLabel(item.sprintId)}</span>
                             </DetailRow>
 
                             <DetailRow icon={<Clock className="h-4 w-4" />} label="Time">
-                                <span className="text-sm text-zinc-300">
+                                <span className="text-sm text-zinc-700 dark:text-zinc-300">
                                     {item.totalLoggedMinutes}
                                     {item.estimatedMinutes ? `/${item.estimatedMinutes}` : ''} min
                                 </span>
@@ -154,13 +154,13 @@ export function WorkItemDetailModal({
 
                             <DetailRow icon={<CheckCircle2 className="h-4 w-4" />} label="Progress">
                                 <div className="flex items-center gap-2">
-                                    <div className="h-1.5 w-24 overflow-hidden rounded-full bg-zinc-700">
+                                    <div className="h-1.5 w-24 overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-700">
                                         <div
                                             className="h-full rounded-full bg-gradient-to-r from-cyan-400 to-sky-500"
                                             style={{ width: `${progress}%` }}
                                         />
                                     </div>
-                                    <span className="text-sm text-zinc-300">{progress}%</span>
+                                    <span className="text-sm text-zinc-700 dark:text-zinc-300">{progress}%</span>
                                 </div>
                             </DetailRow>
                         </div>
@@ -168,20 +168,20 @@ export function WorkItemDetailModal({
                         {/* Assignees */}
                         <DetailRow icon={<Users className="h-4 w-4" />} label="Assignees">
                             {item.assignees.length === 0 ? (
-                                <span className="text-sm text-zinc-500">Unassigned</span>
+                                <span className="text-sm text-zinc-400 dark:text-zinc-500">Unassigned</span>
                             ) : (
                                 <div className="mt-1 flex flex-wrap gap-2">
                                     {item.assignees.map((a) => (
                                         <div
                                             key={a.id}
-                                            className="flex items-center gap-2 rounded-xl border border-zinc-700/60 bg-zinc-800/60 px-2.5 py-1.5"
+                                            className="flex items-center gap-2 rounded-xl border border-zinc-200 bg-zinc-50 px-2.5 py-1.5 dark:border-zinc-700/60 dark:bg-zinc-800/60"
                                         >
-                                            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-zinc-700 text-[10px] font-semibold text-zinc-200">
+                                            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-zinc-200 text-[10px] font-semibold text-zinc-700 dark:bg-zinc-700 dark:text-zinc-200">
                                                 {getInitials(a.user.name)}
                                             </div>
                                             <div>
-                                                <p className="text-xs font-medium text-zinc-200">{a.user.name}</p>
-                                                <p className="text-[10px] text-zinc-500">{a.role}</p>
+                                                <p className="text-xs font-medium text-zinc-800 dark:text-zinc-200">{a.user.name}</p>
+                                                <p className="text-[10px] text-zinc-400 dark:text-zinc-500">{a.role}</p>
                                             </div>
                                         </div>
                                     ))}
@@ -196,7 +196,7 @@ export function WorkItemDetailModal({
                                     {item.tags.map((tag) => (
                                         <span
                                             key={tag.id}
-                                            className="rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-xs font-medium text-zinc-300"
+                                            className="rounded-full border px-2.5 py-0.5 text-xs font-medium"
                                             style={{ borderColor: `${tag.color}40`, color: tag.color }}
                                         >
                                             #{tag.name}
@@ -206,10 +206,10 @@ export function WorkItemDetailModal({
                             </DetailRow>
                         )}
 
-                        {/* Comments placeholder */}
-                        <div className="rounded-xl border border-zinc-800 bg-zinc-800/30 p-4">
-                            <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">Activity</p>
-                            <p className="mt-2 text-sm text-zinc-600">
+                        {/* Activity placeholder */}
+                        <div className="rounded-xl border border-zinc-100 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-800/30">
+                            <p className="text-xs font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">Activity</p>
+                            <p className="mt-2 text-sm text-zinc-400 dark:text-zinc-600">
                                 Comments and activity history will appear here once connected to the backend.
                             </p>
                         </div>
@@ -217,11 +217,11 @@ export function WorkItemDetailModal({
                 </div>
 
                 {/* Footer */}
-                <div className="flex items-center justify-end gap-3 border-t border-zinc-800 px-6 py-4">
+                <div className="flex items-center justify-end gap-3 border-t border-zinc-100 px-6 py-4 dark:border-zinc-800">
                     <button
                         type="button"
                         onClick={() => onEdit(item)}
-                        className="rounded-xl border border-zinc-700/60 bg-zinc-800/60 px-4 py-2 text-sm font-medium text-zinc-300 transition-colors hover:bg-zinc-700 hover:text-zinc-100"
+                        className="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:border-zinc-700/60 dark:bg-zinc-800/60 dark:text-zinc-300 dark:hover:bg-zinc-700 dark:hover:text-zinc-100"
                     >
                         Edit
                     </button>
@@ -229,7 +229,7 @@ export function WorkItemDetailModal({
                         <button
                             type="button"
                             onClick={() => onComplete(item)}
-                            className="rounded-xl bg-emerald-500 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-emerald-400"
+                            className="rounded-xl bg-emerald-500 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-emerald-600 dark:hover:bg-emerald-400"
                         >
                             Mark as Done
                         </button>

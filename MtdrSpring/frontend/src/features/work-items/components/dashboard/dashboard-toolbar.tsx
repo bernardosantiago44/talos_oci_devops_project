@@ -36,13 +36,13 @@ export function DashboardToolbar({
         <div className="flex flex-wrap items-center gap-3">
             {/* Search */}
             <div className="relative min-w-[200px] flex-1">
-                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400 dark:text-zinc-500" />
                 <input
                     type="text"
                     placeholder="Search tasks…"
                     value={search}
                     onChange={(e) => onSearchChange(e.target.value)}
-                    className="w-full rounded-xl border border-zinc-700/60 bg-zinc-800/60 py-2 pl-9 pr-4 text-sm text-zinc-200 placeholder-zinc-500 outline-none focus:border-sky-500/60 focus:ring-1 focus:ring-sky-500/30"
+                    className="w-full rounded-xl border border-zinc-200 bg-white py-2 pl-9 pr-4 text-sm text-zinc-800 placeholder-zinc-400 outline-none focus:border-sky-400/60 focus:ring-1 focus:ring-sky-400/30 dark:border-zinc-700/60 dark:bg-zinc-800/60 dark:text-zinc-200 dark:placeholder-zinc-500 dark:focus:border-sky-500/60 dark:focus:ring-sky-500/30"
                 />
             </div>
 
@@ -50,7 +50,7 @@ export function DashboardToolbar({
             <select
                 value={statusFilter}
                 onChange={(e) => onStatusFilterChange(e.target.value as WorkItemStatus | '')}
-                className="rounded-xl border border-zinc-700/60 bg-zinc-800/60 px-3 py-2 text-sm text-zinc-300 outline-none focus:border-sky-500/60 focus:ring-1 focus:ring-sky-500/30"
+                className="rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-700 outline-none focus:border-sky-400/60 focus:ring-1 focus:ring-sky-400/30 dark:border-zinc-700/60 dark:bg-zinc-800/60 dark:text-zinc-300 dark:focus:border-sky-500/60 dark:focus:ring-sky-500/30"
             >
                 <option value="">All statuses</option>
                 {WORK_ITEM_STATUSES.map((s) => (
@@ -62,7 +62,7 @@ export function DashboardToolbar({
             <select
                 value={assigneeFilter}
                 onChange={(e) => onAssigneeFilterChange(e.target.value)}
-                className="rounded-xl border border-zinc-700/60 bg-zinc-800/60 px-3 py-2 text-sm text-zinc-300 outline-none focus:border-sky-500/60 focus:ring-1 focus:ring-sky-500/30"
+                className="rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-700 outline-none focus:border-sky-400/60 focus:ring-1 focus:ring-sky-400/30 dark:border-zinc-700/60 dark:bg-zinc-800/60 dark:text-zinc-300 dark:focus:border-sky-500/60 dark:focus:ring-sky-500/30"
             >
                 <option value="">All assignees</option>
                 {users.map((u) => (
@@ -71,14 +71,14 @@ export function DashboardToolbar({
             </select>
 
             {/* View toggle */}
-            <div className="flex items-center rounded-xl border border-zinc-700/60 bg-zinc-800/60 p-1">
+            <div className="flex items-center rounded-xl border border-zinc-200 bg-zinc-100 p-1 dark:border-zinc-700/60 dark:bg-zinc-800/60">
                 <button
                     type="button"
                     onClick={() => onViewModeChange('list')}
                     className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
                         viewMode === 'list'
-                            ? 'bg-zinc-700 text-white'
-                            : 'text-zinc-400 hover:text-zinc-200'
+                            ? 'bg-white text-zinc-800 shadow-sm dark:bg-zinc-700 dark:text-white dark:shadow-none'
+                            : 'text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200'
                     }`}
                     title="List view"
                 >
@@ -90,8 +90,8 @@ export function DashboardToolbar({
                     onClick={() => onViewModeChange('kanban')}
                     className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
                         viewMode === 'kanban'
-                            ? 'bg-zinc-700 text-white'
-                            : 'text-zinc-400 hover:text-zinc-200'
+                            ? 'bg-white text-zinc-800 shadow-sm dark:bg-zinc-700 dark:text-white dark:shadow-none'
+                            : 'text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200'
                     }`}
                     title="Kanban view"
                 >
@@ -104,7 +104,7 @@ export function DashboardToolbar({
             <button
                 type="button"
                 onClick={onCreateClick}
-                className="ml-auto flex items-center gap-2 rounded-xl bg-sky-500 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-500/50"
+                className="ml-auto flex items-center gap-2 rounded-xl bg-sky-500 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-sky-600 focus:outline-none focus:ring-2 focus:ring-sky-500/50 dark:hover:bg-sky-400"
             >
                 <Plus className="h-4 w-4" />
                 New Task

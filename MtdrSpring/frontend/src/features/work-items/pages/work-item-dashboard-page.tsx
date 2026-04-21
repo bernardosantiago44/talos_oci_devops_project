@@ -1,4 +1,4 @@
-import { Layers } from 'lucide-react';
+import { Layers, Sun, Moon } from 'lucide-react';
 import { mockTags } from '@/shared/mock/tags.mock';
 import { DashboardSummaryCards } from '../components/dashboard/dashboard-summary-cards';
 import { DashboardToolbar } from '../components/dashboard/dashboard-toolbar';
@@ -8,25 +8,47 @@ import { WorkItemFormModal } from '../components/dashboard/work-item-form-modal'
 import { WorkItemDetailModal } from '../components/dashboard/work-item-detail-modal';
 import { useWorkItemsViewModel } from "@/features/work-items/viewModels/useWorkItemsViewModel";
 import type { IWorkItemsViewModel } from "@/features/work-items/viewModels/useWorkItemsViewModel";
+import { useTheme } from '@/contexts/theme-context';
 
 export function WorkItemDashboardPage() {
   const viewModel: IWorkItemsViewModel = useWorkItemsViewModel();
+  const { theme, toggle } = useTheme();
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100">
+    <div className="min-h-screen bg-zinc-50 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100">
       <div className="mx-auto max-w-screen-xl px-4 py-8 sm:px-6">
 
         {/* Page header */}
         <div className="mb-8 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-sky-500/15 text-sky-400">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-sky-500/15 text-sky-600 dark:text-sky-400">
               <Layers className="h-5 w-5" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-zinc-100">Work Items</h1>
+              <h1 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">Work Items</h1>
               <p className="text-sm text-zinc-500">Sprint 1 · Talos OCI DevOps Project</p>
             </div>
           </div>
+
+          {/* Theme toggle */}
+          <button
+            type="button"
+            onClick={toggle}
+            title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            className="flex items-center gap-2 rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-100 hover:text-zinc-800 dark:border-zinc-700/60 dark:bg-zinc-800/60 dark:text-zinc-300 dark:hover:bg-zinc-700 dark:hover:text-zinc-100"
+          >
+            {theme === 'dark' ? (
+              <>
+                <Sun className="h-4 w-4" />
+                <span>Light</span>
+              </>
+            ) : (
+              <>
+                <Moon className="h-4 w-4" />
+                <span>Dark</span>
+              </>
+            )}
+          </button>
         </div>
 
         {/* Summary cards */}
@@ -51,7 +73,7 @@ export function WorkItemDashboardPage() {
         </div>
 
         {/* Results count */}
-        <p className="mb-3 text-xs text-zinc-500">
+        <p className="mb-3 text-xs text-zinc-500 dark:text-zinc-500">
           {viewModel.loading
             ? 'Loading…'
             : `${viewModel.items.length} of ${viewModel.totalItemCount()} task${viewModel.totalItemCount() !== 1 ? 's' : ''}`}
@@ -60,7 +82,7 @@ export function WorkItemDashboardPage() {
         {/* View area */}
         {viewModel.loading ? (
           <div className="flex items-center justify-center py-24">
-            <div className="h-8 w-8 animate-spin rounded-full border-2 border-zinc-700 border-t-sky-400" />
+            <div className="h-8 w-8 animate-spin rounded-full border-2 border-zinc-200 border-t-sky-500 dark:border-zinc-700 dark:border-t-sky-400" />
           </div>
         ) : viewModel.viewMode === 'list' ? (
           <WorkItemListView
