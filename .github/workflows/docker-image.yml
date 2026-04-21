@@ -59,9 +59,19 @@ jobs:
           OCI_CLI_KEY_CONTENT: ${{ secrets.OCI_CLI_KEY_CONTENT }}
           OCI_CLI_REGION: ${{ vars.OCI_CLI_REGION }}
 
-      - name: Verify Secret Fingerprint
+      - name: Deep Debug OCI
         run: |
-          echo "${{ secrets.OCI_CLI_KEY_CONTENT }}" | openssl rsa -pubout -outform DER | openssl md5 -c
+          echo "Checking OCI CLI Version..."
+          oci --version
+        
+          echo "Testing OCI Auth directly..."
+          oci iam region list --output table
+        env:
+          OCI_CLI_USER: ${{ vars.OCI_CLI_USER }}
+          OCI_CLI_TENANCY: ${{ vars.OCI_CLI_TENANCY }}
+          OCI_CLI_FINGERPRINT: ${{ secrets.OCI_CLI_FINGERPRINT }}
+          OCI_CLI_KEY_CONTENT: ${{ secrets.OCI_CLI_KEY_CONTENT }}
+          OCI_CLI_REGION: ${{ vars.OCI_CLI_REGION }}
 
       - name: Deploy to OKE
         working-directory: MtdrSpring/backend
@@ -74,4 +84,10 @@ jobs:
           kubectl apply -f ./ready-to-deploy.yaml -n mtdrworkshop
           rm ./ready-to-deploy.yaml
           kubectl rollout status deployment/todolistapp-springboot-deployment -n mtdrworkshop
+        env:
+          OCI_CLI_USER: ${{ vars.OCI_CLI_USER }}
+          OCI_CLI_TENANCY: ${{ vars.OCI_CLI_TENANCY }}
+          OCI_CLI_FINGERPRINT: ${{ secrets.OCI_CLI_FINGERPRINT }}
+          OCI_CLI_KEY_CONTENT: ${{ secrets.OCI_CLI_KEY_CONTENT }}
+          OCI_CLI_REGION: ${{ vars.OCI_CLI_REGION }}
 
