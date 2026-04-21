@@ -6,6 +6,8 @@ on:
   pull_request:
     branches: [ "cicd-setup" ]
     paths: ["MtdrSpring/backend/src/main/java/**"]
+env:
+  DOCKER_REGISTRY: ${{ vars.OCI_REGION }}/${{ vars.OCI_TENANCY_NAMESPACE }}/${{ vars.OCI_CONTAINER_REGISTRY }}
 
 jobs:
 
@@ -27,7 +29,7 @@ jobs:
     - name: Build the Docker image
       working-directory: MtdrSpring/backend
       run: |
-        export DOCKER_REGISTRY=${{ vars.OCI_REGION }}/${{ vars.OCI_TENANCY_NAMESPACE }}/${{ vars.OCI_CONTAINER_REGISTRY }}
+        export DOCKER_REGISTRY=$DOCKER_REGISTRY
         chmod +x build.sh
         export CI=false
         ./build.sh
@@ -38,8 +40,32 @@ jobs:
         DB_URL: ${{ vars.DB_URL }}
         DB_USERNAME: ${{ vars.DB_USERNAME }}
         DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-    
-    - name: Debug file system
-      working-directory: MtdrSpring/backend
-      run: ls -R
-        
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Configure Kubectl for OKE
+        uses: oracle-actions/configure-kubectl-oke@v1.5.0
+        with:
+          cluster: ${{ vars.OKE_CLUSTER_OCID }}
+        env:
+          OCI_CLI_USER: ${{ vars.OCI_CLI_USER }}
+          OCI_CLI_TENANCY: ${{ vars.OCI_CLI_TENANCY }}
+          OCI_CLI_FINGERPRINT: ${{ secrets.OCI_CLI_FINGERPRINT }}
+          OCI_CLI_KEY_CONTENT: ${{ secrets.OCI_CLI_KEY_CONTENT }}
+          OCI_CLI_REGION: ${{ vars.OCI_REGION }}
+
+      - name: Deploy to OKE
+        working-directory: MtdrSpring/backend
+        run: |
+          cp ./resources/todolistapp-springboot.yaml ./ready-to-deploy.yaml
+          sed -i "s|%DOCKER_REGISTRY%|${{ env.DOCKER_REGISTRY }}|g" ./ready-to-deploy.yaml
+          sed -i "s|%OCI_REGION%|${{ vars.OCI_CLI_REGION }}|g" ./ready-to-deploy.yaml
+          sed -i "s|%TODO_PDB_NAME%|${{ vars.TODO_PDB_NAME }}|g" ./ready-to-deploy.yaml
+          sed -i "s|%UI_USERNAME%|${{ vars.UI_USERNAME }}|g" ./ready-to-deploy.yaml
+          kubectl apply -f ./ready-to-deploy.yaml -n mtdrworkshop
+          rm ./ready-to-deploy.yaml
+          kubectl rollout status deployment/todolistapp-springboot-deployment -n mtdrworkshop
