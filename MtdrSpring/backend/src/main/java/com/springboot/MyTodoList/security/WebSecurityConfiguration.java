@@ -15,6 +15,7 @@ public class WebSecurityConfiguration {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+            .cors(cors -> cors.configure(http)) // Enable CORS using the CorsConfigurationSource bean
             .authorizeHttpRequests(auth -> auth
                 .anyRequest().permitAll() // Permitir todo sin autenticación
             )
