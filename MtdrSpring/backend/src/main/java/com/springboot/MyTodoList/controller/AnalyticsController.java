@@ -65,6 +65,54 @@ public class AnalyticsController {
         return result;
     }
 
+    @GetMapping("/analytics/velocity")
+    public Map<String, Object> getVelocity() {
+
+        String sql =
+            "SELECT " +
+            "  s.SPRINT_ID  AS sprint_id, " +
+            "  s.NAME       AS sprint_name, " +
+            "  s.STATUS     AS sprint_status, " +
+            "  s.START_DATE, " +
+            "  s.END_DATE, " +
+            "  COUNT(wi.WORK_ITEM_ID) AS total_tasks, " +
+            "  SUM(CASE WHEN wi.STATUS IN ('DONE','COMPLETED','CLOSED') THEN 1 ELSE 0 END) AS completed_tasks " +
+            "FROM CHATBOT_USER.SPRINT s " +
+            "LEFT JOIN CHATBOT_USER.WORK_ITEM wi ON wi.SPRINT_ID = s.SPRINT_ID " +
+            "GROUP BY s.SPRINT_ID, s.NAME, s.STATUS, s.START_DATE, s.END_DATE " +
+            "ORDER BY s.START_DATE DESC";
+
+        List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql);
+
+        List<Map<String, Object>> sprints = new ArrayList<>();
+        for (Map<String, Object> row : rows) {
+            long total     = ((Number) row.get("TOTAL_TASKS")).longValue();
+            long completed = ((Number) row.get("COMPLETED_TASKS")).longValue();
+            double pct     = total == 0 ? 0.0 : round1((double) completed * 100.0 / total);
+
+            Map<String, Object> sprint = new LinkedHashMap<>();
+            sprint.put("sprintId",       row.get("SPRINT_ID"));
+            sprint.put("sprintName",     row.get("SPRINT_NAME"));
+            sprint.put("sprintStatus",   row.get("SPRINT_STATUS"));
+            sprint.put("startDate",      row.get("START_DATE") != null ? row.get("START_DATE").toString() : null);
+            sprint.put("endDate",        row.get("END_DATE")   != null ? row.get("END_DATE").toString()   : null);
+            sprint.put("totalTasks",     total);
+            sprint.put("completedTasks", completed);
+            sprint.put("fulfillmentPct", pct);
+            sprints.add(sprint);
+        }
+
+        long totalAll     = sprints.stream().mapToLong(s -> ((Number) s.get("totalTasks")).longValue()).sum();
+        long completedAll = sprints.stream().mapToLong(s -> ((Number) s.get("completedTasks")).longValue()).sum();
+        double overallPct = totalAll == 0 ? 0.0 : round1((double) completedAll * 100.0 / totalAll);
+
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("target",     84.0);
+        result.put("overallPct", overallPct);
+        result.put("sprints",    sprints);
+        return result;
+    }
+
     @GetMapping("/analytics/debug")
     public Map<String, Object> debug() {
         Map<String, Object> result = new java.util.LinkedHashMap<>();

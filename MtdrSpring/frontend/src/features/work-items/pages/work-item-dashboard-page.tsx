@@ -9,6 +9,7 @@ import { WorkItemDetailModal } from '../components/dashboard/work-item-detail-mo
 import { useWorkItemsViewModel } from "@/features/work-items/viewModels/useWorkItemsViewModel";
 import type { IWorkItemsViewModel } from "@/features/work-items/viewModels/useWorkItemsViewModel";
 import { useTheme } from '@/contexts/theme-context';
+import { VelocityFulfillmentCard } from '../components/dashboard/velocity-fulfillment-card';
 
 export function WorkItemDashboardPage() {
   const viewModel: IWorkItemsViewModel = useWorkItemsViewModel();
@@ -54,6 +55,11 @@ export function WorkItemDashboardPage() {
         {/* Summary cards */}
         <div className="mb-6">
           <DashboardSummaryCards items={viewModel.items} />
+        </div>
+
+        {/* KPI: Velocity Fulfillment */}
+        <div className="mb-6">
+          <VelocityFulfillmentCard />
         </div>
 
         {/* Toolbar */}
