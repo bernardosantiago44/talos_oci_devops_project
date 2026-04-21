@@ -47,8 +47,7 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      - name: Debug 1
-        run: ls -R
+
       - name: Configure Kubectl for OKE
         uses: oracle-actions/configure-kubectl-oke@v1.5.0
         with:
@@ -59,8 +58,11 @@ jobs:
           OCI_CLI_FINGERPRINT: ${{ secrets.OCI_CLI_FINGERPRINT }}
           OCI_CLI_KEY_CONTENT: ${{ secrets.OCI_CLI_KEY_CONTENT }}
           OCI_CLI_REGION: ${{ vars.OCI_CLI_REGION }}
-      - name: Debug 2
-        run: ls -R
+
+      - name: Verify Secret Fingerprint
+        run: |
+          echo "${{ secrets.OCI_CLI_KEY_CONTENT }}" | openssl rsa -pubout -outform DER | openssl md5 -c
+
       - name: Deploy to OKE
         working-directory: MtdrSpring/backend
         run: |
@@ -72,5 +74,4 @@ jobs:
           kubectl apply -f ./ready-to-deploy.yaml -n mtdrworkshop
           rm ./ready-to-deploy.yaml
           kubectl rollout status deployment/todolistapp-springboot-deployment -n mtdrworkshop
-      - name: Debug 3
-        run: ls -R
+
