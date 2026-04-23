@@ -2,7 +2,7 @@ name: Build and publish backend
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "change-image-version" ]
   pull_request:
     branches: [ "main" ]
     paths: ["MtdrSpring/backend/**"]
