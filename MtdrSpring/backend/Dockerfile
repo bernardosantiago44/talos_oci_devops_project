@@ -3,5 +3,6 @@ FROM openjdk:22-jdk
 #COPY src /tmp/src/
 WORKDIR /tmp/
 EXPOSE 8080
+COPY ./wallet wallet
 COPY target/MyTodoList-0.0.1-SNAPSHOT.jar MyTodoList.jar
 ENTRYPOINT ["java","-jar","MyTodoList.jar"]

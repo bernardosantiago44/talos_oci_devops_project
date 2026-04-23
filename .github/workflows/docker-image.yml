@@ -1,0 +1,93 @@
+name: Build and publish backend
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+    paths: ["MtdrSpring/backend/**"]
+env:
+  DOCKER_REGISTRY: ${{ vars.OCI_REGION }}/${{ vars.OCI_TENANCY_NAMESPACE }}/${{ vars.OCI_CONTAINER_REGISTRY }}
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Login to container registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ vars.OCI_REGION }}
+        username: ${{ vars.OCI_USERNAME }}
+        password: ${{ secrets.OCI_TOKEN }}
+
+    - name: Build the Docker image
+      working-directory: MtdrSpring/backend
+      run: |
+        export DOCKER_REGISTRY=$DOCKER_REGISTRY
+        chmod +x build.sh
+        echo ${{ secrets.DB_WALLET }} | base64 -d > wallet.zip
+        unzip wallet.zip -d ./wallet
+        export CI=false
+        ./build.sh
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure Kubectl for OKE
+        uses: oracle-actions/configure-kubectl-oke@v1.5.0
+        with:
+          cluster: ${{ vars.OKE_CLUSTER_OCID }}
+        env:
+          OCI_CLI_USER: ${{ vars.OCI_CLI_USER }}
+          OCI_CLI_TENANCY: ${{ vars.OCI_CLI_TENANCY }}
+          OCI_CLI_FINGERPRINT: ${{ secrets.OCI_CLI_FINGERPRINT }}
+          OCI_CLI_KEY_CONTENT: ${{ secrets.OCI_CLI_KEY_CONTENT }}
+          OCI_CLI_REGION: ${{ vars.OCI_CLI_REGION }}
+
+      - name: Deep Debug OCI
+        run: |
+          echo "Checking OCI CLI Version..."
+          oci --version
+        
+          echo "Testing OCI Auth directly..."
+          oci iam region list --output table
+        env:
+          OCI_CLI_USER: ${{ vars.OCI_CLI_USER }}
+          OCI_CLI_TENANCY: ${{ vars.OCI_CLI_TENANCY }}
+          OCI_CLI_FINGERPRINT: ${{ secrets.OCI_CLI_FINGERPRINT }}
+          OCI_CLI_KEY_CONTENT: ${{ secrets.OCI_CLI_KEY_CONTENT }}
+          OCI_CLI_REGION: ${{ vars.OCI_CLI_REGION }}
+
+      - name: Deploy to OKE
+        working-directory: MtdrSpring/backend
+        run: |
+          cp ./src/main/resources/todolistapp-springboot.yaml ./ready-to-deploy.yaml
+          sed -i "s|%DOCKER_REGISTRY%|${{ env.DOCKER_REGISTRY }}|g" ./ready-to-deploy.yaml
+          sed -i "s|%OCI_REGION%|${{ vars.OCI_CLI_REGION }}|g" ./ready-to-deploy.yaml
+          sed -i "s|%TODO_PDB_NAME%|${{ vars.TODO_PDB_NAME }}|g" ./ready-to-deploy.yaml
+          sed -i "s|%UI_USERNAME%|${{ vars.UI_USERNAME }}|g" ./ready-to-deploy.yaml
+          sed -i "s|%TELEGRAM_BOT_TOKEN%|${{ secrets.TELEGRAM_BOT_TOKEN }}|g" ./ready-to-deploy.yaml
+          sed -i "s|%TELEGRAM_BOT_NAME%|${{ vars.TELEGRAM_BOT_NAME }}|g" ./ready-to-deploy.yaml
+          sed -i "s|%DB_URL%|${{ vars.DB_URL }}|g" ./ready-to-deploy.yaml
+          sed -i "s|%DB_USERNAME%|${{ vars.DB_USERNAME }}|g" ./ready-to-deploy.yaml
+          sed -i "s|%DB_PASSWORD%|${{ secrets.DB_PASSWORD }}|g" ./ready-to-deploy.yaml
+          kubectl apply -f ./ready-to-deploy.yaml -n mtdrworkshop
+          rm ./ready-to-deploy.yaml
+          kubectl rollout status deployment/todolistapp-springboot-deployment -n mtdrworkshop
+        env:
+          OCI_CLI_USER: ${{ vars.OCI_CLI_USER }}
+          OCI_CLI_TENANCY: ${{ vars.OCI_CLI_TENANCY }}
+          OCI_CLI_FINGERPRINT: ${{ secrets.OCI_CLI_FINGERPRINT }}
+          OCI_CLI_KEY_CONTENT: ${{ secrets.OCI_CLI_KEY_CONTENT }}
+          OCI_CLI_REGION: ${{ vars.OCI_CLI_REGION }}
+
