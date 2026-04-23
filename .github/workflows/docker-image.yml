@@ -17,7 +17,7 @@ jobs:
       timestamp: ${{ steps.set-date.outputs.datetime }}
     steps:
       - id: set-date
-        run: echo "datetime=$(date +'%Y-%m-%dT%H:%M:%S')" >> $GITHUB_OUTPUT
+        run: echo "datetime=$(date +'%Y_%m_%dT%H_%M_%S')" >> $GITHUB_OUTPUT
 
   build:
 
