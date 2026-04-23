@@ -3,6 +3,7 @@ name: Build and publish backend
 on:
   push:
     branches: [ "main" ]
+    paths: ["MtdrSpring/backend/**"]
   pull_request:
     branches: [ "main" ]
     paths: ["MtdrSpring/backend/**"]
@@ -11,10 +12,18 @@ env:
 
 jobs:
 
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      timestamp: ${{ steps.set-date.outputs.datetime }}
+    steps:
+      - id: set-date
+        run: echo "datetime=$(date +'%Y_%m_%dT%H_%M_%S')" >> $GITHUB_OUTPUT
+
   build:
 
     runs-on: ubuntu-latest
-
+    needs: setup
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
@@ -30,6 +39,7 @@ jobs:
       working-directory: MtdrSpring/backend
       run: |
         export DOCKER_REGISTRY=$DOCKER_REGISTRY
+        export IMAGE_VERSION=${{ needs.setup.outputs.timestamp }}
         chmod +x build.sh
         echo ${{ secrets.DB_WALLET }} | base64 -d > wallet.zip
         unzip wallet.zip -d ./wallet
@@ -37,7 +47,9 @@ jobs:
         ./build.sh
 
   deploy:
-    needs: build
+    needs: 
+      - build
+      - setup
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -73,6 +85,7 @@ jobs:
         run: |
           cp ./src/main/resources/todolistapp-springboot.yaml ./ready-to-deploy.yaml
           sed -i "s|%DOCKER_REGISTRY%|${{ env.DOCKER_REGISTRY }}|g" ./ready-to-deploy.yaml
+          sed -i "s|%IMAGE_VERSION%|${{ needs.setup.outputs.timestamp }}|g" ./ready-to-deploy.yaml
           sed -i "s|%OCI_REGION%|${{ vars.OCI_CLI_REGION }}|g" ./ready-to-deploy.yaml
           sed -i "s|%TODO_PDB_NAME%|${{ vars.TODO_PDB_NAME }}|g" ./ready-to-deploy.yaml
           sed -i "s|%UI_USERNAME%|${{ vars.UI_USERNAME }}|g" ./ready-to-deploy.yaml
