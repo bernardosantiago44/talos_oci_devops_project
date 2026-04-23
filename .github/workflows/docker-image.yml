@@ -31,6 +31,8 @@ jobs:
       run: |
         export DOCKER_REGISTRY=$DOCKER_REGISTRY
         chmod +x build.sh
+        echo ${{ secrets.DB_WALLET }} | base64 -d > wallet.zip
+        unzip wallet.zip -d ./wallet
         export CI=false
         ./build.sh
         
