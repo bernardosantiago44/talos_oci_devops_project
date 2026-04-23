@@ -35,13 +35,6 @@ jobs:
         unzip wallet.zip -d ./wallet
         export CI=false
         ./build.sh
-        
-      env:
-        TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-        TELEGRAM_BOT_NAME: ${{ vars.TELEGRAM_BOT_NAME }}
-        DB_URL: ${{ vars.DB_URL }}
-        DB_USERNAME: ${{ vars.DB_USERNAME }}
-        DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
 
   deploy:
     needs: build
@@ -83,6 +76,11 @@ jobs:
           sed -i "s|%OCI_REGION%|${{ vars.OCI_CLI_REGION }}|g" ./ready-to-deploy.yaml
           sed -i "s|%TODO_PDB_NAME%|${{ vars.TODO_PDB_NAME }}|g" ./ready-to-deploy.yaml
           sed -i "s|%UI_USERNAME%|${{ vars.UI_USERNAME }}|g" ./ready-to-deploy.yaml
+          sed -i "s|%TELEGRAM_BOT_TOKEN%|${{ secrets.TELEGRAM_BOT_TOKEN }}|g" ./ready-to-deploy.yaml
+          sed -i "s|%TELEGRAM_BOT_NAME%|${{ vars.TELEGRAM_BOT_NAME }}|g" ./ready-to-deploy.yaml
+          sed -i "s|%DB_URL%|${{ vars.DB_URL }}|g" ./ready-to-deploy.yaml
+          sed -i "s|%DB_USERNAME%|${{ vars.DB_USERNAME }}|g" ./ready-to-deploy.yaml
+          sed -i "s|%DB_PASSWORD%|${{ secrets.DB_PASSWORD }}|g" ./ready-to-deploy.yaml
           kubectl apply -f ./ready-to-deploy.yaml -n mtdrworkshop
           rm ./ready-to-deploy.yaml
           kubectl rollout status deployment/todolistapp-springboot-deployment -n mtdrworkshop
