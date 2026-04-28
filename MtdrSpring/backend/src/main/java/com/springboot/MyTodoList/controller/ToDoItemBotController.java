@@ -22,13 +22,13 @@ import org.telegram.telegrambots.meta.generics.TelegramClient;
 
 @Component
 @ConditionalOnExpression("!'${telegram.bot.token:}'.trim().isEmpty()")
-public class ToDoItemBotController  implements SpringLongPollingBot, LongPollingSingleThreadUpdateConsumer {
+public class ToDoItemBotController implements SpringLongPollingBot, LongPollingSingleThreadUpdateConsumer {
 
 	private static final Logger logger = LoggerFactory.getLogger(ToDoItemBotController.class);
 	private ToDoItemService toDoItemService;
 	private DeepSeekService deepSeekService;
 	private final TelegramClient telegramClient;
-	
+
 	private final BotProps botProps;
 
 	@Autowired
@@ -37,16 +37,16 @@ public class ToDoItemBotController  implements SpringLongPollingBot, LongPolling
 	@Value("${telegram.bot.token}")
 	private String telegramBotToken;
 
-
 	@Override
-    public String getBotToken() {
-		if(telegramBotToken != null && !telegramBotToken.trim().isEmpty()){
-        	return telegramBotToken;
-		}else{
+	public String getBotToken() {
+		System.out.println(telegramBotToken);
+		System.out.println(botProps.getToken());
+		if (telegramBotToken != null && !telegramBotToken.trim().isEmpty()) {
+			return telegramBotToken;
+		} else {
 			return botProps.getToken();
 		}
-    }
-
+	}
 
 	public ToDoItemBotController(BotProps bp, ToDoItemService tsvc, DeepSeekService ds) {
 		this.botProps = bp;
@@ -56,31 +56,31 @@ public class ToDoItemBotController  implements SpringLongPollingBot, LongPolling
 	}
 
 	@Override
-    public LongPollingUpdateConsumer getUpdatesConsumer() {
-        return this;
-    }
+	public LongPollingUpdateConsumer getUpdatesConsumer() {
+		return this;
+	}
 
 	@Override
 	public void consume(Update update) {
 
-		if (!update.hasMessage() || !update.getMessage().hasText()) return;
-
-		
+		if (!update.hasMessage() || !update.getMessage().hasText())
+			return;
 
 		String messageTextFromTelegram = update.getMessage().getText();
 		long chatId = update.getMessage().getChatId();
-		String fromUsername = update.getMessage().getFrom() != null ? update.getMessage().getFrom().getUserName() : "unknown";
-		String fromName = update.getMessage().getFrom() != null ? update.getMessage().getFrom().getFirstName() : "unknown";
+		String fromUsername = update.getMessage().getFrom() != null ? update.getMessage().getFrom().getUserName()
+				: "unknown";
+		String fromName = update.getMessage().getFrom() != null ? update.getMessage().getFrom().getFirstName()
+				: "unknown";
 		logger.info("📨 Message from {} (@{}) — chatId: {}", fromName, fromUsername, chatId);
 
 		BotActions actions = new BotActions(telegramClient, toDoItemService, deepSeekService, jdbcTemplate);
 		actions.setRequestText(messageTextFromTelegram);
 		actions.setChatId(chatId);
-		if(actions.getTodoService()==null){
+		if (actions.getTodoService() == null) {
 			logger.info("todosvc error");
 			actions.setTodoService(toDoItemService);
 		}
-
 
 		actions.fnStart();
 		actions.fnDone();
@@ -95,10 +95,8 @@ public class ToDoItemBotController  implements SpringLongPollingBot, LongPolling
 	}
 
 	@AfterBotRegistration
-    public void afterRegistration(BotSession botSession) {
-        System.out.println("Registered bot running state is: " + botSession.isRunning());
-    }
+	public void afterRegistration(BotSession botSession) {
+		System.out.println("Registered bot running state is: " + botSession.isRunning());
+	}
 
 }
-
-

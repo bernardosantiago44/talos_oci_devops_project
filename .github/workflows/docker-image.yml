@@ -2,7 +2,7 @@ name: Build and publish backend
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "resolve-telegram-connection-errors" ]
     paths: ["MtdrSpring/backend/**"]
   pull_request:
     branches: [ "main" ]
