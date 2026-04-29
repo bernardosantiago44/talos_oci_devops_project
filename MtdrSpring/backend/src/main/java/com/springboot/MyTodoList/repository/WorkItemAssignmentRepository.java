@@ -8,6 +8,5 @@ import java.util.List;
 
 @Repository
 public interface WorkItemAssignmentRepository extends JpaRepository<WorkItemAssignment, String> {
-    List<WorkItemAssignment> findByWorkItemId(String workItemId);
-    List<WorkItemAssignment> findByUserId(String userId);
+    List<WorkItemAssignment> findByWorkItem_WorkItemId(String workItemId);
 }

@@ -1,12 +1,14 @@
 package com.springboot.MyTodoList.repository;
 
 import com.springboot.MyTodoList.model.WorkItem;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface WorkItemRepository extends JpaRepository<WorkItem, String> {
@@ -21,4 +23,11 @@ public interface WorkItemRepository extends JpaRepository<WorkItem, String> {
             "ORDER BY wi.CREATED_AT DESC, ", 
     nativeQuery = true)
     List<WorkItem> findForUserId(@Param("userId") String userId);
+
+    @EntityGraph(attributePaths = {
+            "assignments",
+            "assignments.assignedUser",
+            "assignments.assignedByUser"
+    })
+    List<WorkItem> findAll();
 }

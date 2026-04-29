@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.UUID;
+
 /*
     representation of the USER table that exists already
     in the autonomous database
@@ -24,8 +26,8 @@ import lombok.Setter;
 @Table(name = "APP_USER")
 public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    String id;
+    @Column(name = "user_id")
+    String userId;
 
     @Column(name = "PHONE_NUMBER")
     String phoneNumber;
@@ -39,10 +41,16 @@ public class User {
     public User(){}
 
     public User(String ID, String number, String password){
-        this.id = ID;
+        this.userId = ID;
         this.phoneNumber = number;
         this.userPassword = password;
     }
 
-
+    // Assign a random UUID before insertion
+    @PrePersist
+    public void prePersist() {
+        if (userId == null) {
+            userId = UUID.randomUUID().toString();
+        }
+    }
 }

@@ -1,19 +1,15 @@
 package com.springboot.MyTodoList.dto.WorkItem;
 
-import com.springboot.MyTodoList.model.AppUser;
-import com.springboot.MyTodoList.model.Assignee;
-import com.springboot.MyTodoList.model.Sprint;
-
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
-import java.util.Set;
+import java.util.List;
 
 public record WorkItemResponse(
         String workItemId,
         String sprintId,
         String createdByUserId,
         String workType,
-        Set<Assignee> assignedUsers,
+        List<WorkItemAssignmentDto> assignments,
         String title,
         String description,
         String status,

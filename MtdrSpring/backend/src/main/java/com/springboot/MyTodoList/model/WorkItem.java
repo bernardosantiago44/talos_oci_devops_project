@@ -60,17 +60,9 @@ public class WorkItem {
     @Column(name = "COMPLETED_AT")
     private OffsetDateTime completedAt;
 
-
-    @ManyToMany
-    @JoinTable(
-        name = "work_item_assignment",
-        schema = "CHATBOT_USER",
-        joinColumns = @JoinColumn(name = "WORK_ITEM_ID"), 
-        inverseJoinColumns = @JoinColumn(name = "USER_ID") 
-    )
-    private Set<Assignee> assignedUsers = new HashSet<>();
+    @OneToMany(mappedBy = "workItem", cascade = CascadeType.ALL)
+    private Set<WorkItemAssignment> assignments = new HashSet<>();
 
     public WorkItem() {}
-
 }
 
