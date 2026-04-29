@@ -4,8 +4,8 @@ import com.springboot.MyTodoList.dto.WorkItem.*;
 import com.springboot.MyTodoList.exception.BusinessRuleException;
 import com.springboot.MyTodoList.exception.WorkItemNotFoundException;
 import com.springboot.MyTodoList.model.WorkItem;
+import com.springboot.MyTodoList.repository.AppUserRepository;
 import com.springboot.MyTodoList.repository.SprintRepository;
-import com.springboot.MyTodoList.repository.UserRepository;
 import com.springboot.MyTodoList.repository.WorkItemRepository;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
@@ -16,17 +16,20 @@ import java.util.List;
 @Service
 public class WorkItemService {
     private final WorkItemRepository workItemRepository;
-    private final UserRepository userRepository;
+    private final AppUserRepository appUserRepository;
     private final SprintRepository sprintRepository;
+    private final WorkItemAssignmentService assignmentService;
     private static final Logger log = LoggerFactory.getLogger(WorkItemService.class);
     
     public WorkItemService(WorkItemRepository repository, 
-                           UserRepository userRepository, 
-                           SprintRepository sprintRepository
+                           AppUserRepository appUserRepository,
+                           SprintRepository sprintRepository,
+                           WorkItemAssignmentService assignmentService
     ) {
         this.workItemRepository = repository;
-        this.userRepository = userRepository;
+        this.appUserRepository = appUserRepository;
         this.sprintRepository = sprintRepository;
+        this.assignmentService = assignmentService;
     }
     
     public List<WorkItemResponse> findAll() {
@@ -58,6 +61,10 @@ public class WorkItemService {
         
         WorkItem workItem = WorkItemMapper.fromCreateRequest(request);
         WorkItem saved = workItemRepository.save(workItem);
+        if (request.getAssigneeIds() != null) {
+            assignmentService.replaceAssignees(saved, request.getAssigneeIds());
+        }
+
         return WorkItemMapper.toResponse(saved);
     }
     
@@ -71,6 +78,9 @@ public class WorkItemService {
         // Applies the non-null attributes of the request to the workItem
         WorkItemMapper.applyUpdates(workItem, request);
         WorkItem savedWorkItem = workItemRepository.save(workItem);
+        if (request.getAssigneeIds() != null) {
+            assignmentService.replaceAssignees(savedWorkItem, request.getAssigneeIds());
+        }
 
         log.info("Updated work item id={}", savedWorkItem.getWorkItemId());
 
@@ -84,7 +94,7 @@ public class WorkItemService {
     }
 
     private void validateCreateWorkItem(CreateWorkItemRequest request) {
-        if (!userRepository.existsById(request.getCreatedByUserId())) {
+        if (!appUserRepository.existsById(request.getCreatedByUserId())) {
             log.warn("User does not exist: {}", request.getCreatedByUserId());
             throw new BusinessRuleException("Creator user does not exist: " + request.getCreatedByUserId());
         }

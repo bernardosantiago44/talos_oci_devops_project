@@ -37,7 +37,7 @@ public final class WorkItemMapper {
         );
     }
 
-    private static WorkItemAssignmentDto toAssignmentDto(WorkItemAssignment assignment) {
+    public static WorkItemAssignmentDto toAssignmentDto(WorkItemAssignment assignment) {
         return new WorkItemAssignmentDto(
                 assignment.getAssignmentId(),
                 assignment.getAssignmentRole(),

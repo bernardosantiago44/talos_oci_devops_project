@@ -2,7 +2,9 @@ package com.springboot.MyTodoList.controller;
 
 import com.springboot.MyTodoList.dto.WorkItem.CreateWorkItemRequest;
 import com.springboot.MyTodoList.dto.WorkItem.UpdateWorkItemRequest;
+import com.springboot.MyTodoList.dto.WorkItem.WorkItemAssignmentDto;
 import com.springboot.MyTodoList.dto.WorkItem.WorkItemResponse;
+import com.springboot.MyTodoList.service.WorkItemAssignmentService;
 import com.springboot.MyTodoList.service.WorkItemService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,9 +22,11 @@ public class WorkItemController {
     private JdbcTemplate jdbcTemplate;
     
     private final WorkItemService service;
+    private final WorkItemAssignmentService assignmentService;
     
-    public WorkItemController(WorkItemService service) {
+    public WorkItemController(WorkItemService service, WorkItemAssignmentService assignmentService) {
         this.service = service;
+        this.assignmentService = assignmentService;
     }
 
     /**
@@ -76,6 +80,29 @@ public class WorkItemController {
         WorkItemResponse response = service.updateWorkItem(id, request);
 
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{id}/assignees")
+    public ResponseEntity<List<WorkItemAssignmentDto>> getAssignees(@PathVariable String id) {
+        return ResponseEntity.ok(assignmentService.getAssignees(id));
+    }
+
+    @PostMapping("/{id}/assignees/{userId}")
+    public ResponseEntity<WorkItemAssignmentDto> addAssignee(
+            @PathVariable String id,
+            @PathVariable String userId
+    ) {
+        WorkItemAssignmentDto assignment = assignmentService.addAssignee(id, userId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(assignment);
+    }
+
+    @DeleteMapping("/{id}/assignees/{userId}")
+    public ResponseEntity<Void> removeAssignee(
+            @PathVariable String id,
+            @PathVariable String userId
+    ) {
+        assignmentService.removeAssignee(id, userId);
+        return ResponseEntity.noContent().build();
     }
 
     // DELETE /workitems/{id} — eliminar task
