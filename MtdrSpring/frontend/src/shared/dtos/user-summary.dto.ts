@@ -1,5 +1,5 @@
 export type UserSummaryDto = {
-    id: string
+    userId: string
     name: string
     email?: string
     telegramUserId?: string

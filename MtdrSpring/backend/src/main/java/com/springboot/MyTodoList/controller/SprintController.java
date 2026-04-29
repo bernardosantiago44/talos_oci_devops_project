@@ -1,25 +1,26 @@
 package com.springboot.MyTodoList.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
+import com.springboot.MyTodoList.dto.sprint.SprintResponse;
+import com.springboot.MyTodoList.service.SprintService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/sprints")
 public class SprintController {
-
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-
+    private final SprintService sprintService;
+    
+    public SprintController(SprintService sprintService) { this.sprintService = sprintService; }
+    
     @GetMapping
-    public List<Map<String, Object>> getAll() {
-        return jdbcTemplate.queryForList(
-            "SELECT SPRINT_ID AS \"sprintId\", NAME AS \"name\", STATUS AS \"status\", " +
-            "START_DATE AS \"startDate\", END_DATE AS \"endDate\" " +
-            "FROM CHATBOT_USER.SPRINT ORDER BY START_DATE DESC"
-        );
+    public ResponseEntity<List<SprintResponse>> getAll() {
+        return ResponseEntity.ok(sprintService.findAll());
+    }
+    
+    @GetMapping("/{id}")
+    public ResponseEntity<SprintResponse> getSprint(@PathVariable String id) {
+        return ResponseEntity.ok(sprintService.findById(id));
     }
 }

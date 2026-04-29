@@ -2,6 +2,10 @@ package com.springboot.MyTodoList.model;
 
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.util.UUID;
 
 /*
     representation of the USER table that exists already
@@ -16,50 +20,37 @@ import jakarta.persistence.*;
         PRIMARY KEY (ID) -- Define ID como clave primaria
    );
  */
+@Setter
+@Getter
 @Entity
-@Table(name = "USERS")
+@Table(name = "APP_USER")
 public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    int ID;
+    @Column(name = "user_id")
+    String userId;
 
-    @Column(name = "PHONENUMBER")
-    String phonenumber;
+    @Column(name = "PHONE_NUMBER")
+    String phoneNumber;
 
-    @Column(name = "PASSWORD")
-    String userpassword;
+    @Column(name = "PASSWORD_HASH")
+    String userPassword;
+    
+    @Column(name = "NAME")
+    private String name;
 
     public User(){}
 
-    public User(int ID, String number, String password){
-        this.ID=ID;
-        this.phonenumber = number;
-        this.userpassword = password;
+    public User(String ID, String number, String password){
+        this.userId = ID;
+        this.phoneNumber = number;
+        this.userPassword = password;
     }
 
-    public int getID(){
-        return ID;
+    // Assign a random UUID before insertion
+    @PrePersist
+    public void prePersist() {
+        if (userId == null) {
+            userId = UUID.randomUUID().toString();
+        }
     }
-
-    public void setID(int ID){
-        this.ID=ID;
-    }
-
-    public String getPhoneNumber(){
-        return phonenumber;
-    }
-
-    public void setPhoneNumber(String number){
-        this.phonenumber=number;
-    }
-
-    
-    public String getUserPassword(){
-        return userpassword;
-    }
-
-    public void setUserPassword(String password){
-        this.userpassword=password;
-    }
-
 }

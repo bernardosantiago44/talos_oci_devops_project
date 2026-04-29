@@ -173,7 +173,7 @@ export function WorkItemDetailModal({
                                 <div className="mt-1 flex flex-wrap gap-2">
                                     {item.assignees.map((a) => (
                                         <div
-                                            key={a.id}
+                                            key={a.userId}
                                             className="flex items-center gap-2 rounded-xl border border-zinc-200 bg-zinc-50 px-2.5 py-1.5 dark:border-zinc-700/60 dark:bg-zinc-800/60"
                                         >
                                             <div className="flex h-6 w-6 items-center justify-center rounded-full bg-zinc-200 text-[10px] font-semibold text-zinc-700 dark:bg-zinc-700 dark:text-zinc-200">
@@ -181,7 +181,7 @@ export function WorkItemDetailModal({
                                             </div>
                                             <div>
                                                 <p className="text-xs font-medium text-zinc-800 dark:text-zinc-200">{a.user.name}</p>
-                                                <p className="text-[10px] text-zinc-400 dark:text-zinc-500">{a.role}</p>
+                                                <p className="text-[10px] text-zinc-400 dark:text-zinc-500">{a.assignmentRole}</p>
                                             </div>
                                         </div>
                                     ))}
