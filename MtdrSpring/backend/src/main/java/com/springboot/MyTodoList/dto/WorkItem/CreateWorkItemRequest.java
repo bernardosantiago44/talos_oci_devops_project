@@ -7,6 +7,7 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -23,5 +24,5 @@ public class CreateWorkItemRequest {
         private Integer estimatedMinutes;
         private LocalDate dueDate;
         private OffsetDateTime completedAt;
-        private String[] assigneeIds;
+        private List<String> assigneeIds;
 }

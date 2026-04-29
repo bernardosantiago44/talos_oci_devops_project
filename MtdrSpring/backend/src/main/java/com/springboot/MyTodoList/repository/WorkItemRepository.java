@@ -12,16 +12,22 @@ import java.util.Optional;
 
 @Repository
 public interface WorkItemRepository extends JpaRepository<WorkItem, String> {
-    @Query(value = "SELECT wi.WORK_ITEM_ID, wi.TITLE, wi.STATUS, wi.PRIORITY, wi.DUE_DATE, " +
-            "       s.NAME AS SPRINT_NAME " +
-            "FROM WORK_ITEM wi " +
-            "JOIN WORK_ITEM_ASSIGNMENT wia ON wi.WORK_ITEM_ID = wia.WORK_ITEM_ID " +
-            "  AND wia.UNASSIGNED_AT IS NULL " +
-            "JOIN APP_USER u ON wia.USER_ID = u.USER_ID " +
-            "LEFT JOIN SPRINT s ON wi.SPRINT_ID = s.SPRINT_ID " +
-            "WHERE u.TELEGRAM_USER_ID = :userId " +
-            "ORDER BY wi.CREATED_AT DESC, ", 
-    nativeQuery = true)
+    @EntityGraph(attributePaths = {
+            "assignments",
+            "assignments.assignedUser",
+            "assignments.assignedByUser"
+    })
+    @Query(value = """
+           SELECT wi.WORK_ITEM_ID, wi.TITLE, wi.STATUS, wi.PRIORITY, wi.DUE_DATE,
+                  s.NAME AS SPRINT_NAME
+           FROM WORK_ITEM wi
+           JOIN WORK_ITEM_ASSIGNMENT wia ON wi.WORK_ITEM_ID = wia.WORK_ITEM_ID
+             AND wia.UNASSIGNED_AT IS NULL
+           JOIN APP_USER u ON wia.USER_ID = u.USER_ID
+           LEFT JOIN SPRINT s ON wi.SPRINT_ID = s.SPRINT_ID
+           WHERE u.TELEGRAM_USER_ID = :userId
+           ORDER BY wi.CREATED_AT DESC
+           """, nativeQuery = true)
     List<WorkItem> findForUserId(@Param("userId") String userId);
 
     @EntityGraph(attributePaths = {
@@ -30,4 +36,12 @@ public interface WorkItemRepository extends JpaRepository<WorkItem, String> {
             "assignments.assignedByUser"
     })
     List<WorkItem> findAll();
+
+    @Override
+    @EntityGraph(attributePaths = {
+            "assignments",
+            "assignments.assignedUser",
+            "assignments.assignedByUser"
+    })
+    Optional<WorkItem> findById(String id);
 }
