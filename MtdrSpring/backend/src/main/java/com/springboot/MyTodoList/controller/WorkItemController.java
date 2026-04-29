@@ -7,20 +7,14 @@ import com.springboot.MyTodoList.dto.WorkItem.WorkItemResponse;
 import com.springboot.MyTodoList.service.WorkItemAssignmentService;
 import com.springboot.MyTodoList.service.WorkItemService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
 @RequestMapping("/workitems")
 public class WorkItemController {
-
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-    
     private final WorkItemService service;
     private final WorkItemAssignmentService assignmentService;
     
@@ -87,7 +81,7 @@ public class WorkItemController {
         return ResponseEntity.ok(assignmentService.getAssignees(id));
     }
 
-    @PostMapping("/{id}/assignees/{userId}")
+    @PatchMapping("/{id}/assignees/{userId}")
     public ResponseEntity<WorkItemAssignmentDto> addAssignee(
             @PathVariable String id,
             @PathVariable String userId
