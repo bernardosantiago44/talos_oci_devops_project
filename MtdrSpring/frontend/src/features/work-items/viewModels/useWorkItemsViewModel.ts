@@ -67,7 +67,6 @@ export const useWorkItemsViewModel = () => {
     loadItems().then();
   }, [loadItems, loadFoundationData]);
 
-  // Derived State (SwiftUI "Computed Properties")
   const filteredItems = useMemo(() => {
     return items.filter((item) => {
       const matchesSearch = !filters.search ||
@@ -75,7 +74,7 @@ export const useWorkItemsViewModel = () => {
         (item.description ?? '').toLowerCase().includes(filters.search.toLowerCase());
       const matchesStatus = !filters.status || item.status === filters.status;
       const matchesAssignee = !filters.assignee ||
-        item.assignees.some((a) => a.user.id === filters.assignee);
+        item.assignees.some((a) => a.user.userId === filters.assignee);
 
       return matchesSearch && matchesStatus && matchesAssignee;
     });

@@ -4,8 +4,10 @@ import com.springboot.MyTodoList.model.AppUser;
 import com.springboot.MyTodoList.model.WorkItem;
 import com.springboot.MyTodoList.model.WorkItemAssignment;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public final class WorkItemMapper {
@@ -59,5 +61,24 @@ public final class WorkItemMapper {
                 user.getEmail(),
                 user.getTelegramUserId()
         );
+    }
+    
+    public static WorkItem fromCreateRequest(CreateWorkItemRequest request) {
+        WorkItem workItem = new WorkItem();
+
+        workItem.setWorkItemId(UUID.randomUUID().toString());
+        workItem.setSprintId(request.getSprintId());
+        workItem.setCreatedByUserId(request.getCreatedByUserId());
+        workItem.setWorkType(request.getWorkType());
+        workItem.setTitle(request.getTitle());
+        workItem.setDescription(workItem.getDescription());
+        workItem.setStatus("NEW");
+        workItem.setPriority(request.getPriority());
+        workItem.setEstimatedMinutes(request.getEstimatedMinutes());
+        workItem.setDueDate(request.getDueDate());
+        workItem.setCreatedAt(OffsetDateTime.now());
+        workItem.setUpdatedAt(OffsetDateTime.now());
+        
+        return workItem;
     }
 }

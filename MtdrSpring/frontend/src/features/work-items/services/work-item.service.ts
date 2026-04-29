@@ -26,27 +26,12 @@ interface BackendWorkItemRow {
     sprintName?: string;
     sprintId?: string;
     assigneeName?: string;
-    assignedUserIds?: string[];
+    assignees?: Assignee[];
 }
 
 // ─── Mappers ─────────────────────────────────────────────────────
 
 function mapBackendRowToDetailDto(row: BackendWorkItemRow): WorkItemDetailDto {
-    const assignees: Assignee[] = [];
-    if (row.assignedUserIds) {
-        row.assignedUserIds.forEach(assignee => {
-            assignees.push({
-                userId: `asg-${assignee}`,
-                user: {
-                    id: assignee,
-                    name: assignee,
-                },
-                role: 'ASSIGNEE',
-                assignedAt: assignee,
-            });
-        });
-    }
-
     return {
         id: row.workItemId,
         sprintId: row.sprintId,
@@ -60,8 +45,8 @@ function mapBackendRowToDetailDto(row: BackendWorkItemRow): WorkItemDetailDto {
         dueDate: row.dueDate ? String(row.dueDate).slice(0, 10) : undefined,
         createdAt: row.createdAt,
         updatedAt: row.createdAt,
-        createdBy: { id: 'system', name: 'System' },
-        assignees,
+        createdBy: { userId: 'system', name: 'System' },
+        assignees: row.assignees ?? [],
         tags: [],
     };
 }
@@ -104,7 +89,7 @@ function applyClientSideFilters(
 
         const matchesAssignee =
             !filters.assigneeUserId ||
-            item.assignees.some((a) => a.user.id === filters.assigneeUserId);
+            item.assignees.some((a) => a.user.userId === filters.assigneeUserId);
 
         return matchesSearch && matchesSprint && matchesType && matchesStatus && matchesPriority && matchesAssignee;
     });
@@ -192,7 +177,7 @@ export const workItemService = {
             dueDate: input.dueDate,
             createdAt: now,
             updatedAt: now,
-            createdBy: { id: 'current', name: 'Current User' },
+            createdBy: { userId: 'current', name: 'Current User' },
             assignees: [],
             tags: [],
         };

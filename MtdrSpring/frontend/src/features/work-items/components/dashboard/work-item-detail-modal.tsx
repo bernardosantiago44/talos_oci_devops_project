@@ -181,7 +181,7 @@ export function WorkItemDetailModal({
                                             </div>
                                             <div>
                                                 <p className="text-xs font-medium text-zinc-800 dark:text-zinc-200">{a.user.name}</p>
-                                                <p className="text-[10px] text-zinc-400 dark:text-zinc-500">{a.role}</p>
+                                                <p className="text-[10px] text-zinc-400 dark:text-zinc-500">{a.assignmentRole}</p>
                                             </div>
                                         </div>
                                     ))}

@@ -123,7 +123,7 @@ export function WorkItemFormModal({
                 dueDate: item.dueDate ?? '',
                 estimatedMinutes: item.estimatedMinutes?.toString() ?? '',
                 sprintId: item.sprintId ?? '',
-                assigneeUserIds: item.assignees.map((a) => a.user.id),
+                assigneeUserIds: item.assignees.map((a) => a.user.userId),
                 tagIds: item.tags.map((t) => t.id),
             });
         } else {
@@ -316,12 +316,12 @@ export function WorkItemFormModal({
                             <Label>Assignees</Label>
                             <div className="flex flex-wrap gap-2">
                                 {users.map((u) => {
-                                    const selected = form.assigneeUserIds.includes(u.id);
+                                    const selected = form.assigneeUserIds.includes(u.userId);
                                     return (
                                         <button
-                                            key={u.id}
+                                            key={u.userId}
                                             type="button"
-                                            onClick={() => toggleArrayItem('assigneeUserIds', u.id)}
+                                            onClick={() => toggleArrayItem('assigneeUserIds', u.userId)}
                                             className={`rounded-xl border px-3 py-1.5 text-sm font-medium transition-colors ${
                                                 selected
                                                     ? 'border-sky-300 bg-sky-50 text-sky-700 dark:border-sky-500/50 dark:bg-sky-500/15 dark:text-sky-300'

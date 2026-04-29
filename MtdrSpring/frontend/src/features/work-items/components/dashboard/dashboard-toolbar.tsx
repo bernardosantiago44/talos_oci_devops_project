@@ -66,7 +66,7 @@ export function DashboardToolbar({
             >
                 <option value="">All assignees</option>
                 {users.map((u) => (
-                    <option key={u.id} value={u.id}>{u.name}</option>
+                    <option key={u.userId} value={u.userId}>{u.name}</option>
                 ))}
             </select>
 

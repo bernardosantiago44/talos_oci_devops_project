@@ -9,7 +9,7 @@ public record WorkItemResponse(
         String sprintId,
         String createdByUserId,
         String workType,
-        List<WorkItemAssignmentDto> assignments,
+        List<WorkItemAssignmentDto> assignees,
         String title,
         String description,
         String status,

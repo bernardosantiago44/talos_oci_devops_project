@@ -52,7 +52,7 @@ export const foundationService = {
             return { success: false, data: [], message: usersResult.message };
         }
         const options: SelectOption[] = usersResult.data.map((user) => ({
-            value: user.id,
+            value: user.userId,
             label: user.name,
         }));
         return { success: true, data: options };
