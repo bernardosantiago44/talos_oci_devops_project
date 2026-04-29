@@ -69,7 +69,7 @@ public final class WorkItemMapper {
         workItem.setCreatedByUserId(request.getCreatedByUserId());
         workItem.setWorkType(request.getWorkType());
         workItem.setTitle(request.getTitle());
-        workItem.setDescription(workItem.getDescription());
+        workItem.setDescription(request.getDescription());
         workItem.setStatus("NEW");
         workItem.setPriority(request.getPriority());
         workItem.setEstimatedMinutes(request.getEstimatedMinutes());
