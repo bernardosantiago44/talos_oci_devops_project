@@ -60,7 +60,7 @@ export function VelocityFulfillmentCard() {
                             KPI · Velocity Fulfillment
                         </p>
                         <p className="text-[11px] text-zinc-400 dark:text-zinc-600">
-                            Tareas completadas vs planeadas · Meta: {target}%
+                            Completed vs planned tasks · Target: {target}%
                         </p>
                     </div>
                 </div>
@@ -87,12 +87,12 @@ export function VelocityFulfillmentCard() {
                         <div
                             className="absolute top-0 h-full w-0.5 bg-amber-400"
                             style={{ left: `${target}%` }}
-                            title={`Meta: ${target}%`}
+                            title={`Target: ${target}%`}
                         />
                     </div>
                     <div className="mt-1 flex items-center justify-between text-[11px] text-zinc-400 dark:text-zinc-600">
                         <span>0%</span>
-                        <span className="text-amber-500 dark:text-amber-400">▲ Meta {target}%</span>
+                        <span className="text-amber-500 dark:text-amber-400">▲ Target {target}%</span>
                         <span>100%</span>
                     </div>
                 </div>
@@ -107,7 +107,7 @@ export function VelocityFulfillmentCard() {
                         className="flex w-full items-center gap-1 text-left text-[11px] font-medium text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300"
                     >
                         {expanded ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
-                        {expanded ? 'Ocultar' : 'Ver'} por sprint ({sprintsWithTasks.length})
+                        {expanded ? 'Hide' : 'View'} by sprint ({sprintsWithTasks.length})
                     </button>
 
                     {expanded && (
@@ -122,7 +122,7 @@ export function VelocityFulfillmentCard() {
 
             {!loading && sprintsWithTasks.length === 0 && (
                 <p className="mt-2 text-xs text-zinc-400 dark:text-zinc-600">
-                    No hay datos de sprints aún.
+                    No sprint data available yet.
                 </p>
             )}
         </div>
