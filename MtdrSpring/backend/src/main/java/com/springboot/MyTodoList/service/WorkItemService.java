@@ -1,8 +1,6 @@
 package com.springboot.MyTodoList.service;
 
-import com.springboot.MyTodoList.dto.WorkItem.CreateWorkItemRequest;
-import com.springboot.MyTodoList.dto.WorkItem.WorkItemMapper;
-import com.springboot.MyTodoList.dto.WorkItem.WorkItemResponse;
+import com.springboot.MyTodoList.dto.WorkItem.*;
 import com.springboot.MyTodoList.exception.BusinessRuleException;
 import com.springboot.MyTodoList.exception.WorkItemNotFoundException;
 import com.springboot.MyTodoList.model.WorkItem;
@@ -62,6 +60,28 @@ public class WorkItemService {
         WorkItem saved = workItemRepository.save(workItem);
         return WorkItemMapper.toResponse(saved);
     }
+    
+    @Transactional
+    public WorkItemResponse updateWorkItem(String id, UpdateWorkItemRequest request) {
+        WorkItem workItem = workItemRepository
+                .findById(id)
+                .orElseThrow(() -> new WorkItemNotFoundException(id));
+        validateUpdateWorkItem(request, workItem);
+        
+        // Applies the non-null attributes of the request to the workItem
+        WorkItemMapper.applyUpdates(workItem, request);
+        WorkItem savedWorkItem = workItemRepository.save(workItem);
+
+        log.info("Updated work item id={}", savedWorkItem.getWorkItemId());
+
+        return WorkItemMapper.toResponse(savedWorkItem);
+    }
+    
+    @Transactional
+    public void deleteWorkItemById(String id) {
+        ensureWorkItemExistsById(id);
+        workItemRepository.deleteById(id);
+    }
 
     private void validateCreateWorkItem(CreateWorkItemRequest request) {
         if (!userRepository.existsById(request.getCreatedByUserId())) {
@@ -78,6 +98,38 @@ public class WorkItemService {
                 request.getEstimatedMinutes() <= 0) {
             log.warn("Provided invalid estimated minutes: {}", request.getEstimatedMinutes());
             throw new BusinessRuleException("Estimated minutes must be greater than zero");
+        }
+    }
+
+    private void validateUpdateWorkItem(UpdateWorkItemRequest request, WorkItem existingWorkItem) {
+        if (request.getTitle() != null && request.getTitle().isBlank()) {
+            throw new BusinessRuleException("Title cannot be blank");
+        }
+
+        if (request.getWorkType() != null && request.getWorkType().isBlank()) {
+            throw new BusinessRuleException("Work type cannot be blank");
+        }
+
+        if (request.getStatus() != null && request.getStatus().isBlank()) {
+            throw new BusinessRuleException("Status cannot be blank");
+        }
+
+        if (request.getPriority() != null && request.getPriority().isBlank()) {
+            throw new BusinessRuleException("Priority cannot be blank");
+        }
+
+        if (request.getEstimatedMinutes() != null && request.getEstimatedMinutes() < 0) {
+            throw new BusinessRuleException("Estimated minutes cannot be negative");
+        }
+
+        if (existingWorkItem.getCompletedAt() != null) {
+            throw new BusinessRuleException("Completed work items cannot be updated");
+        }
+    }
+    private void ensureWorkItemExistsById(String id) {
+        if (!workItemRepository.existsById(id)) {
+            log.warn("Work item not found: {}", id);
+            throw new WorkItemNotFoundException(id);
         }
     }
 }

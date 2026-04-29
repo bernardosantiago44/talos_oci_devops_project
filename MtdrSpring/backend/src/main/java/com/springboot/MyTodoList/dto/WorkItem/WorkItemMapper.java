@@ -6,9 +6,7 @@ import com.springboot.MyTodoList.model.WorkItemAssignment;
 
 import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 public final class WorkItemMapper {
     private WorkItemMapper() {}
@@ -80,5 +78,53 @@ public final class WorkItemMapper {
         workItem.setUpdatedAt(OffsetDateTime.now());
         
         return workItem;
+    }
+    
+    public static void applyUpdates(WorkItem workItem, UpdateWorkItemRequest request) {
+        if (request.getSprintId() != null) {
+            workItem.setSprintId(request.getSprintId());
+        }
+
+        if (request.getWorkType() != null) {
+            workItem.setWorkType(request.getWorkType());
+        }
+
+        if (request.getTitle() != null) {
+            workItem.setTitle(request.getTitle());
+        }
+
+        if (request.getDescription() != null) {
+            workItem.setDescription(request.getDescription());
+        }
+
+        if (request.getStatus() != null) {
+            workItem.setStatus(request.getStatus());
+        }
+
+        if (request.getPriority() != null) {
+            workItem.setPriority(request.getPriority());
+        }
+
+        if (request.getExternalLink() != null) {
+            workItem.setExternalLink(request.getExternalLink());
+        }
+
+        if (request.getEstimatedMinutes() != null) {
+            workItem.setEstimatedMinutes(request.getEstimatedMinutes());
+        }
+
+        if (request.getDueDate() != null) {
+            workItem.setDueDate(request.getDueDate());
+        }
+
+        if (request.getCompletedAt() != null) {
+            workItem.setCompletedAt(request.getCompletedAt());
+        }
+
+        workItem.setUpdatedAt(OffsetDateTime.now());
+        
+        if (request.getStatus() != null && request.getStatus().equals("DONE")) {
+            workItem.setCompletedAt(OffsetDateTime.now());
+        }
     }
 }
