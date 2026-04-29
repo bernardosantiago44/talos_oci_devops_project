@@ -1,5 +1,8 @@
 package com.springboot.MyTodoList.controller;
 
+import com.springboot.MyTodoList.dto.WorkItem.WorkItemResponse;
+import com.springboot.MyTodoList.model.WorkItem;
+import com.springboot.MyTodoList.service.WorkItemService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -15,38 +18,34 @@ public class WorkItemController {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
-
-    // GET /workitems — todas las tasks con info de usuario y sprint
-    @GetMapping
-    public List<Map<String, Object>> getAllWorkItems() {
-        String sql =
-            "SELECT wi.WORK_ITEM_ID, wi.TITLE, wi.DESCRIPTION, wi.STATUS, wi.PRIORITY, " +
-            "       wi.WORK_TYPE, wi.DUE_DATE, wi.CREATED_AT, wi.ESTIMATED_MINUTES, " +
-            "       s.NAME AS SPRINT_NAME, wi.SPRINT_ID, " +
-            "       u.NAME AS ASSIGNEE_NAME, u.USER_ID AS ASSIGNEE_ID " +
-            "FROM CHATBOT_USER.WORK_ITEM wi " +
-            "LEFT JOIN CHATBOT_USER.SPRINT s ON wi.SPRINT_ID = s.SPRINT_ID " +
-            "LEFT JOIN CHATBOT_USER.WORK_ITEM_ASSIGNMENT wia ON wi.WORK_ITEM_ID = wia.WORK_ITEM_ID " +
-            "  AND wia.UNASSIGNED_AT IS NULL " +
-            "LEFT JOIN CHATBOT_USER.APP_USER u ON wia.USER_ID = u.USER_ID " +
-            "ORDER BY wi.CREATED_AT DESC";
-        return jdbcTemplate.queryForList(sql);
+    
+    private final WorkItemService service;
+    
+    public WorkItemController(WorkItemService service) {
+        this.service = service;
     }
 
-    // GET /workitems/user/{telegramUserId} — tasks de un usuario por su Telegram ID (para el bot)
+    /**
+     * Get all the work items in the database
+     * @return List of WorkItemResponse
+     * @apiNote /workitems
+     */
+    @GetMapping
+    public ResponseEntity<List<WorkItemResponse>> getAllWorkItems() {
+        return ResponseEntity.ok(service.findAll());
+    }
+
+
+    /**
+     * Returns the tasks assigned to the provided telegram user id
+     * @param telegramUserId String 
+     * @return List of WorkItemResponse 
+     * @apiNote /workitems/user/{telegramUserId}
+     */
+    
     @GetMapping("/user/{telegramUserId}")
-    public List<Map<String, Object>> getWorkItemsByTelegramUser(@PathVariable String telegramUserId) {
-        String sql =
-            "SELECT wi.WORK_ITEM_ID, wi.TITLE, wi.STATUS, wi.PRIORITY, wi.DUE_DATE, " +
-            "       s.NAME AS SPRINT_NAME " +
-            "FROM CHATBOT_USER.WORK_ITEM wi " +
-            "JOIN CHATBOT_USER.WORK_ITEM_ASSIGNMENT wia ON wi.WORK_ITEM_ID = wia.WORK_ITEM_ID " +
-            "  AND wia.UNASSIGNED_AT IS NULL " +
-            "JOIN CHATBOT_USER.APP_USER u ON wia.USER_ID = u.USER_ID " +
-            "LEFT JOIN CHATBOT_USER.SPRINT s ON wi.SPRINT_ID = s.SPRINT_ID " +
-            "WHERE u.TELEGRAM_USER_ID = ? " +
-            "ORDER BY wi.CREATED_AT DESC";
-        return jdbcTemplate.queryForList(sql, telegramUserId);
+    public ResponseEntity<List<WorkItemResponse>> getWorkItemsByTelegramUser(@PathVariable String telegramUserId) {
+        return ResponseEntity.ok(service.findForUserId(telegramUserId));
     }
 
     // POST /workitems — crear task y asignarla a un usuario

@@ -14,50 +14,52 @@ import { apiClient } from '@/shared/services/api-client';
 // ─── Backend response shape from WorkItemController ──────────────
 
 interface BackendWorkItemRow {
-    WORK_ITEM_ID: string;
-    TITLE: string;
-    DESCRIPTION?: string;
-    STATUS: string;
-    PRIORITY: string;
-    WORK_TYPE: string;
-    DUE_DATE?: string;
-    CREATED_AT: string;
-    ESTIMATED_MINUTES?: number;
-    SPRINT_NAME?: string;
-    SPRINT_ID?: string;
-    ASSIGNEE_NAME?: string;
-    ASSIGNEE_ID?: string;
+    workItemId: string;
+    title: string;
+    description?: string;
+    status: string;
+    priority: string;
+    workType: string;
+    dueDate?: string;
+    createdAt: string;
+    estimatedMinutes?: number;
+    sprintName?: string;
+    sprintId?: string;
+    assigneeName?: string;
+    assignedUserIds?: string[];
 }
 
 // ─── Mappers ─────────────────────────────────────────────────────
 
 function mapBackendRowToDetailDto(row: BackendWorkItemRow): WorkItemDetailDto {
     const assignees: Assignee[] = [];
-    if (row.ASSIGNEE_ID && row.ASSIGNEE_NAME) {
-        assignees.push({
-            id: `asg-${row.ASSIGNEE_ID}`,
-            user: {
-                id: row.ASSIGNEE_ID,
-                name: row.ASSIGNEE_NAME,
-            },
-            role: 'ASSIGNEE',
-            assignedAt: row.CREATED_AT,
+    if (row.assignedUserIds) {
+        row.assignedUserIds.forEach(assignee => {
+            assignees.push({
+                userId: `asg-${assignee}`,
+                user: {
+                    id: assignee,
+                    name: assignee,
+                },
+                role: 'ASSIGNEE',
+                assignedAt: assignee,
+            });
         });
     }
 
     return {
-        id: row.WORK_ITEM_ID,
-        sprintId: row.SPRINT_ID,
-        title: row.TITLE,
-        description: row.DESCRIPTION ?? undefined,
-        type: (row.WORK_TYPE ?? 'TASK') as WorkItemType,
-        status: normalizeStatus(row.STATUS),
-        priority: (row.PRIORITY ?? 'MEDIUM') as WorkItemPriority,
-        estimatedMinutes: row.ESTIMATED_MINUTES ?? undefined,
+        id: row.workItemId,
+        sprintId: row.sprintId,
+        title: row.title,
+        description: row.description ?? undefined,
+        type: (row.workType ?? 'TASK') as WorkItemType,
+        status: normalizeStatus(row.status),
+        priority: (row.priority ?? 'MEDIUM') as WorkItemPriority,
+        estimatedMinutes: row.estimatedMinutes ?? undefined,
         totalLoggedMinutes: 0,
-        dueDate: row.DUE_DATE ? String(row.DUE_DATE).slice(0, 10) : undefined,
-        createdAt: row.CREATED_AT,
-        updatedAt: row.CREATED_AT,
+        dueDate: row.dueDate ? String(row.dueDate).slice(0, 10) : undefined,
+        createdAt: row.createdAt,
+        updatedAt: row.createdAt,
         createdBy: { id: 'system', name: 'System' },
         assignees,
         tags: [],
@@ -152,7 +154,7 @@ export const workItemService = {
             return { success: false, data: null, message: result.message };
         }
 
-        const row = result.data.find((r) => r.WORK_ITEM_ID === id);
+        const row = result.data.find((r) => r.workItemId === id);
         if (!row) return { success: true, data: null };
 
         return { success: true, data: mapBackendRowToDetailDto(row) };

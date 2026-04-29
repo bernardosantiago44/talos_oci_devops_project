@@ -30,4 +30,12 @@ public class WorkItemService {
                 .map(WorkItemMapper::toResponse)
                 .orElseThrow(() -> new WorkItemNotFoundException(id));
     }
+    
+    public List<WorkItemResponse> findForUserId(String userId) {
+        return workItemRepository
+                .findForUserId(userId)
+                .stream()
+                .map(WorkItemMapper::toResponse)
+                .toList();
+    }
 }

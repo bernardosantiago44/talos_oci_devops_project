@@ -23,7 +23,7 @@ export const mockWorkItems: WorkItemDetailDto[] = [
         },
         assignees: [
             {
-                id: 'asg-001',
+                userId: 'asg-001',
                 user: {
                     id: 'usr-002',
                     name: 'Ana Developer',
@@ -68,7 +68,7 @@ export const mockWorkItems: WorkItemDetailDto[] = [
         },
         assignees: [
             {
-                id: 'asg-002',
+                userId: 'asg-002',
                 user: {
                     id: 'usr-003',
                     name: 'Luis Developer',
@@ -120,7 +120,7 @@ export const mockWorkItems: WorkItemDetailDto[] = [
         },
         assignees: [
             {
-                id: 'asg-003',
+                userId: 'asg-003',
                 user: {
                     id: 'usr-002',
                     name: 'Ana Developer',
@@ -166,7 +166,7 @@ export const mockWorkItems: WorkItemDetailDto[] = [
         },
         assignees: [
             {
-                id: 'asg-004',
+                userId: 'asg-004',
                 user: {
                     id: 'usr-003',
                     name: 'Luis Developer',
@@ -208,7 +208,7 @@ export const mockWorkItems: WorkItemDetailDto[] = [
         },
         assignees: [
             {
-                id: 'asg-005',
+                userId: 'asg-005',
                 user: {
                     id: 'usr-002',
                     name: 'Ana Developer',
@@ -253,7 +253,7 @@ export const mockWorkItems: WorkItemDetailDto[] = [
         },
         assignees: [
             {
-                id: 'asg-006',
+                userId: 'asg-006',
                 user: {
                     id: 'usr-003',
                     name: 'Luis Developer',
@@ -298,7 +298,7 @@ export const mockWorkItems: WorkItemDetailDto[] = [
         },
         assignees: [
             {
-                id: 'asg-007',
+                userId: 'asg-007',
                 user: {
                     id: 'usr-002',
                     name: 'Ana Developer',

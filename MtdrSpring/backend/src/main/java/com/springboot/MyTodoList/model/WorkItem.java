@@ -6,6 +6,10 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 @Setter
 @Getter
@@ -19,10 +23,6 @@ public class WorkItem {
 
     @Column(name = "SPRINT_ID")
     private String sprintId;
-    
-    @ManyToOne
-    @JoinColumn(name = "sprint_id")
-    private Sprint sprint;
 
     @Column(name = "CREATED_BY_USER_ID")
     private String createdByUserId;
@@ -60,6 +60,17 @@ public class WorkItem {
     @Column(name = "COMPLETED_AT")
     private OffsetDateTime completedAt;
 
+
+    @ManyToMany
+    @JoinTable(
+        name = "work_item_assignment",
+        schema = "CHATBOT_USER",
+        joinColumns = @JoinColumn(name = "WORK_ITEM_ID"), 
+        inverseJoinColumns = @JoinColumn(name = "USER_ID") 
+    )
+    private Set<Assignee> assignedUsers = new HashSet<>();
+
     public WorkItem() {}
 
 }
+

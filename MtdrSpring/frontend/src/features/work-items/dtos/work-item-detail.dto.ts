@@ -32,7 +32,7 @@ export type WorkItemDetailDto = {
 };
 
 export type Assignee = {
-    id: string;
+    userId: string;
     user: UserSummaryDto;
     role: AssignmentRole;
     assignedAt: string;

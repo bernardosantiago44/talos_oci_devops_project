@@ -1,6 +1,10 @@
 package com.springboot.MyTodoList.dto.WorkItem;
 
+import com.springboot.MyTodoList.model.AppUser;
 import com.springboot.MyTodoList.model.WorkItem;
+
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public final class WorkItemMapper {
     private WorkItemMapper() {}
@@ -8,9 +12,10 @@ public final class WorkItemMapper {
     public static WorkItemResponse toResponse(WorkItem entity) {
         return new WorkItemResponse(
                 entity.getWorkItemId(),
-                entity.getSprint(),
+                entity.getSprintId(),
                 entity.getCreatedByUserId(),
                 entity.getWorkType(),
+                entity.getAssignedUsers(),
                 entity.getTitle(),
                 entity.getDescription(),
                 entity.getStatus(),
