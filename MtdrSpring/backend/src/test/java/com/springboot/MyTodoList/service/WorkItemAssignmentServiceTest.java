@@ -8,6 +8,7 @@ import com.springboot.MyTodoList.model.WorkItemAssignment;
 import com.springboot.MyTodoList.repository.AppUserRepository;
 import com.springboot.MyTodoList.repository.WorkItemAssignmentRepository;
 import com.springboot.MyTodoList.repository.WorkItemRepository;
+import com.springboot.MyTodoList.testdata.TestDataFactory;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -41,8 +42,8 @@ class WorkItemAssignmentServiceTest {
 
     @Test
     void addAssigneeCreatesAssignment() {
-        WorkItem workItem = workItem("wi-1");
-        AppUser user = appUser("user-1");
+        WorkItem workItem = TestDataFactory.workItem("wi-1");
+        AppUser user = TestDataFactory.appUser("user-1");
 
         when(workItemRepository.findById("wi-1")).thenReturn(Optional.of(workItem));
         when(appUserRepository.findById("user-1")).thenReturn(Optional.of(user));
@@ -67,8 +68,8 @@ class WorkItemAssignmentServiceTest {
 
     @Test
     void addAssigneeRejectsDuplicateAssignment() {
-        when(workItemRepository.findById("wi-1")).thenReturn(Optional.of(workItem("wi-1")));
-        when(appUserRepository.findById("user-1")).thenReturn(Optional.of(appUser("user-1")));
+        when(workItemRepository.findById("wi-1")).thenReturn(Optional.of(TestDataFactory.workItem("wi-1")));
+        when(appUserRepository.findById("user-1")).thenReturn(Optional.of(TestDataFactory.appUser("user-1")));
         when(assignmentRepository.existsByWorkItem_WorkItemIdAndAssignedUser_UserId("wi-1", "user-1"))
                 .thenReturn(true);
 
@@ -92,7 +93,7 @@ class WorkItemAssignmentServiceTest {
 
     @Test
     void addAssigneeRejectsMissingUser() {
-        when(workItemRepository.findById("wi-1")).thenReturn(Optional.of(workItem("wi-1")));
+        when(workItemRepository.findById("wi-1")).thenReturn(Optional.of(TestDataFactory.workItem("wi-1")));
         when(appUserRepository.findById("missing")).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> service.addAssignee("wi-1", "missing"))
@@ -127,13 +128,9 @@ class WorkItemAssignmentServiceTest {
 
     @Test
     void getAssigneesReturnsAssignmentsForExistingWorkItem() {
-        WorkItem workItem = workItem("wi-1");
-        AppUser user = appUser("user-1");
-        WorkItemAssignment assignment = new WorkItemAssignment();
-        assignment.setAssignmentId("assignment-1");
-        assignment.setWorkItem(workItem);
-        assignment.setAssignedUser(user);
-        assignment.setAssignmentRole("ASSIGNEE");
+        WorkItem workItem = TestDataFactory.workItem("wi-1");
+        AppUser user = TestDataFactory.appUser("user-1");
+        WorkItemAssignment assignment = TestDataFactory.assignment(workItem, user);
 
         when(workItemRepository.existsById("wi-1")).thenReturn(true);
         when(assignmentRepository.findByWorkItem_WorkItemId("wi-1")).thenReturn(List.of(assignment));
@@ -147,9 +144,9 @@ class WorkItemAssignmentServiceTest {
 
     @Test
     void replaceAssigneesDeletesExistingAndCreatesRequestedAssignments() {
-        WorkItem workItem = workItem("wi-1");
-        AppUser firstUser = appUser("user-1");
-        AppUser secondUser = appUser("user-2");
+        WorkItem workItem = TestDataFactory.workItem("wi-1");
+        AppUser firstUser = TestDataFactory.appUser("user-1");
+        AppUser secondUser = TestDataFactory.appUser("user-2");
 
         when(appUserRepository.findById("user-1")).thenReturn(Optional.of(firstUser));
         when(appUserRepository.findById("user-2")).thenReturn(Optional.of(secondUser));
@@ -175,7 +172,7 @@ class WorkItemAssignmentServiceTest {
 
     @Test
     void replaceAssigneesWithEmptyListRemovesAllAssignments() {
-        WorkItem workItem = workItem("wi-1");
+        WorkItem workItem = TestDataFactory.workItem("wi-1");
         workItem.getAssignments().add(new WorkItemAssignment());
 
         service.replaceAssignees(workItem, List.of());
@@ -187,7 +184,7 @@ class WorkItemAssignmentServiceTest {
 
     @Test
     void replaceAssigneesRejectsDuplicateUserIdsBeforeDeletingExistingAssignments() {
-        WorkItem workItem = workItem("wi-1");
+        WorkItem workItem = TestDataFactory.workItem("wi-1");
 
         assertThatThrownBy(() -> service.replaceAssignees(workItem, List.of("user-1", "user-1")))
                 .isInstanceOf(BusinessRuleException.class)
@@ -197,15 +194,15 @@ class WorkItemAssignmentServiceTest {
         verify(assignmentRepository, never()).save(any());
     }
 
-    private static WorkItem workItem(String id) {
-        WorkItem workItem = new WorkItem();
-        workItem.setWorkItemId(id);
-        return workItem;
-    }
+    @Test
+    void replaceAssigneesRejectsBlankUserIdBeforeDeletingExistingAssignments() {
+        WorkItem workItem = TestDataFactory.workItem("wi-1");
 
-    private static AppUser appUser(String id) {
-        AppUser user = new AppUser();
-        user.setUserId(id);
-        return user;
+        assertThatThrownBy(() -> service.replaceAssignees(workItem, List.of("user-1", " ")))
+                .isInstanceOf(BusinessRuleException.class)
+                .hasMessage("Assignee user id is required");
+
+        verify(assignmentRepository, never()).deleteByWorkItem_WorkItemId(any());
+        verify(assignmentRepository, never()).save(any());
     }
 }
