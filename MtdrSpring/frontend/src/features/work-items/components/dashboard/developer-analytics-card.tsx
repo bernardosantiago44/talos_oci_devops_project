@@ -1,11 +1,27 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
     Cell, PieChart, Pie, Legend,
 } from 'recharts';
 import { Lightbulb, Zap } from 'lucide-react';
-import { analyticsService } from '@/shared/services/analytics.service';
-import type { DashboardData, DeveloperRow } from '@/shared/services/analytics.service';
+import { useAnalyticsDashboard } from '@/hooks/api';
+
+interface DeveloperRow {
+    DEVELOPER: string;
+    SPRINT_NAME: string;
+    TASKS_COMPLETED: number;
+    REAL_HOURS: number;
+}
+
+interface DashboardData {
+    kpis: {
+        totalTasks: number;
+        totalHours: number;
+        avgTasksPerDev: number;
+        avgHoursPerDev: number;
+    };
+    chartData: DeveloperRow[];
+}
 
 interface DevSummary {
     developer: string;
@@ -108,16 +124,28 @@ function SectionHeader({ children }: { children: React.ReactNode }) {
 }
 
 export function DeveloperAnalyticsCard() {
-    const [data, setData] = useState<DashboardData | null>(null);
-    const [loading, setLoading] = useState(true);
     const [activeChart, setActiveChart] = useState<'tasks' | 'hours'>('tasks');
+    const dashboardQuery = useAnalyticsDashboard();
+    const loading = dashboardQuery.isLoading;
 
-    useEffect(() => {
-        analyticsService.getDashboard().then(result => {
-            if (result.success) setData(result.data);
-            setLoading(false);
-        });
-    }, []);
+    const data: DashboardData | null = dashboardQuery.data
+        ? {
+            kpis: {
+                totalTasks: dashboardQuery.data.kpis?.totalTasks ?? 0,
+                totalHours: dashboardQuery.data.kpis?.totalHours ?? 0,
+                avgTasksPerDev: dashboardQuery.data.kpis?.avgTasksPerDev ?? 0,
+                avgHoursPerDev: dashboardQuery.data.kpis?.avgHoursPerDev ?? 0,
+            },
+            chartData: (dashboardQuery.data.chartData ?? [])
+                .map((row) => ({
+                    DEVELOPER: row.DEVELOPER ?? row.developer ?? '',
+                    SPRINT_NAME: row.SPRINT_NAME ?? row.SPRINT ?? row.sprint ?? '',
+                    TASKS_COMPLETED: row.TASKS_COMPLETED ?? row.tasksCompleted ?? 0,
+                    REAL_HOURS: row.REAL_HOURS ?? row.TOTAL_HOURS_WORKED ?? row.totalHoursWorked ?? 0,
+                }))
+                .filter((row) => row.DEVELOPER),
+        }
+        : null;
 
     const devs = data ? aggregateByDeveloper(data.chartData) : [];
     const insights = data ? generateInsights(devs, data.kpis) : [];

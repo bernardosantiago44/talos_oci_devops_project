@@ -7,6 +7,7 @@ import { WorkItemListView } from '../components/dashboard/work-item-list-view';
 import { KanbanView } from '../components/dashboard/kanban-view';
 import { WorkItemFormModal } from '../components/dashboard/work-item-form-modal';
 import { WorkItemDetailModal } from '../components/dashboard/work-item-detail-modal';
+import { WorkLogModal } from '../components/dashboard/work-log-modal';
 import { useWorkItemsViewModel } from "@/features/work-items/viewModels/useWorkItemsViewModel";
 import type { IWorkItemsViewModel } from "@/features/work-items/viewModels/useWorkItemsViewModel";
 import { useTheme } from '@/contexts/theme-context';
@@ -172,6 +173,7 @@ export function WorkItemDashboardPage() {
         isOpen={viewModel.formOpen}
         item={viewModel.editingItem}
         users={viewModel.users}
+        sprints={viewModel.sprints}
         tags={mockTags}
         onClose={viewModel.actions.closeAll}
         onCreate={viewModel.actions.handleCreate}
@@ -185,6 +187,17 @@ export function WorkItemDashboardPage() {
         onClose={viewModel.actions.closeAll}
         onEdit={viewModel.actions.handleEditFromDetail}
         onComplete={viewModel.actions.handleCompleteFromDetail}
+        onLogWork={viewModel.actions.handleLogWork}
+      />
+
+      {/* Time entry modal */}
+      <WorkLogModal
+        isOpen={viewModel.workLogOpen}
+        item={viewModel.workLogItem}
+        mode={viewModel.workLogMode}
+        users={viewModel.users}
+        onClose={viewModel.actions.closeWorkLog}
+        onSubmit={viewModel.actions.handleWorkLogSubmit}
       />
     </div>
   );

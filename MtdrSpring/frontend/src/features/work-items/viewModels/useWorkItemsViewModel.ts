@@ -1,22 +1,114 @@
-import { useState, useCallback, useEffect, useMemo } from 'react';
-import { workItemService } from '../services/work-item.service';
-import { foundationService } from '@/shared/services/foundation.service';
-import type { SprintDto } from '@/shared/services/foundation.service';
-import type { ViewMode } from "@/features/work-items/components/dashboard/dashboard-toolbar";
-import type { WorkItemDetailDto } from '../dtos/work-item-detail.dto';
+import { useState, useCallback, useMemo } from 'react';
+import { useAppUserList, useSprintList, useTimeEntryCreate, useWorkItemCreate, useWorkItemList, useWorkItemUpdate } from '@/hooks/api';
+import type { AppUserSummary, CreateWorkItemRequest, SprintResponse, UpdateWorkItemRequest, WorkItemResponse } from '@/api/generated';
+import type { ViewMode } from '@/features/work-items/components/dashboard/dashboard-toolbar';
+import type { WorkItemDetailDto, Assignee } from '../dtos/work-item-detail.dto';
 import type { CreateWorkItemDto } from '../dtos/create-work-item.dto';
 import type { UpdateWorkItemDto } from '../dtos/update-work-item.dto';
+import type { WorkLogDto, WorkLogMode } from '../dtos/work-log.dto';
 import type { WorkItemStatus } from '../enums/work-item-status.enum';
+import { normalizeStatus, toBackendStatus } from '../enums/work-item-status.enum';
+import type { WorkItemType } from '../enums/work-item-type.enum';
+import type { WorkItemPriority } from '../enums/work-item-priority.enum';
+import type { AssignmentRole } from '../enums/assignment-role.enum';
 import type { UserSummaryDto } from '@/shared/dtos/user-summary.dto';
 
-export const useWorkItemsViewModel = () => {
-  // 1. Data State
-  const [items, setItems] = useState<WorkItemDetailDto[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [users, setUsers] = useState<UserSummaryDto[]>([]);
-  const [sprints, setSprints] = useState<SprintDto[]>([]);
+export interface SprintDto {
+  sprintId: string;
+  name: string;
+  status?: string;
+  startDate?: string;
+  endDate?: string;
+}
 
-  // 2. UI State (Grouped logically)
+function mapAppUser(user: AppUserSummary): UserSummaryDto | null {
+  if (!user.userId || !user.name) return null;
+
+  return {
+    userId: user.userId,
+    name: user.name,
+    email: user.email,
+    telegramUserId: user.telegramUserId,
+  };
+}
+
+function mapSprint(sprint: SprintResponse): SprintDto | null {
+  if (!sprint.sprintId || !sprint.name) return null;
+
+  return {
+    sprintId: sprint.sprintId,
+    name: sprint.name,
+    status: sprint.status,
+    startDate: sprint.startDate,
+    endDate: sprint.endDate,
+  };
+}
+
+function mapWorkItem(row: WorkItemResponse, userById: Map<string, UserSummaryDto>): WorkItemDetailDto | null {
+  if (!row.workItemId || !row.title) return null;
+
+  const createdBy: UserSummaryDto =
+    row.createdByUserId && userById.has(row.createdByUserId)
+      ? userById.get(row.createdByUserId)!
+      : {
+          userId: row.createdByUserId ?? 'system',
+          name: row.createdByUserId ?? 'System',
+        };
+
+  const assignees = (row.assignees ?? []).reduce<Assignee[]>((acc, assignment) => {
+      const userId = assignment.user?.userId;
+      if (!assignment.assignmentId || !userId) return acc;
+
+      const user = userById.get(userId) ?? {
+        userId,
+        name: assignment.user?.name ?? userId,
+        email: assignment.user?.email,
+        telegramUserId: assignment.user?.telegramUserId,
+      };
+
+      const assignee: Assignee = {
+        assignmentId: assignment.assignmentId,
+        userId,
+        user,
+        assignmentRole: (assignment.assignmentRole ?? 'ASSIGNEE') as AssignmentRole,
+        assignedAt: assignment.assignedAt ?? row.createdAt ?? new Date().toISOString(),
+        unassignedAt: assignment.unassignedAt,
+        assignedBy: assignment.assignedBy?.userId,
+      };
+
+      acc.push(assignee);
+      return acc;
+    }, []);
+
+  return {
+    id: row.workItemId,
+    sprintId: row.sprintId,
+    title: row.title,
+    description: row.description,
+    type: (row.workType ?? 'TASK') as WorkItemType,
+    status: normalizeStatus(row.status),
+    priority: (row.priority ?? 'MEDIUM') as WorkItemPriority,
+    externalLink: row.externalLink,
+    estimatedMinutes: row.estimatedMinutes,
+    totalLoggedMinutes: 0,
+    dueDate: row.dueDate ? String(row.dueDate).slice(0, 10) : undefined,
+    createdAt: row.createdAt ?? new Date().toISOString(),
+    updatedAt: row.updatedAt ?? row.createdAt ?? new Date().toISOString(),
+    completedAt: row.completedAt,
+    createdBy,
+    assignees,
+    tags: [],
+  };
+}
+
+export const useWorkItemsViewModel = () => {
+  const workItemsQuery = useWorkItemList();
+  const usersQuery = useAppUserList();
+  const sprintsQuery = useSprintList();
+  const createWorkItemMutation = useWorkItemCreate();
+  const updateWorkItemMutation = useWorkItemUpdate();
+  const createTimeEntryMutation = useTimeEntryCreate();
+
   const [filters, setFilters] = useState({
     search: '',
     status: '' as WorkItemStatus | '',
@@ -24,48 +116,35 @@ export const useWorkItemsViewModel = () => {
   });
   const [viewMode, setViewMode] = useState<ViewMode>('list');
 
-  // 3. Modal/Overlay State
   const [modals, setModals] = useState({
     formOpen: false,
     detailOpen: false,
+    workLogOpen: false,
     editingItem: null as WorkItemDetailDto | null,
     detailItem: null as WorkItemDetailDto | null,
+    workLogItem: null as WorkItemDetailDto | null,
+    workLogMode: 'log' as WorkLogMode,
   });
 
-  // --- Actions ---
+  const users = useMemo(
+    () => (usersQuery.data ?? []).map(mapAppUser).filter((user): user is UserSummaryDto => Boolean(user)),
+    [usersQuery.data]
+  );
 
-  const loadItems = useCallback(async () => {
-    setLoading(true);
-    try {
-      // Single API call — the service maps backend rows to WorkItemDetailDto
-      const result = await workItemService.getWorkItems({ page: 1, pageSize: 100 });
-      if (result.success) {
-        // getWorkItems now returns mapped DTOs directly; fetch full detail set
-        const ids = result.data.items.map((i) => i.id);
-        const details = await Promise.all(ids.map((id) => workItemService.getWorkItemById(id)));
-        const fullItems = details
-          .filter((r) => r.success && r.data !== null)
-          .map((r) => r.data as WorkItemDetailDto);
-        setItems(fullItems);
-      }
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const sprints = useMemo(
+    () => (sprintsQuery.data ?? []).map(mapSprint).filter((sprint): sprint is SprintDto => Boolean(sprint)),
+    [sprintsQuery.data]
+  );
 
-  const loadFoundationData = useCallback(async () => {
-    const [usersResult, sprintsResult] = await Promise.all([
-      foundationService.getUsers(),
-      foundationService.getSprints(),
-    ]);
-    if (usersResult.success) setUsers(usersResult.data);
-    if (sprintsResult.success) setSprints(sprintsResult.data);
-  }, []);
+  const userById = useMemo(() => new Map(users.map((user) => [user.userId, user])), [users]);
 
-  useEffect(() => {
-    loadFoundationData().then();
-    loadItems().then();
-  }, [loadItems, loadFoundationData]);
+  const items = useMemo(
+    () =>
+      (workItemsQuery.data ?? [])
+        .map((item) => mapWorkItem(item, userById))
+        .filter((item): item is WorkItemDetailDto => Boolean(item)),
+    [workItemsQuery.data, userById]
+  );
 
   const filteredItems = useMemo(() => {
     return items.filter((item) => {
@@ -80,59 +159,123 @@ export const useWorkItemsViewModel = () => {
     });
   }, [items, filters]);
 
-  // --- Handlers ---
-  const handleCreate = async (dto: CreateWorkItemDto) => {
-    const result = await workItemService.createWorkItem(dto);
-    if (result.success) setItems((prev) => [result.data, ...prev]);
-  };
-  
-  const handleUpdate = useCallback(async (id: string, dto: UpdateWorkItemDto) => {
-    const result = await workItemService.updateWorkItem(id, dto);
-    
-    if (result.success && result.data) {
-      const updated = result.data;
-      setItems((prev) =>
-        prev.map((item) => (item.id === id ? updated : item))
-      );
-      
-      setModals((prevModals) => {
-        if (prevModals.detailItem?.id === id) {
-          return { ...prevModals, detailItem: updated };
-        }
-        return prevModals;
-      });
-    }
-  }, []);
+  const loadItems = useCallback(async () => {
+    await workItemsQuery.refetch();
+  }, [workItemsQuery]);
+
+  const handleCreate = useCallback(
+    async (dto: CreateWorkItemDto) => {
+      const sprintId = dto.sprintId || sprints[0]?.sprintId;
+      const createdByUserId = users[0]?.userId;
+
+      if (!sprintId || !createdByUserId) {
+        throw new Error('A sprint and creator user are required before creating work items.');
+      }
+
+      const body: CreateWorkItemRequest = {
+        sprintId,
+        createdByUserId,
+        workType: dto.type,
+        title: dto.title,
+        description: dto.description,
+        status: toBackendStatus(dto.status ?? 'TODO'),
+        priority: dto.priority,
+        externalLink: dto.externalLink,
+        estimatedMinutes: dto.estimatedMinutes,
+        dueDate: dto.dueDate,
+        assigneeIds: dto.assigneeUserIds,
+      };
+
+      await createWorkItemMutation.mutateAsync(body);
+    },
+    [createWorkItemMutation, sprints, users]
+  );
+
+  const handleUpdate = useCallback(
+    async (id: string, dto: UpdateWorkItemDto) => {
+      const body: UpdateWorkItemRequest = {
+        title: dto.title,
+        description: dto.description,
+        status: dto.status ? toBackendStatus(dto.status) : undefined,
+        priority: dto.priority,
+        externalLink: dto.externalLink,
+        estimatedMinutes: dto.estimatedMinutes,
+        dueDate: dto.dueDate,
+        completedAt: dto.completedAt,
+        assigneeIds: dto.assigneeUserIds,
+      };
+
+      await updateWorkItemMutation.mutateAsync({ id, body });
+    },
+    [updateWorkItemMutation]
+  );
 
   const handleEdit = useCallback((item: WorkItemDetailDto) => {
-    setModals({
+    setModals(prev => ({
+      ...prev,
       formOpen: true,
       detailOpen: false,
       editingItem: item,
       detailItem: null,
-    });
+    }));
   }, []);
-  
-  const handleComplete = useCallback(async (item: WorkItemDetailDto) => {
-    await handleUpdate(item.id, {
-      status: 'DONE',
-      completedAt: new Date().toISOString()
-    });
-  }, [handleUpdate]);
 
-  // UI Navigation / Modal Handlers
+  const handleComplete = useCallback((item: WorkItemDetailDto) => {
+    setModals(prev => ({
+      ...prev,
+      workLogOpen: true,
+      workLogItem: item,
+      workLogMode: 'complete',
+    }));
+  }, []);
+
+  const handleLogWork = useCallback((item: WorkItemDetailDto) => {
+    setModals(prev => ({
+      ...prev,
+      workLogOpen: true,
+      workLogItem: item,
+      workLogMode: 'log',
+    }));
+  }, []);
+
+  const handleWorkLogSubmit = useCallback(async (dto: WorkLogDto) => {
+    await createTimeEntryMutation.mutateAsync(dto);
+
+    if (modals.workLogMode === 'complete') {
+      await handleUpdate(dto.workItemId, {
+        status: 'DONE',
+        completedAt: new Date().toISOString()
+      });
+    }
+  }, [createTimeEntryMutation, handleUpdate, modals.workLogMode]);
+
   const openNew = () =>
-    setModals({ ...modals, editingItem: null,  formOpen: true});
-  
+    setModals(prev => ({ ...prev, editingItem: null, formOpen: true }));
+
   const openEdit = (item: WorkItemDetailDto) =>
-    setModals({ ...modals, editingItem: item, formOpen: true, detailOpen: false });
+    setModals(prev => ({ ...prev, editingItem: item, formOpen: true, detailOpen: false }));
 
   const openDetail = (item: WorkItemDetailDto) =>
-    setModals({ ...modals, detailItem: item, detailOpen: true });
-  
+    setModals(prev => ({ ...prev, detailItem: item, detailOpen: true }));
+
   const closeAll = useCallback(() => {
     setModals(prev => ({
-      ...prev, formOpen: false, detailOpen: false, editingItem: null, detailItem: null
+      ...prev,
+      formOpen: false,
+      detailOpen: false,
+      workLogOpen: false,
+      editingItem: null,
+      detailItem: null,
+      workLogItem: null,
+    }));
+  }, []);
+
+  const closeWorkLog = useCallback(() => {
+    setModals(prev => ({
+      ...prev,
+      workLogOpen: false,
+      workLogItem: null,
+      workLogMode: 'log',
     }));
   }, []);
 
@@ -142,22 +285,22 @@ export const useWorkItemsViewModel = () => {
   }, [handleEdit, closeAll]);
 
   const handleCompleteFromDetail = useCallback(async (item: WorkItemDetailDto) => {
-    await handleComplete(item);
-    closeAll();
-  }, [handleComplete, closeAll]);
-  
-  // --- Final API ---
+    handleComplete(item);
+  }, [handleComplete]);
+
+  const detailItem = modals.detailItem
+    ? items.find((item) => item.id === modals.detailItem?.id) ?? modals.detailItem
+    : null;
+
   return {
-    // Data
     items: filteredItems,
-    totalItemCount: () => { return items.length },
-    loading,
+    totalItemCount: () => items.length,
+    loading: workItemsQuery.isLoading || usersQuery.isLoading || sprintsQuery.isLoading,
     viewMode,
     setViewMode,
     users,
     sprints,
 
-    // UI State
     search: filters.search,
     statusFilter: filters.status,
     assigneeFilter: filters.assignee,
@@ -165,23 +308,25 @@ export const useWorkItemsViewModel = () => {
     setStatusFilter: (status: WorkItemStatus | '') => setFilters(f => ({ ...f, status })),
     setAssigneeFilter: (assignee: string) => setFilters(f => ({ ...f, assignee })),
 
-    // Modal state
     ...modals,
+    detailItem,
     editingItem: modals.editingItem,
 
-    // Actions
     actions: {
       loadItems,
       openNew,
       handleCreate,
       handleUpdate,
       handleComplete,
+      handleLogWork,
+      handleWorkLogSubmit,
       handleEdit,
       handleEditFromDetail,
       handleCompleteFromDetail,
       openEdit,
       openDetail,
-      closeAll
+      closeAll,
+      closeWorkLog,
     }
   };
 };

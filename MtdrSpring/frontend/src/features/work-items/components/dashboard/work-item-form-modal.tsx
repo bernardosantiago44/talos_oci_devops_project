@@ -8,6 +8,7 @@ import type { WorkItemStatus } from '../../enums/work-item-status.enum';
 import type { WorkItemPriority } from '../../enums/work-item-priority.enum';
 import type { UserSummaryDto } from '@/shared/dtos/user-summary.dto';
 import type { TagDto } from '@/shared/dtos/tag.dto';
+import type { SprintDto } from '../../viewModels/useWorkItemsViewModel';
 import { WORK_ITEM_TYPES } from '../../enums/work-item-type.enum';
 import { WORK_ITEM_STATUSES } from '../../enums/work-item-status.enum';
 import { WORK_ITEM_PRIORITIES } from '../../enums/work-item-priority.enum';
@@ -21,6 +22,7 @@ interface WorkItemFormModalProps {
     isOpen: boolean;
     item?: WorkItemDetailDto | null;
     users: UserSummaryDto[];
+    sprints: SprintDto[];
     tags: TagDto[];
     onClose: () => void;
     onCreate: (dto: CreateWorkItemDto) => Promise<void>;
@@ -52,13 +54,6 @@ const DEFAULT_FORM: FormState = {
     assigneeUserIds: [],
     tagIds: [],
 };
-
-const SPRINT_OPTIONS = [
-    { id: '', label: 'No Sprint' },
-    { id: 'spr-001', label: 'Sprint 1' },
-    { id: 'spr-002', label: 'Sprint 2' },
-    { id: 'spr-003', label: 'Sprint 3' },
-];
 
 function Label({ children }: { children: React.ReactNode }) {
     return <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">{children}</label>;
@@ -101,6 +96,7 @@ export function WorkItemFormModal({
     isOpen,
     item,
     users,
+    sprints,
     tags,
     onClose,
     onCreate,
@@ -304,8 +300,9 @@ export function WorkItemFormModal({
                             <div>
                                 <Label>Sprint</Label>
                                 <Select value={form.sprintId} onChange={(v) => set('sprintId', v)}>
-                                    {SPRINT_OPTIONS.map((s) => (
-                                        <option key={s.id} value={s.id}>{s.label}</option>
+                                    <option value="">Default Sprint</option>
+                                    {sprints.map((s) => (
+                                        <option key={s.sprintId} value={s.sprintId}>{s.name}</option>
                                     ))}
                                 </Select>
                             </div>
