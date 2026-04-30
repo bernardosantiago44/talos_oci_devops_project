@@ -1,131 +1,32 @@
 package com.springboot.MyTodoList.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
+import com.springboot.MyTodoList.model.AnalyticsDashboard;
+import com.springboot.MyTodoList.model.AnalyticsDebug;
+import com.springboot.MyTodoList.model.VelocityAnalytics;
+import com.springboot.MyTodoList.service.AnalyticsService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.*;
-
 @RestController
 public class AnalyticsController {
+    private final AnalyticsService analyticsService;
 
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
+    public AnalyticsController(AnalyticsService analyticsService) {
+        this.analyticsService = analyticsService;
+    }
 
     @GetMapping("/analytics/dashboard")
-    public Map<String, Object> getDashboardData() {
-
-        String sql =
-            "SELECT " +
-            "  u.NAME        AS developer, " +
-            "  s.NAME        AS sprint_name, " +
-            "  COUNT(DISTINCT wi.WORK_ITEM_ID)          AS tasks_completed, " +
-            "  NVL(SUM(te.sprint_minutes), 0) / 60.0   AS real_hours " +
-            "FROM CHATBOT_USER.WORK_ITEM wi " +
-            "JOIN CHATBOT_USER.WORK_ITEM_ASSIGNMENT wia ON wi.WORK_ITEM_ID = wia.WORK_ITEM_ID " +
-            "JOIN CHATBOT_USER.APP_USER u               ON wia.USER_ID     = u.USER_ID " +
-            "JOIN CHATBOT_USER.SPRINT  s                ON wi.SPRINT_ID    = s.SPRINT_ID " +
-            "LEFT JOIN ( " +
-            "  SELECT WORK_ITEM_ID, SUM(MINUTES) AS sprint_minutes " +
-            "  FROM CHATBOT_USER.TIME_ENTRY " +
-            "  GROUP BY WORK_ITEM_ID " +
-            ") te ON wi.WORK_ITEM_ID = te.WORK_ITEM_ID " +
-            "WHERE wi.STATUS IN ('DONE', 'COMPLETED', 'CLOSED') " +
-            "GROUP BY u.NAME, s.NAME " +
-            "ORDER BY u.NAME, s.NAME";
-
-        List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql);
-
-        // ── KPIs ──────────────────────────────────────────────────────────────
-        long   totalTasks = rows.stream()
-                .mapToLong(r -> ((Number) r.get("TASKS_COMPLETED")).longValue())
-                .sum();
-        double totalHours = rows.stream()
-                .mapToDouble(r -> ((Number) r.get("REAL_HOURS")).doubleValue())
-                .sum();
-
-        Set<String> devNames = new LinkedHashSet<>();
-        rows.forEach(r -> devNames.add((String) r.get("DEVELOPER")));
-        int numDevs = devNames.isEmpty() ? 1 : devNames.size();
-
-        double avgTasks = (double) totalTasks / numDevs;
-        double avgHours = totalHours / numDevs;
-
-        Map<String, Object> kpis = new LinkedHashMap<>();
-        kpis.put("totalTasks",     totalTasks);
-        kpis.put("totalHours",     round1(totalHours));
-        kpis.put("avgTasksPerDev", round1(avgTasks));
-        kpis.put("avgHoursPerDev", round1(avgHours));
-
-        // ── Response ──────────────────────────────────────────────────────────
-        Map<String, Object> result = new LinkedHashMap<>();
-        result.put("kpis",      kpis);
-        result.put("chartData", rows);
-        return result;
+    public AnalyticsDashboard getDashboardData() {
+        return analyticsService.getDashboardData();
     }
 
     @GetMapping("/analytics/velocity")
-    public Map<String, Object> getVelocity() {
-
-        String sql =
-            "SELECT " +
-            "  s.SPRINT_ID  AS sprint_id, " +
-            "  s.NAME       AS sprint_name, " +
-            "  s.STATUS     AS sprint_status, " +
-            "  s.START_DATE, " +
-            "  s.END_DATE, " +
-            "  COUNT(wi.WORK_ITEM_ID) AS total_tasks, " +
-            "  SUM(CASE WHEN wi.STATUS IN ('DONE','COMPLETED','CLOSED') THEN 1 ELSE 0 END) AS completed_tasks " +
-            "FROM CHATBOT_USER.SPRINT s " +
-            "LEFT JOIN CHATBOT_USER.WORK_ITEM wi ON wi.SPRINT_ID = s.SPRINT_ID " +
-            "GROUP BY s.SPRINT_ID, s.NAME, s.STATUS, s.START_DATE, s.END_DATE " +
-            "ORDER BY s.START_DATE DESC";
-
-        List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql);
-
-        List<Map<String, Object>> sprints = new ArrayList<>();
-        for (Map<String, Object> row : rows) {
-            long total     = ((Number) row.get("TOTAL_TASKS")).longValue();
-            long completed = ((Number) row.get("COMPLETED_TASKS")).longValue();
-            double pct     = total == 0 ? 0.0 : round1((double) completed * 100.0 / total);
-
-            Map<String, Object> sprint = new LinkedHashMap<>();
-            sprint.put("sprintId",       row.get("SPRINT_ID"));
-            sprint.put("sprintName",     row.get("SPRINT_NAME"));
-            sprint.put("sprintStatus",   row.get("SPRINT_STATUS"));
-            sprint.put("startDate",      row.get("START_DATE") != null ? row.get("START_DATE").toString() : null);
-            sprint.put("endDate",        row.get("END_DATE")   != null ? row.get("END_DATE").toString()   : null);
-            sprint.put("totalTasks",     total);
-            sprint.put("completedTasks", completed);
-            sprint.put("fulfillmentPct", pct);
-            sprints.add(sprint);
-        }
-
-        long totalAll     = sprints.stream().mapToLong(s -> ((Number) s.get("totalTasks")).longValue()).sum();
-        long completedAll = sprints.stream().mapToLong(s -> ((Number) s.get("completedTasks")).longValue()).sum();
-        double overallPct = totalAll == 0 ? 0.0 : round1((double) completedAll * 100.0 / totalAll);
-
-        Map<String, Object> result = new LinkedHashMap<>();
-        result.put("target",     84.0);
-        result.put("overallPct", overallPct);
-        result.put("sprints",    sprints);
-        return result;
+    public VelocityAnalytics getVelocity() {
+        return analyticsService.getVelocity();
     }
 
     @GetMapping("/analytics/debug")
-    public Map<String, Object> debug() {
-        Map<String, Object> result = new java.util.LinkedHashMap<>();
-        result.put("workItems", jdbcTemplate.queryForList(
-            "SELECT WORK_ITEM_ID, TITLE, STATUS, SPRINT_ID FROM CHATBOT_USER.WORK_ITEM WHERE WORK_ITEM_ID LIKE 'wi-d%' ORDER BY WORK_ITEM_ID"));
-        result.put("assignments", jdbcTemplate.queryForList(
-            "SELECT ASSIGNMENT_ID, WORK_ITEM_ID, USER_ID FROM CHATBOT_USER.WORK_ITEM_ASSIGNMENT WHERE WORK_ITEM_ID LIKE 'wi-d%' ORDER BY ASSIGNMENT_ID"));
-        result.put("timeEntries", jdbcTemplate.queryForList(
-            "SELECT TIME_ENTRY_ID, WORK_ITEM_ID, MINUTES FROM CHATBOT_USER.TIME_ENTRY WHERE WORK_ITEM_ID LIKE 'wi-d%' ORDER BY TIME_ENTRY_ID"));
-        return result;
-    }
-
-    private double round1(double v) {
-        return Math.round(v * 10.0) / 10.0;
+    public AnalyticsDebug debug() {
+        return analyticsService.getDebugData();
     }
 }
