@@ -1,5 +1,6 @@
 package com.springboot.MyTodoList.controller;
 
+import com.springboot.MyTodoList.exception.AiServiceUnavailableException;
 import com.springboot.MyTodoList.exception.BusinessRuleException;
 import com.springboot.MyTodoList.exception.SprintNotFoundException;
 import com.springboot.MyTodoList.exception.WorkItemNotFoundException;
@@ -14,6 +15,19 @@ import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(AiServiceUnavailableException.class)
+    public ResponseEntity<Map<String, Object>> handleAiServiceUnavailable(
+            AiServiceUnavailableException ex
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(Map.of(
+                        "status", 503,
+                        "error", "AI_SERVICE_UNAVAILABLE",
+                        "message", ex.getMessage()
+                ));
+    }
     @ExceptionHandler(SprintNotFoundException.class)
     public ResponseEntity<Map<String, String>> handleSprintNotFound(SprintNotFoundException exception) {
         return this.handleGenericNotFound(exception);

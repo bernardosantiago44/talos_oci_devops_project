@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Layers, Sun, Moon, BarChart2 } from 'lucide-react';
+import { Layers, Sun, Moon, BarChart2, Sparkles } from 'lucide-react';
 import { mockTags } from '@/shared/mock/tags.mock';
 import { DashboardSummaryCards } from '../components/dashboard/dashboard-summary-cards';
 import { DashboardToolbar } from '../components/dashboard/dashboard-toolbar';
@@ -11,8 +11,9 @@ import { useWorkItemsViewModel } from "@/features/work-items/viewModels/useWorkI
 import type { IWorkItemsViewModel } from "@/features/work-items/viewModels/useWorkItemsViewModel";
 import { useTheme } from '@/contexts/theme-context';
 import { AnalyticsPage } from './analytics-page';
+import { SemanticSearchPanel } from '../components/dashboard/semantic-search-panel';
 
-type Tab = 'workitems' | 'analytics';
+type Tab = 'workitems' | 'ai-search' | 'analytics';
 
 export function WorkItemDashboardPage() {
   const viewModel: IWorkItemsViewModel = useWorkItemsViewModel();
@@ -72,10 +73,22 @@ export function WorkItemDashboardPage() {
           </button>
           <button
             type="button"
+            onClick={() => setActiveTab('ai-search')}
+            className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+              activeTab === 'ai-search'
+                ? 'bg-violet-500 text-white shadow-sm'
+                : 'text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-100'
+            }`}
+          >
+            <Sparkles className="h-4 w-4" />
+            AI Search
+          </button>
+          <button
+            type="button"
             onClick={() => setActiveTab('analytics')}
             className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
               activeTab === 'analytics'
-                ? 'bg-violet-500 text-white shadow-sm'
+                ? 'bg-emerald-500 text-white shadow-sm'
                 : 'text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-100'
             }`}
           >
@@ -87,6 +100,19 @@ export function WorkItemDashboardPage() {
         {/* Tab content */}
         {activeTab === 'analytics' ? (
           <AnalyticsPage />
+        ) : activeTab === 'ai-search' ? (
+          <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/60">
+            <div className="mb-5 flex items-center gap-3">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-violet-500/15 text-violet-600 dark:text-violet-400">
+                <Sparkles className="h-5 w-5" />
+              </div>
+              <div>
+                <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-100">Semantic Search</h2>
+                <p className="text-xs text-zinc-500">RF-005 · Find tasks by meaning, not just keywords</p>
+              </div>
+            </div>
+            <SemanticSearchPanel onViewDetail={viewModel.actions.openDetail} />
+          </div>
         ) : (
           <>
             {/* Summary cards */}
