@@ -1,24 +1,22 @@
 package com.springboot.MyTodoList.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
+import com.springboot.MyTodoList.model.AppUserSummary;
+import com.springboot.MyTodoList.service.AppUserService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/appusers")
 public class AppUserController {
+    private final AppUserService appUserService;
 
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
+    public AppUserController(AppUserService appUserService) {
+        this.appUserService = appUserService;
+    }
 
     @GetMapping
-    public List<Map<String, Object>> getAll() {
-        return jdbcTemplate.queryForList(
-            "SELECT USER_ID AS \"userId\", NAME AS \"name\", EMAIL AS \"email\", " +
-            "TELEGRAM_USER_ID AS \"telegramUserId\" FROM CHATBOT_USER.APP_USER ORDER BY NAME"
-        );
+    public List<AppUserSummary> getAll() {
+        return appUserService.findAll();
     }
 }
