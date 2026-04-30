@@ -134,21 +134,34 @@ public class SemanticSearchService {
         // Sort descending by similarity
         scored.sort((a, b) -> Double.compare(b.getValue(), a.getValue()));
 
-        // Fetch work items for top results
+        // Collect top result ids and scores first, then fetch work items in one batch
         List<SemanticSearchResponse> results = new ArrayList<>();
         int limit = Math.min(maxResults, scored.size());
+        List<String> topIds = new ArrayList<>();
+        Map<String, Double> scoresById = new HashMap<>();
 
         for (int i = 0; i < limit; i++) {
             Map.Entry<String, Double> scoredEntry = scored.get(i);
             // Only include results with meaningful similarity (> 0.3 threshold)
             if (scoredEntry.getValue() < 0.3) break;
 
-            Optional<WorkItem> itemOpt = workItemRepository.findById(scoredEntry.getKey());
-            if (itemOpt.isPresent()) {
-                WorkItemResponse response = WorkItemMapper.toResponse(itemOpt.get());
+            String workItemId = scoredEntry.getKey();
+            topIds.add(workItemId);
+            scoresById.put(workItemId, Math.round(scoredEntry.getValue() * 1000.0) / 1000.0);
+        }
+
+        Map<String, WorkItem> itemsById = new HashMap<>();
+        for (WorkItem item : workItemRepository.findAllById(topIds)) {
+            itemsById.put(item.getId(), item);
+        }
+
+        for (String workItemId : topIds) {
+            WorkItem item = itemsById.get(workItemId);
+            if (item != null) {
+                WorkItemResponse response = WorkItemMapper.toResponse(item);
                 results.add(new SemanticSearchResponse(
                         response,
-                        Math.round(scoredEntry.getValue() * 1000.0) / 1000.0
+                        scoresById.get(workItemId)
                 ));
             }
         }
