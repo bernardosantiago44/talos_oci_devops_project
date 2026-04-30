@@ -152,7 +152,7 @@ public class SemanticSearchService {
 
         Map<String, WorkItem> itemsById = new HashMap<>();
         for (WorkItem item : workItemRepository.findAllById(topIds)) {
-            itemsById.put(item.getId(), item);
+            itemsById.put(item.getWorkItemId(), item);
         }
 
         for (String workItemId : topIds) {
