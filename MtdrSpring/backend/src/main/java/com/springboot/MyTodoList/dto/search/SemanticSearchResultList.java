@@ -1,16 +1,24 @@
 package com.springboot.MyTodoList.dto.search;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.util.List;
 
 /**
  * Wrapper for a list of semantic search results.
  * Includes metadata about the search operation.
  */
+@Schema(description = "Semantic search response with metadata and ranked results.")
 public record SemanticSearchResultList(
+        @Schema(description = "Original search query.", example = "analytics dashboard")
         String query,
+        @Schema(description = "Number of returned results.", example = "3")
         int totalResults,
+        @Schema(description = "Whether AI embeddings were available for this search.", example = "true")
         boolean aiAvailable,
+        @Schema(description = "Fallback message when keyword search was used.", example = "AI service unavailable; returned keyword-based results.")
         String fallbackMessage,
+        @Schema(description = "Ranked search results.")
         List<SemanticSearchResponse> results
 ) {
     /**

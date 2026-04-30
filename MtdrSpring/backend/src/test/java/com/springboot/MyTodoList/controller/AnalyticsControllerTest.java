@@ -39,7 +39,7 @@ class AnalyticsControllerTest {
         );
         when(analyticsService.getDashboardData()).thenReturn(dashboard);
 
-        mockMvc.perform(get("/analytics/dashboard"))
+        mockMvc.perform(get("/api/analytics/dashboard"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.kpis.totalTasks").value(3))
                 .andExpect(jsonPath("$.kpis.totalHours").value(4.5))
@@ -60,7 +60,7 @@ class AnalyticsControllerTest {
         );
         when(analyticsService.getVelocity()).thenReturn(velocity);
 
-        mockMvc.perform(get("/analytics/velocity"))
+        mockMvc.perform(get("/api/analytics/velocity"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.target").value(84.0))
                 .andExpect(jsonPath("$.overallPct").value(75.0))
@@ -77,7 +77,7 @@ class AnalyticsControllerTest {
         );
         when(analyticsService.getDebugData()).thenReturn(debug);
 
-        mockMvc.perform(get("/analytics/debug"))
+        mockMvc.perform(get("/api/analytics/debug"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.workItems[0].WORK_ITEM_ID").value("wi-d1"))
                 .andExpect(jsonPath("$.assignments[0].ASSIGNMENT_ID").value("assignment-1"))

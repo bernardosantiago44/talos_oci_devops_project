@@ -31,7 +31,7 @@ class AppUserControllerTest {
                 new AppUserSummary("user-1", "Ada Lovelace", "ada@example.com", "telegram-user-1")
         ));
 
-        mockMvc.perform(get("/appusers"))
+        mockMvc.perform(get("/api/appusers"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].userId").value("user-1"))
                 .andExpect(jsonPath("$[0].name").value("Ada Lovelace"))

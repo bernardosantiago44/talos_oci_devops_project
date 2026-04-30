@@ -46,7 +46,7 @@ class WorkItemControllerTest {
     void getAllWorkItemsReturnsWorkItems() throws Exception {
         when(workItemService.findAll()).thenReturn(List.of(TestDataFactory.workItemResponse()));
 
-        mockMvc.perform(get("/workitems"))
+        mockMvc.perform(get("/api/workitems"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].workItemId").value(TestDataFactory.WORK_ITEM_ID))
                 .andExpect(jsonPath("$[0].title").value("Build assignment tests"))
@@ -58,7 +58,7 @@ class WorkItemControllerTest {
         when(workItemService.findById(TestDataFactory.WORK_ITEM_ID))
                 .thenReturn(TestDataFactory.workItemResponse());
 
-        mockMvc.perform(get("/workitems/{id}", TestDataFactory.WORK_ITEM_ID))
+        mockMvc.perform(get("/api/workitems/{id}", TestDataFactory.WORK_ITEM_ID))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.workItemId").value(TestDataFactory.WORK_ITEM_ID))
                 .andExpect(jsonPath("$.priority").value("HIGH"));
@@ -69,7 +69,7 @@ class WorkItemControllerTest {
         when(workItemService.findById("missing"))
                 .thenThrow(new WorkItemNotFoundException("missing"));
 
-        mockMvc.perform(get("/workitems/{id}", "missing"))
+        mockMvc.perform(get("/api/workitems/{id}", "missing"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.error").value("Work Item not found: missing"));
     }
@@ -81,7 +81,7 @@ class WorkItemControllerTest {
         when(workItemService.createWorkItem(org.mockito.ArgumentMatchers.any(CreateWorkItemRequest.class)))
                 .thenReturn(TestDataFactory.workItemResponse());
 
-        mockMvc.perform(post("/workitems")
+        mockMvc.perform(post("/api/workitems")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -94,7 +94,7 @@ class WorkItemControllerTest {
         CreateWorkItemRequest request = TestDataFactory.validCreateWorkItemRequest();
         request.setTitle(null);
 
-        mockMvc.perform(post("/workitems")
+        mockMvc.perform(post("/api/workitems")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
@@ -109,7 +109,7 @@ class WorkItemControllerTest {
         when(workItemService.createWorkItem(org.mockito.ArgumentMatchers.any(CreateWorkItemRequest.class)))
                 .thenThrow(new BusinessRuleException("Creator user does not exist: creator-1"));
 
-        mockMvc.perform(post("/workitems")
+        mockMvc.perform(post("/api/workitems")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
@@ -124,7 +124,7 @@ class WorkItemControllerTest {
                 org.mockito.ArgumentMatchers.any()
         )).thenReturn(TestDataFactory.workItemResponse());
 
-        mockMvc.perform(patch("/workitems/{id}", TestDataFactory.WORK_ITEM_ID)
+        mockMvc.perform(patch("/api/workitems/{id}", TestDataFactory.WORK_ITEM_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(TestDataFactory.validUpdateWorkItemRequest())))
                 .andExpect(status().isOk())
@@ -136,7 +136,7 @@ class WorkItemControllerTest {
         when(assignmentService.getAssignees(TestDataFactory.WORK_ITEM_ID))
                 .thenReturn(List.of(TestDataFactory.assignmentDto()));
 
-        mockMvc.perform(get("/workitems/{id}/assignees", TestDataFactory.WORK_ITEM_ID))
+        mockMvc.perform(get("/api/workitems/{id}/assignees", TestDataFactory.WORK_ITEM_ID))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].assignmentId").value(TestDataFactory.ASSIGNMENT_ID))
                 .andExpect(jsonPath("$[0].user.userId").value(TestDataFactory.ASSIGNEE_USER_ID));
@@ -148,7 +148,7 @@ class WorkItemControllerTest {
                 .thenReturn(TestDataFactory.assignmentDto());
 
         mockMvc.perform(patch(
-                        "/workitems/{id}/assignees/{userId}",
+                        "/api/workitems/{id}/assignees/{userId}",
                         TestDataFactory.WORK_ITEM_ID,
                         TestDataFactory.ASSIGNEE_USER_ID
                 ))
@@ -162,7 +162,7 @@ class WorkItemControllerTest {
                 .removeAssignee(TestDataFactory.WORK_ITEM_ID, TestDataFactory.ASSIGNEE_USER_ID);
 
         mockMvc.perform(delete(
-                        "/workitems/{id}/assignees/{userId}",
+                        "/api/workitems/{id}/assignees/{userId}",
                         TestDataFactory.WORK_ITEM_ID,
                         TestDataFactory.ASSIGNEE_USER_ID
                 ))
@@ -175,7 +175,7 @@ class WorkItemControllerTest {
     void deleteWorkItemReturnsNoContent() throws Exception {
         doNothing().when(workItemService).deleteWorkItemById(TestDataFactory.WORK_ITEM_ID);
 
-        mockMvc.perform(delete("/workitems/{id}", TestDataFactory.WORK_ITEM_ID))
+        mockMvc.perform(delete("/api/workitems/{id}", TestDataFactory.WORK_ITEM_ID))
                 .andExpect(status().isNoContent());
 
         verify(workItemService).deleteWorkItemById(TestDataFactory.WORK_ITEM_ID);
