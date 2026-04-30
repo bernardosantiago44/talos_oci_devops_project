@@ -52,7 +52,7 @@ frontend/yarn-error.log*
 /MtdrSpring/backend/src/main/resources/Wallet_chatbotBD/
 *.gz
 /MtdrSpring/backend/*.log*
-
+/MtdrSpring/backend/src/main/resources/application.properties
 # Playwright
 node_modules/
 /test-results/
