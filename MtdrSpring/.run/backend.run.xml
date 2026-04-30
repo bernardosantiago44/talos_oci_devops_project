@@ -7,7 +7,8 @@
           <option name="delegateBuildToMaven" value="false" />
           <option name="environmentProperties">
             <map>
-              <entry key="DB_PASSWORD" value="" />
+              <entry key="ALIBABA_API_KEY" value="sk-de4711e3bbfd41eca92af92eb4196634" />
+              <entry key="DB_PASSWORD" value="Chatbot2026AB" />
               <entry key="DB_URL" value="jdbc:oracle:thin:@chatbotbd_medium?TNS_ADMIN=$PROJECT_DIR$/backend/src/main/resources/Wallet_chatbotBD" />
             </map>
           </option>
