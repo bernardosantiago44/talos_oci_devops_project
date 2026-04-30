@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo } from 'react';
-import { useAppUserList, useSprintList, useWorkItemCreate, useWorkItemList, useWorkItemUpdate } from '@/hooks/api';
+import { useAppUserList, useSprintList, useTimeEntryCreate, useWorkItemCreate, useWorkItemList, useWorkItemUpdate } from '@/hooks/api';
 import { normalizeStatus, toBackendStatus } from '../enums/work-item-status.enum';
 function mapAppUser(user) {
     if (!user.userId || !user.name)
@@ -79,6 +79,7 @@ export const useWorkItemsViewModel = () => {
     const sprintsQuery = useSprintList();
     const createWorkItemMutation = useWorkItemCreate();
     const updateWorkItemMutation = useWorkItemUpdate();
+    const createTimeEntryMutation = useTimeEntryCreate();
     const [filters, setFilters] = useState({
         search: '',
         status: '',
@@ -88,8 +89,11 @@ export const useWorkItemsViewModel = () => {
     const [modals, setModals] = useState({
         formOpen: false,
         detailOpen: false,
+        workLogOpen: false,
         editingItem: null,
         detailItem: null,
+        workLogItem: null,
+        workLogMode: 'log',
     });
     const users = useMemo(() => (usersQuery.data ?? []).map(mapAppUser).filter((user) => Boolean(user)), [usersQuery.data]);
     const sprints = useMemo(() => (sprintsQuery.data ?? []).map(mapSprint).filter((sprint) => Boolean(sprint)), [sprintsQuery.data]);
@@ -147,25 +151,59 @@ export const useWorkItemsViewModel = () => {
         await updateWorkItemMutation.mutateAsync({ id, body });
     }, [updateWorkItemMutation]);
     const handleEdit = useCallback((item) => {
-        setModals({
+        setModals(prev => ({
+            ...prev,
             formOpen: true,
             detailOpen: false,
             editingItem: item,
             detailItem: null,
-        });
+        }));
     }, []);
-    const handleComplete = useCallback(async (item) => {
-        await handleUpdate(item.id, {
-            status: 'DONE',
-            completedAt: new Date().toISOString()
-        });
-    }, [handleUpdate]);
-    const openNew = () => setModals({ ...modals, editingItem: null, formOpen: true });
-    const openEdit = (item) => setModals({ ...modals, editingItem: item, formOpen: true, detailOpen: false });
-    const openDetail = (item) => setModals({ ...modals, detailItem: item, detailOpen: true });
+    const handleComplete = useCallback((item) => {
+        setModals(prev => ({
+            ...prev,
+            workLogOpen: true,
+            workLogItem: item,
+            workLogMode: 'complete',
+        }));
+    }, []);
+    const handleLogWork = useCallback((item) => {
+        setModals(prev => ({
+            ...prev,
+            workLogOpen: true,
+            workLogItem: item,
+            workLogMode: 'log',
+        }));
+    }, []);
+    const handleWorkLogSubmit = useCallback(async (dto) => {
+        await createTimeEntryMutation.mutateAsync(dto);
+        if (modals.workLogMode === 'complete') {
+            await handleUpdate(dto.workItemId, {
+                status: 'DONE',
+                completedAt: new Date().toISOString()
+            });
+        }
+    }, [createTimeEntryMutation, handleUpdate, modals.workLogMode]);
+    const openNew = () => setModals(prev => ({ ...prev, editingItem: null, formOpen: true }));
+    const openEdit = (item) => setModals(prev => ({ ...prev, editingItem: item, formOpen: true, detailOpen: false }));
+    const openDetail = (item) => setModals(prev => ({ ...prev, detailItem: item, detailOpen: true }));
     const closeAll = useCallback(() => {
         setModals(prev => ({
-            ...prev, formOpen: false, detailOpen: false, editingItem: null, detailItem: null
+            ...prev,
+            formOpen: false,
+            detailOpen: false,
+            workLogOpen: false,
+            editingItem: null,
+            detailItem: null,
+            workLogItem: null,
+        }));
+    }, []);
+    const closeWorkLog = useCallback(() => {
+        setModals(prev => ({
+            ...prev,
+            workLogOpen: false,
+            workLogItem: null,
+            workLogMode: 'log',
         }));
     }, []);
     const handleEditFromDetail = useCallback((item) => {
@@ -173,9 +211,8 @@ export const useWorkItemsViewModel = () => {
         handleEdit(item);
     }, [handleEdit, closeAll]);
     const handleCompleteFromDetail = useCallback(async (item) => {
-        await handleComplete(item);
-        closeAll();
-    }, [handleComplete, closeAll]);
+        handleComplete(item);
+    }, [handleComplete]);
     const detailItem = modals.detailItem
         ? items.find((item) => item.id === modals.detailItem?.id) ?? modals.detailItem
         : null;
@@ -202,12 +239,15 @@ export const useWorkItemsViewModel = () => {
             handleCreate,
             handleUpdate,
             handleComplete,
+            handleLogWork,
+            handleWorkLogSubmit,
             handleEdit,
             handleEditFromDetail,
             handleCompleteFromDetail,
             openEdit,
             openDetail,
-            closeAll
+            closeAll,
+            closeWorkLog,
         }
     };
 };
