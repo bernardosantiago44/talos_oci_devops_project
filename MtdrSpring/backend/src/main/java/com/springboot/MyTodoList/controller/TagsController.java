@@ -2,6 +2,7 @@ package com.springboot.MyTodoList.controller;
 
 import com.springboot.MyTodoList.dto.tag.CreateTagRequest;
 import com.springboot.MyTodoList.dto.tag.TagResponse;
+import com.springboot.MyTodoList.dto.tag.UpdateTagRequest;
 import com.springboot.MyTodoList.service.TagsService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -45,5 +46,16 @@ public class TagsController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(response);
+    }
+    
+    @PatchMapping("/{id}")
+    @Operation(summary = "Update an existing tag", description = "Only provided fields will be updated.")
+    public ResponseEntity<TagResponse> updateTag(@PathVariable String id, 
+                                                 @Valid @RequestBody UpdateTagRequest request
+    ) {
+        TagResponse response = tagsService.updateTag(id, request);
+        LOGGER.info("Updated tag {}", id);
+        
+        return ResponseEntity.ok(response);
     }
 }

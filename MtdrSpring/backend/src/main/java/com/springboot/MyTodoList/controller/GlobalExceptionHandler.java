@@ -43,6 +43,11 @@ public class GlobalExceptionHandler {
         return this.handleGenericNotFound(exception);
     }
     
+    @ExceptionHandler(TagNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleTagNotFound(TagNotFoundException exception) {
+        return this.handleGenericNotFound(exception);
+    }
+    
     private ResponseEntity<Map<String, String>> handleGenericNotFound(RuntimeException exception) {
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
