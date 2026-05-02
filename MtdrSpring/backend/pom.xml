@@ -137,7 +137,9 @@
 				<version>1.4</version>
 				<executions>
 					<execution>
+						<!-- mvn verify -->
 						<id>integration-test</id>
+						<phase>integration-test</phase>
 						<goals>
 							<goal>generate</goal>
 						</goals>
