@@ -7,8 +7,6 @@ import lombok.Setter;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 @Setter
@@ -39,8 +37,9 @@ public class WorkItem {
     @Column(name = "STATUS")
     private String status;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "PRIORITY")
-    private String priority;
+    private WorkItemPriority priority;
 
     @Column(name = "EXTERNAL_LINK")
     private String externalLink;
@@ -65,4 +64,3 @@ public class WorkItem {
 
     public WorkItem() {}
 }
-

@@ -1,6 +1,7 @@
 package com.springboot.MyTodoList.service;
 
 import com.springboot.MyTodoList.dto.WorkItem.*;
+import com.springboot.MyTodoList.exception.AppUserNotFoundException;
 import com.springboot.MyTodoList.exception.BusinessRuleException;
 import com.springboot.MyTodoList.exception.WorkItemNotFoundException;
 import com.springboot.MyTodoList.model.WorkItem;
@@ -20,16 +21,18 @@ public class WorkItemService {
     private final SprintRepository sprintRepository;
     private final WorkItemAssignmentService assignmentService;
     private static final Logger log = LoggerFactory.getLogger(WorkItemService.class);
-    
+    private final AppUserRepository userRepository;
+
     public WorkItemService(WorkItemRepository repository, 
                            AppUserRepository appUserRepository,
                            SprintRepository sprintRepository,
-                           WorkItemAssignmentService assignmentService
-    ) {
+                           WorkItemAssignmentService assignmentService,
+                           AppUserRepository userRepository) {
         this.workItemRepository = repository;
         this.appUserRepository = appUserRepository;
         this.sprintRepository = sprintRepository;
         this.assignmentService = assignmentService;
+        this.userRepository = userRepository;
     }
     
     public List<WorkItemResponse> findAll() {
@@ -47,9 +50,10 @@ public class WorkItemService {
                 .orElseThrow(() -> new WorkItemNotFoundException(id));
     }
     
-    public List<WorkItemResponse> findForUserId(String userId) {
+    public List<WorkItemResponse> findByTelegramUserId(String userId) {
+        ensureUserExistsByTelegramId(userId);
         return workItemRepository
-                .findForUserId(userId)
+                .findByTelegramUserId(userId)
                 .stream()
                 .map(WorkItemMapper::toResponse)
                 .toList();
@@ -99,7 +103,7 @@ public class WorkItemService {
             throw new BusinessRuleException("Creator user does not exist: " + request.getCreatedByUserId());
         }
 
-        if (request.getSprintId() != null && !sprintRepository.existsById(request.getSprintId())) {
+        if (!sprintRepository.existsById(request.getSprintId())) {
             log.warn("Sprint does not exist: {}", request.getSprintId());
             throw new BusinessRuleException("Sprint does not exist: " + request.getSprintId());
         }
@@ -124,10 +128,6 @@ public class WorkItemService {
             throw new BusinessRuleException("Status cannot be blank");
         }
 
-        if (request.getPriority() != null && request.getPriority().isBlank()) {
-            throw new BusinessRuleException("Priority cannot be blank");
-        }
-
         if (request.getEstimatedMinutes() != null && request.getEstimatedMinutes() < 0) {
             throw new BusinessRuleException("Estimated minutes cannot be negative");
         }
@@ -140,6 +140,13 @@ public class WorkItemService {
         if (!workItemRepository.existsById(id)) {
             log.warn("Work item not found: {}", id);
             throw new WorkItemNotFoundException(id);
+        }
+    }
+    
+    private void ensureUserExistsByTelegramId(String id) {
+        if (userRepository.findByTelegramUserId(id).isEmpty()) {
+            log.warn("User with telegram id {} not found", id);
+            throw new AppUserNotFoundException("telegram::"+id);
         }
     }
 }

@@ -1,11 +1,11 @@
 package com.springboot.MyTodoList.controller;
 
-import com.springboot.MyTodoList.exception.AiServiceUnavailableException;
-import com.springboot.MyTodoList.exception.BusinessRuleException;
-import com.springboot.MyTodoList.exception.SprintNotFoundException;
-import com.springboot.MyTodoList.exception.WorkItemNotFoundException;
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import com.springboot.MyTodoList.exception.*;
+import com.springboot.MyTodoList.model.WorkItemPriority;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -31,6 +31,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(SprintNotFoundException.class)
     public ResponseEntity<Map<String, String>> handleSprintNotFound(SprintNotFoundException exception) {
         return this.handleGenericNotFound(exception);
+    }
+
+    @ExceptionHandler(AppUserNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleUserNotFound(AppUserNotFoundException exception) {
+        return handleGenericNotFound(exception);
     }
     
     @ExceptionHandler(WorkItemNotFoundException.class)
@@ -62,6 +67,26 @@ public class GlobalExceptionHandler {
         response.put("fields", fieldErrors);
 
         return ResponseEntity.badRequest().body(response);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<Map<String, Object>> handleUnreadableMessage(
+            HttpMessageNotReadableException ex
+    ) {
+        String message = "Malformed JSON request";
+
+        if (ex.getCause() instanceof InvalidFormatException invalidFormatException &&
+                invalidFormatException.getTargetType() == WorkItemPriority.class) {
+            message = "Priority must be one of: LOW, MEDIUM, HIGH";
+        }
+
+        return ResponseEntity
+                .badRequest()
+                .body(Map.of(
+                        "status", 400,
+                        "error", "BAD_REQUEST",
+                        "message", message
+                ));
     }
 
     @ExceptionHandler(BusinessRuleException.class)

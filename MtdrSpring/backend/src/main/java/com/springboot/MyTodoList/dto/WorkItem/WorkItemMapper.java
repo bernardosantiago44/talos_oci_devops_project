@@ -27,7 +27,7 @@ public final class WorkItemMapper {
                 entity.getTitle(),
                 entity.getDescription(),
                 entity.getStatus(),
-                entity.getPriority(),
+                entity.getPriority() != null ? entity.getPriority().name() : null,
                 entity.getExternalLink(),
                 entity.getEstimatedMinutes(),
                 entity.getDueDate(),

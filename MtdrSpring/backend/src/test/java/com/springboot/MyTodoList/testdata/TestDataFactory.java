@@ -8,6 +8,7 @@ import com.springboot.MyTodoList.dto.WorkItem.WorkItemResponse;
 import com.springboot.MyTodoList.model.AppUser;
 import com.springboot.MyTodoList.model.WorkItem;
 import com.springboot.MyTodoList.model.WorkItemAssignment;
+import com.springboot.MyTodoList.model.WorkItemPriority;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -31,7 +32,7 @@ public final class TestDataFactory {
         request.setTitle("Build assignment tests");
         request.setDescription("Add starter backend tests");
         request.setStatus("NEW");
-        request.setPriority("HIGH");
+        request.setPriority(WorkItemPriority.HIGH);
         request.setExternalLink("https://example.com/work/wi-1");
         request.setEstimatedMinutes(30);
         request.setDueDate(LocalDate.of(2026, 5, 15));
@@ -42,7 +43,7 @@ public final class TestDataFactory {
         UpdateWorkItemRequest request = new UpdateWorkItemRequest();
         request.setTitle("Updated title");
         request.setStatus("IN_PROGRESS");
-        request.setPriority("MEDIUM");
+        request.setPriority(WorkItemPriority.MEDIUM);
         request.setEstimatedMinutes(45);
         return request;
     }
@@ -60,7 +61,7 @@ public final class TestDataFactory {
         workItem.setTitle("Build assignment tests");
         workItem.setDescription("Add starter backend tests");
         workItem.setStatus("NEW");
-        workItem.setPriority("HIGH");
+        workItem.setPriority(WorkItemPriority.HIGH);
         workItem.setEstimatedMinutes(30);
         workItem.setDueDate(LocalDate.of(2026, 5, 15));
         workItem.setCreatedAt(OffsetDateTime.parse("2026-04-29T10:00:00-06:00"));

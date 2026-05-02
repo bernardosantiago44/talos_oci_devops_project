@@ -8,15 +8,12 @@ import com.springboot.MyTodoList.exception.WorkItemNotFoundException;
 import com.springboot.MyTodoList.model.AppUser;
 import com.springboot.MyTodoList.model.TimeEntry;
 import com.springboot.MyTodoList.model.WorkItem;
-import com.springboot.MyTodoList.model.WorkItemAssignment;
 import com.springboot.MyTodoList.repository.AppUserRepository;
 import com.springboot.MyTodoList.repository.TimeEntryRepository;
 import com.springboot.MyTodoList.repository.WorkItemRepository;
-import lombok.extern.java.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;

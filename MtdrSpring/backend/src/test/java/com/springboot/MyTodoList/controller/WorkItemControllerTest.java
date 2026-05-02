@@ -17,9 +17,8 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -103,6 +102,29 @@ class WorkItemControllerTest {
     }
 
     @Test
+    void createWorkItemReturnsBadRequestForInvalidPriority() throws Exception {
+        String request = """
+                {
+                  "sprintId": "sprint-1",
+                  "createdByUserId": "creator-1",
+                  "workType": "TASK",
+                  "title": "Build assignment tests",
+                  "status": "NEW",
+                  "priority": "URGENT"
+                }
+                """;
+
+        mockMvc.perform(post("/api/workitems")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(request))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("BAD_REQUEST"))
+                .andExpect(jsonPath("$.message").value("Priority must be one of: LOW, MEDIUM, HIGH"));
+
+        verify(workItemService, never()).createWorkItem(org.mockito.ArgumentMatchers.any());
+    }
+
+    @Test
     void createWorkItemReturnsBusinessRuleError() throws Exception {
         CreateWorkItemRequest request = TestDataFactory.validCreateWorkItemRequest();
 
@@ -129,6 +151,27 @@ class WorkItemControllerTest {
                         .content(objectMapper.writeValueAsString(TestDataFactory.validUpdateWorkItemRequest())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.workItemId").value(TestDataFactory.WORK_ITEM_ID));
+    }
+
+    @Test
+    void updateWorkItemReturnsBadRequestForInvalidPriority() throws Exception {
+        String request = """
+                {
+                  "priority": "URGENT"
+                }
+                """;
+
+        mockMvc.perform(patch("/api/workitems/{id}", TestDataFactory.WORK_ITEM_ID)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(request))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("BAD_REQUEST"))
+                .andExpect(jsonPath("$.message").value("Priority must be one of: LOW, MEDIUM, HIGH"));
+
+        verify(workItemService, never()).updateWorkItem(
+                org.mockito.ArgumentMatchers.any(),
+                org.mockito.ArgumentMatchers.any()
+        );
     }
 
     @Test
@@ -179,5 +222,13 @@ class WorkItemControllerTest {
                 .andExpect(status().isNoContent());
 
         verify(workItemService).deleteWorkItemById(TestDataFactory.WORK_ITEM_ID);
+    }
+    
+    @Test
+    void getWorkItemsByTelegramUser() throws Exception {
+        when(workItemService.findByTelegramUserId(any())).thenReturn(List.of(TestDataFactory.workItemResponse()));
+        
+        mockMvc.perform(get("/api/workitems/telegramUser/{id}", "t-001"))
+                .andExpect(status().isOk());
     }
 }

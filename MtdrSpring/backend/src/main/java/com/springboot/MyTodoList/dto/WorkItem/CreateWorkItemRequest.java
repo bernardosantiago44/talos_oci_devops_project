@@ -1,5 +1,6 @@
 package com.springboot.MyTodoList.dto.WorkItem;
 
+import com.springboot.MyTodoList.model.WorkItemPriority;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -34,7 +35,7 @@ public class CreateWorkItemRequest {
         @NotBlank private String status;
 
         @Schema(description = "Work item priority.", example = "HIGH")
-        @NotBlank private String priority;
+        @NotNull private WorkItemPriority priority;
 
         @Schema(description = "External reference URL.", example = "https://example.com/work/wi-1")
         private String externalLink;

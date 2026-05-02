@@ -53,13 +53,13 @@ public class WorkItemController {
      * @return List of WorkItemResponse 
      * @apiNote /workitems/user/{telegramUserId}
      */
-    @GetMapping("/user/{telegramUserId}")
+    @GetMapping("/telegramUser/{telegramUserId}")
     @Operation(summary = "List work items for Telegram user", description = "Returns work items assigned to the app user with the provided Telegram user ID.")
     public ResponseEntity<List<WorkItemResponse>> getWorkItemsByTelegramUser(
             @Parameter(description = "Telegram user identifier.", example = "telegram-user-1")
             @PathVariable String telegramUserId
     ) {
-        return ResponseEntity.ok(service.findForUserId(telegramUserId));
+        return ResponseEntity.ok(service.findByTelegramUserId(telegramUserId));
     }
 
     /**
@@ -85,7 +85,7 @@ public class WorkItemController {
     public ResponseEntity<WorkItemResponse> updateWorkItem(
             @Parameter(description = "Work item identifier.", example = "wi-1")
             @PathVariable String id,
-            @RequestBody UpdateWorkItemRequest request
+            @Valid @RequestBody UpdateWorkItemRequest request
     ) {
         WorkItemResponse response = service.updateWorkItem(id, request);
 
