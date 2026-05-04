@@ -2,7 +2,7 @@
 
 import type { Client, Options as Options2, TDataShape } from './client';
 import { client } from './client.gen';
-import type { AddAssigneeData, AddAssigneeResponses, AddToDoItemData, AddToDoItemResponses, CreateWorkItemData, CreateWorkItemResponses, DebugData, DebugResponses, DeleteToDoItemData, DeleteToDoItemResponses, DeleteWorkItemData, DeleteWorkItemResponses, GetAll1Data, GetAll1Responses, GetAllData, GetAllResponses, GetAllToDoItemsData, GetAllToDoItemsResponses, GetAllWorkItemsData, GetAllWorkItemsResponses, GetAssigneesData, GetAssigneesResponses, GetByIdData, GetByIdResponses, GetDashboardDataData, GetDashboardDataResponses, GetSprintData, GetSprintResponses, GetToDoItemByIdData, GetToDoItemByIdResponses, GetVelocityData, GetVelocityResponses, GetWorkItemsByTelegramUserData, GetWorkItemsByTelegramUserResponses, LogTimeData, LogTimeResponses, ReindexData, ReindexResponses, RemoveAssigneeData, RemoveAssigneeResponses, SearchData, SearchResponses, UpdateToDoItemData, UpdateToDoItemResponses, UpdateWorkItemData, UpdateWorkItemResponses } from './types.gen';
+import type { AddAssigneeData, AddAssigneeResponses, AddToDoItemData, AddToDoItemResponses, CreateTagData, CreateTagResponses, CreateWorkItemData, CreateWorkItemResponses, DebugData, DebugResponses, DeleteToDoItemData, DeleteToDoItemResponses, DeleteWorkItemData, DeleteWorkItemResponses, GetAll1Data, GetAll1Responses, GetAllData, GetAllResponses, GetAllToDoItemsData, GetAllToDoItemsResponses, GetAllWorkItemsData, GetAllWorkItemsResponses, GetAssigneesData, GetAssigneesResponses, GetByIdData, GetByIdResponses, GetDashboardDataData, GetDashboardDataResponses, GetData, GetResponses, GetSprintData, GetSprintResponses, GetToDoItemByIdData, GetToDoItemByIdResponses, GetVelocityData, GetVelocityResponses, GetWorkItemsByTelegramUserData, GetWorkItemsByTelegramUserResponses, LogTimeData, LogTimeResponses, ReindexData, ReindexResponses, RemoveAssigneeData, RemoveAssigneeResponses, SearchData, SearchResponses, UpdateTagData, UpdateTagResponses, UpdateToDoItemData, UpdateToDoItemResponses, UpdateWorkItemData, UpdateWorkItemResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -103,6 +103,27 @@ export const logTime = <ThrowOnError extends boolean = false>(options: Options<L
 });
 
 /**
+ * List tags
+ *
+ * Returns all saved tags.
+ */
+export const get = <ThrowOnError extends boolean = false>(options?: Options<GetData, ThrowOnError>) => (options?.client ?? client).get<GetResponses, unknown, ThrowOnError>({ url: '/api/tags', ...options });
+
+/**
+ * Create a tag
+ *
+ * Creates a new tag.
+ */
+export const createTag = <ThrowOnError extends boolean = false>(options: Options<CreateTagData, ThrowOnError>) => (options.client ?? client).post<CreateTagResponses, unknown, ThrowOnError>({
+    url: '/api/tags',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
  * Search work items semantically
  *
  * Searches work items by natural-language meaning and falls back to keyword search when AI is unavailable.
@@ -166,6 +187,20 @@ export const removeAssignee = <ThrowOnError extends boolean = false>(options: Op
 export const addAssignee = <ThrowOnError extends boolean = false>(options: Options<AddAssigneeData, ThrowOnError>) => (options.client ?? client).patch<AddAssigneeResponses, unknown, ThrowOnError>({ url: '/api/workitems/{id}/assignees/{userId}', ...options });
 
 /**
+ * Update an existing tag
+ *
+ * Only provided fields will be updated.
+ */
+export const updateTag = <ThrowOnError extends boolean = false>(options: Options<UpdateTagData, ThrowOnError>) => (options.client ?? client).patch<UpdateTagResponses, unknown, ThrowOnError>({
+    url: '/api/tags/{id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
  * List work item assignees
  *
  * Returns active assignees for a work item.
@@ -177,7 +212,7 @@ export const getAssignees = <ThrowOnError extends boolean = false>(options: Opti
  *
  * Returns work items assigned to the app user with the provided Telegram user ID.
  */
-export const getWorkItemsByTelegramUser = <ThrowOnError extends boolean = false>(options: Options<GetWorkItemsByTelegramUserData, ThrowOnError>) => (options.client ?? client).get<GetWorkItemsByTelegramUserResponses, unknown, ThrowOnError>({ url: '/api/workitems/user/{telegramUserId}', ...options });
+export const getWorkItemsByTelegramUser = <ThrowOnError extends boolean = false>(options: Options<GetWorkItemsByTelegramUserData, ThrowOnError>) => (options.client ?? client).get<GetWorkItemsByTelegramUserResponses, unknown, ThrowOnError>({ url: '/api/workitems/telegramUser/{telegramUserId}', ...options });
 
 /**
  * List sprints

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { X } from 'lucide-react';
+import { Loader2, Plus, X } from 'lucide-react';
+import { useTagCreate } from '@/hooks/api';
 import type { WorkItemDetailDto } from '../../dtos/work-item-detail.dto';
 import type { CreateWorkItemDto } from '../../dtos/create-work-item.dto';
 import type { UpdateWorkItemDto } from '../../dtos/update-work-item.dto';
@@ -17,6 +18,10 @@ import {
     formatStatusLabel,
     formatPriorityLabel,
 } from '../../lib/dashboard-ui';
+
+const HEX_COLOR_PATTERN = /^#[0-9A-Fa-f]{6}$/;
+const DEFAULT_TAG_COLOR = '#3B82F6';
+const TAG_DESCRIPTION_MAX_LENGTH = 300;
 
 interface WorkItemFormModalProps {
     isOpen: boolean;
@@ -92,6 +97,153 @@ function Select({ value, onChange, children }: {
     );
 }
 
+function CreateTagModal({
+    isOpen,
+    onClose,
+    onCreated,
+}: {
+    isOpen: boolean;
+    onClose: () => void;
+    onCreated: (tag: TagDto) => void;
+}) {
+    const createTagMutation = useTagCreate();
+    const [name, setName] = useState('');
+    const [description, setDescription] = useState('');
+    const [color, setColor] = useState(DEFAULT_TAG_COLOR);
+    const [error, setError] = useState('');
+
+    useEffect(() => {
+        if (!isOpen) return;
+        setName('');
+        setDescription('');
+        setColor(DEFAULT_TAG_COLOR);
+        setError('');
+    }, [isOpen]);
+
+    async function handleSubmit(e: React.FormEvent) {
+        e.preventDefault();
+        const trimmedName = name.trim();
+        const trimmedDescription = description.trim();
+        const normalizedColor = color.trim();
+
+        if (!trimmedName) {
+            setError('Tag name is required.');
+            return;
+        }
+        if (trimmedDescription.length > TAG_DESCRIPTION_MAX_LENGTH) {
+            setError(`Description must be ${TAG_DESCRIPTION_MAX_LENGTH} characters or fewer.`);
+            return;
+        }
+        if (!HEX_COLOR_PATTERN.test(normalizedColor)) {
+            setError('Color must be a valid HEX value, for example #3B82F6.');
+            return;
+        }
+
+        setError('');
+        try {
+            const tag = await createTagMutation.mutateAsync({
+                name: trimmedName,
+                color: normalizedColor,
+                description: trimmedDescription || undefined,
+            });
+            onCreated(tag);
+            onClose();
+        } catch {
+            setError('Could not create tag. Please try again.');
+        }
+    }
+
+    if (!isOpen) return null;
+
+    return (
+        <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Create tag"
+            className="fixed inset-0 z-[60] flex items-center justify-center p-4"
+        >
+            <div className="absolute inset-0 bg-black/50 backdrop-blur-sm dark:bg-black/70" onClick={onClose} />
+
+            <form
+                onSubmit={handleSubmit}
+                className="relative z-10 w-full max-w-md rounded-2xl border border-zinc-200 bg-white shadow-xl dark:border-zinc-700 dark:bg-zinc-900"
+            >
+                <div className="flex items-center justify-between border-b border-zinc-100 px-5 py-4 dark:border-zinc-800">
+                    <h3 className="text-base font-semibold text-zinc-900 dark:text-zinc-100">New Tag</h3>
+                    <button
+                        type="button"
+                        onClick={onClose}
+                        className="rounded-lg p-1.5 text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-700 dark:text-zinc-500 dark:hover:bg-zinc-800 dark:hover:text-zinc-200"
+                        aria-label="Close tag modal"
+                    >
+                        <X className="h-4 w-4" />
+                    </button>
+                </div>
+
+                <div className="grid gap-4 p-5">
+                    {error && (
+                        <p className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm text-rose-600 dark:border-rose-500/20 dark:bg-rose-500/10 dark:text-rose-400">
+                            {error}
+                        </p>
+                    )}
+
+                    <div>
+                        <Label>Name *</Label>
+                        <Input value={name} onChange={setName} placeholder="e.g. Frontend" />
+                    </div>
+
+                    <div>
+                        <Label>Description</Label>
+                        <textarea
+                            value={description}
+                            onChange={(event) => setDescription(event.target.value)}
+                            maxLength={TAG_DESCRIPTION_MAX_LENGTH}
+                            rows={3}
+                            placeholder="Describe when this tag should be used..."
+                            className="w-full resize-none rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-800 placeholder-zinc-400 outline-none focus:border-sky-400/60 focus:ring-1 focus:ring-sky-400/30 dark:border-zinc-700/60 dark:bg-zinc-800/60 dark:text-zinc-200 dark:placeholder-zinc-600 dark:focus:border-sky-500/60 dark:focus:ring-sky-500/30"
+                        />
+                        <p className="mt-1 text-right text-[11px] text-zinc-400 dark:text-zinc-500">
+                            {description.length}/{TAG_DESCRIPTION_MAX_LENGTH}
+                        </p>
+                    </div>
+
+                    <div>
+                        <Label>Color *</Label>
+                        <div className="flex gap-3">
+                            <input
+                                type="color"
+                                value={HEX_COLOR_PATTERN.test(color) ? color : DEFAULT_TAG_COLOR}
+                                onChange={(event) => setColor(event.target.value.toUpperCase())}
+                                className="h-10 w-12 shrink-0 cursor-pointer rounded-xl border border-zinc-200 bg-zinc-50 p-1 dark:border-zinc-700/60 dark:bg-zinc-800/60"
+                                aria-label="Pick tag color"
+                            />
+                            <Input value={color} onChange={(value) => setColor(value.toUpperCase())} placeholder="#3B82F6" />
+                        </div>
+                    </div>
+                </div>
+
+                <div className="flex items-center justify-end gap-3 border-t border-zinc-100 px-5 py-4 dark:border-zinc-800">
+                    <button
+                        type="button"
+                        onClick={onClose}
+                        className="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:border-zinc-700/60 dark:bg-zinc-800/60 dark:text-zinc-300 dark:hover:bg-zinc-700 dark:hover:text-zinc-100"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        type="submit"
+                        disabled={createTagMutation.isPending}
+                        className="inline-flex items-center gap-2 rounded-xl bg-sky-500 px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-sky-600 disabled:opacity-50 dark:hover:bg-sky-400"
+                    >
+                        {createTagMutation.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
+                        Create Tag
+                    </button>
+                </div>
+            </form>
+        </div>
+    );
+}
+
 export function WorkItemFormModal({
     isOpen,
     item,
@@ -106,6 +258,7 @@ export function WorkItemFormModal({
     const [form, setForm] = useState<FormState>(DEFAULT_FORM);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
+    const [createTagOpen, setCreateTagOpen] = useState(false);
 
     useEffect(() => {
         if (!isOpen) return;
@@ -140,6 +293,13 @@ export function WorkItemFormModal({
                 [key]: arr.includes(id) ? arr.filter((x) => x !== id) : [...arr, id],
             };
         });
+    }
+
+    function handleTagCreated(tag: TagDto) {
+        setForm((prev) => ({
+            ...prev,
+            tagIds: prev.tagIds.includes(tag.id) ? prev.tagIds : [...prev.tagIds, tag.id],
+        }));
     }
 
     async function handleSubmit(e: React.FormEvent) {
@@ -190,12 +350,13 @@ export function WorkItemFormModal({
     if (!isOpen) return null;
 
     return (
-        <div
-            role="dialog"
-            aria-modal="true"
-            aria-label={isEditing ? 'Edit task' : 'Create task'}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4"
-        >
+        <>
+            <div
+                role="dialog"
+                aria-modal="true"
+                aria-label={isEditing ? 'Edit task' : 'Create task'}
+                className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            >
             {/* Overlay */}
             <div
                 className="absolute inset-0 bg-black/50 backdrop-blur-sm dark:bg-black/70"
@@ -334,8 +495,23 @@ export function WorkItemFormModal({
 
                         {/* Tags */}
                         <div>
-                            <Label>Tags</Label>
+                            <div className="mb-1 flex items-center justify-between gap-3">
+                                <Label>Tags</Label>
+                                <button
+                                    type="button"
+                                    onClick={() => setCreateTagOpen(true)}
+                                    className="inline-flex items-center gap-1 rounded-lg border border-zinc-200 bg-zinc-50 px-2.5 py-1 text-xs font-semibold text-zinc-600 transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:border-zinc-700/60 dark:bg-zinc-800/60 dark:text-zinc-300 dark:hover:bg-zinc-700 dark:hover:text-zinc-100"
+                                >
+                                    <Plus className="h-3.5 w-3.5" />
+                                    New tag
+                                </button>
+                            </div>
                             <div className="flex flex-wrap gap-2">
+                                {tags.length === 0 && (
+                                    <p className="text-sm text-zinc-400 dark:text-zinc-500">
+                                        No tags yet. Create one to classify this task.
+                                    </p>
+                                )}
                                 {tags.map((tag) => {
                                     const selected = form.tagIds.includes(tag.id);
                                     return (
@@ -343,12 +519,17 @@ export function WorkItemFormModal({
                                             key={tag.id}
                                             type="button"
                                             onClick={() => toggleArrayItem('tagIds', tag.id)}
-                                            className={`rounded-xl border px-3 py-1.5 text-sm font-medium transition-colors ${
+                                            className={`inline-flex items-center gap-2 rounded-xl border px-3 py-1.5 text-sm font-medium transition-colors ${
                                                 selected
                                                     ? 'border-violet-300 bg-violet-50 text-violet-700 dark:border-violet-500/50 dark:bg-violet-500/15 dark:text-violet-300'
                                                     : 'border-zinc-200 bg-zinc-50 text-zinc-600 hover:border-zinc-300 hover:text-zinc-800 dark:border-zinc-700/60 dark:bg-zinc-800/60 dark:text-zinc-400 dark:hover:border-zinc-600 dark:hover:text-zinc-200'
                                             }`}
                                         >
+                                            <span
+                                                className="h-2.5 w-2.5 rounded-full"
+                                                style={{ backgroundColor: tag.color }}
+                                                aria-hidden="true"
+                                            />
                                             #{tag.name}
                                         </button>
                                     );
@@ -376,6 +557,13 @@ export function WorkItemFormModal({
                     </div>
                 </form>
             </div>
-        </div>
+            </div>
+
+            <CreateTagModal
+                isOpen={createTagOpen}
+                onClose={() => setCreateTagOpen(false)}
+                onCreated={handleTagCreated}
+            />
+        </>
     );
 }

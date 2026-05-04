@@ -54,7 +54,7 @@ export type CreateWorkItemRequest = {
     /**
      * Work item priority.
      */
-    priority: string;
+    priority: 'LOW' | 'MEDIUM' | 'HIGH';
     /**
      * External reference URL.
      */
@@ -240,6 +240,32 @@ export type TimeEntryResponse = {
 };
 
 /**
+ * Request payload for creating a new tag
+ */
+export type CreateTagRequest = {
+    /**
+     * Tag name
+     */
+    name: string;
+    /**
+     * Tag hexadecimal color
+     */
+    color?: string;
+    /**
+     * Tag description
+     */
+    description?: string;
+};
+
+export type TagResponse = {
+    tagId?: string;
+    name?: string;
+    color?: string;
+    description?: string;
+    createdAt?: string;
+};
+
+/**
  * Request payload for semantic work item search.
  */
 export type SemanticSearchRequest = {
@@ -320,7 +346,7 @@ export type UpdateWorkItemRequest = {
     /**
      * Work item priority.
      */
-    priority?: string;
+    priority?: 'LOW' | 'MEDIUM' | 'HIGH';
     /**
      * External reference URL.
      */
@@ -341,6 +367,24 @@ export type UpdateWorkItemRequest = {
      * Replacement set of assigned user IDs.
      */
     assigneeIds?: Array<string>;
+};
+
+/**
+ * Request payload for editing an existing tag. Null fields will remain unchanged. Only provided fields will be updated.
+ */
+export type UpdateTagRequest = {
+    /**
+     * Tag name
+     */
+    name?: string;
+    /**
+     * Tag hexadecimal color
+     */
+    color?: string;
+    /**
+     * Tag description
+     */
+    description?: string;
 };
 
 /**
@@ -547,13 +591,13 @@ export type DeveloperSprintAnalytics = {
      * Completed task count for the developer and sprint.
      */
     tasksCompleted?: number;
+    TOTAL_HOURS_WORKED?: number;
+    TASKS_COMPLETED?: number;
     USER_ID?: string;
     DEVELOPER?: string;
     SPRINT?: string;
     SPRINT_NAME?: string;
     REAL_HOURS?: number;
-    TOTAL_HOURS_WORKED?: number;
-    TASKS_COMPLETED?: number;
 };
 
 export type DeleteToDoItemData = {
@@ -689,6 +733,38 @@ export type LogTimeResponses = {
 };
 
 export type LogTimeResponse = LogTimeResponses[keyof LogTimeResponses];
+
+export type GetData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/tags';
+};
+
+export type GetResponses = {
+    /**
+     * OK
+     */
+    200: Array<TagResponse>;
+};
+
+export type GetResponse = GetResponses[keyof GetResponses];
+
+export type CreateTagData = {
+    body: CreateTagRequest;
+    path?: never;
+    query?: never;
+    url: '/api/tags';
+};
+
+export type CreateTagResponses = {
+    /**
+     * OK
+     */
+    200: TagResponse;
+};
+
+export type CreateTagResponse = CreateTagResponses[keyof CreateTagResponses];
 
 export type SearchData = {
     body: SemanticSearchRequest;
@@ -831,6 +907,24 @@ export type AddAssigneeResponses = {
 
 export type AddAssigneeResponse = AddAssigneeResponses[keyof AddAssigneeResponses];
 
+export type UpdateTagData = {
+    body: UpdateTagRequest;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/tags/{id}';
+};
+
+export type UpdateTagResponses = {
+    /**
+     * OK
+     */
+    200: TagResponse;
+};
+
+export type UpdateTagResponse = UpdateTagResponses[keyof UpdateTagResponses];
+
 export type GetAssigneesData = {
     body?: never;
     path: {
@@ -861,7 +955,7 @@ export type GetWorkItemsByTelegramUserData = {
         telegramUserId: string;
     };
     query?: never;
-    url: '/api/workitems/user/{telegramUserId}';
+    url: '/api/workitems/telegramUser/{telegramUserId}';
 };
 
 export type GetWorkItemsByTelegramUserResponses = {

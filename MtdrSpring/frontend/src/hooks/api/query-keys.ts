@@ -21,6 +21,11 @@ export const apiQueryKeys = {
     all: ['appUsers'] as const,
     list: () => [...apiQueryKeys.appUsers.all, 'list'] as const,
   },
+  tags: {
+    all: ['tags'] as const,
+    list: () => [...apiQueryKeys.tags.all, 'list'] as const,
+    detail: (id: string | undefined) => [...apiQueryKeys.tags.all, 'detail', id] as const,
+  },
   analytics: {
     all: ['analytics'] as const,
     velocity: () => [...apiQueryKeys.analytics.all, 'velocity'] as const,

@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Layers, Sun, Moon, BarChart2, Sparkles } from 'lucide-react';
-import { mockTags } from '@/shared/mock/tags.mock';
 import { DashboardSummaryCards } from '../components/dashboard/dashboard-summary-cards';
 import { DashboardToolbar } from '../components/dashboard/dashboard-toolbar';
 import { WorkItemListView } from '../components/dashboard/work-item-list-view';
@@ -174,7 +173,7 @@ export function WorkItemDashboardPage() {
         item={viewModel.editingItem}
         users={viewModel.users}
         sprints={viewModel.sprints}
-        tags={mockTags}
+        tags={viewModel.tags}
         onClose={viewModel.actions.closeAll}
         onCreate={viewModel.actions.handleCreate}
         onUpdate={viewModel.actions.handleUpdate}

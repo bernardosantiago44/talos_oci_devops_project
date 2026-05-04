@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo } from 'react';
-import { useAppUserList, useSprintList, useTimeEntryCreate, useWorkItemCreate, useWorkItemList, useWorkItemUpdate } from '@/hooks/api';
-import type { AppUserSummary, CreateWorkItemRequest, SprintResponse, UpdateWorkItemRequest, WorkItemResponse } from '@/api/generated';
+import { useAppUserList, useSprintList, useTagList, useTimeEntryCreate, useWorkItemCreate, useWorkItemList, useWorkItemUpdate } from '@/hooks/api';
+import type { AppUserSummary, CreateWorkItemRequest, SprintResponse, TagResponse, UpdateWorkItemRequest, WorkItemResponse } from '@/api/generated';
 import type { ViewMode } from '@/features/work-items/components/dashboard/dashboard-toolbar';
 import type { WorkItemDetailDto, Assignee } from '../dtos/work-item-detail.dto';
 import type { CreateWorkItemDto } from '../dtos/create-work-item.dto';
@@ -12,6 +12,22 @@ import type { WorkItemType } from '../enums/work-item-type.enum';
 import type { WorkItemPriority } from '../enums/work-item-priority.enum';
 import type { AssignmentRole } from '../enums/assignment-role.enum';
 import type { UserSummaryDto } from '@/shared/dtos/user-summary.dto';
+import type { TagDto } from '@/shared/dtos/tag.dto';
+
+type CreateWorkItemPayload = Omit<CreateWorkItemRequest, 'priority'> & {
+  priority: string;
+  tagIds?: string[];
+};
+
+type UpdateWorkItemPayload = Omit<UpdateWorkItemRequest, 'priority'> & {
+  priority?: string;
+  tagIds?: string[];
+};
+
+type WorkItemWithTags = WorkItemResponse & {
+  tagIds?: string[];
+  tags?: Array<TagResponse & { id?: string }>;
+};
 
 export interface SprintDto {
   sprintId: string;
@@ -44,8 +60,13 @@ function mapSprint(sprint: SprintResponse): SprintDto | null {
   };
 }
 
-function mapWorkItem(row: WorkItemResponse, userById: Map<string, UserSummaryDto>): WorkItemDetailDto | null {
+function mapWorkItem(
+  row: WorkItemResponse,
+  userById: Map<string, UserSummaryDto>,
+  tagById: Map<string, TagDto>
+): WorkItemDetailDto | null {
   if (!row.workItemId || !row.title) return null;
+  const rowWithTags = row as WorkItemWithTags;
 
   const createdBy: UserSummaryDto =
     row.createdByUserId && userById.has(row.createdByUserId)
@@ -80,6 +101,24 @@ function mapWorkItem(row: WorkItemResponse, userById: Map<string, UserSummaryDto
       return acc;
     }, []);
 
+  const tags =
+    rowWithTags.tags?.reduce<TagDto[]>((acc, tag) => {
+      const id = tag.tagId ?? tag.id;
+      if (!id || !tag.name) return acc;
+
+      acc.push({
+        id,
+        name: tag.name,
+        color: tag.color ?? '#3B82F6',
+        description: tag.description,
+      });
+      return acc;
+    }, []) ??
+    rowWithTags.tagIds
+      ?.map((tagId) => tagById.get(tagId))
+      .filter((tag): tag is TagDto => Boolean(tag)) ??
+    [];
+
   return {
     id: row.workItemId,
     sprintId: row.sprintId,
@@ -97,7 +136,7 @@ function mapWorkItem(row: WorkItemResponse, userById: Map<string, UserSummaryDto
     completedAt: row.completedAt,
     createdBy,
     assignees,
-    tags: [],
+    tags,
   };
 }
 
@@ -105,6 +144,7 @@ export const useWorkItemsViewModel = () => {
   const workItemsQuery = useWorkItemList();
   const usersQuery = useAppUserList();
   const sprintsQuery = useSprintList();
+  const tagsQuery = useTagList();
   const createWorkItemMutation = useWorkItemCreate();
   const updateWorkItemMutation = useWorkItemUpdate();
   const createTimeEntryMutation = useTimeEntryCreate();
@@ -137,13 +177,15 @@ export const useWorkItemsViewModel = () => {
   );
 
   const userById = useMemo(() => new Map(users.map((user) => [user.userId, user])), [users]);
+  const tags = useMemo(() => tagsQuery.data ?? [], [tagsQuery.data]);
+  const tagById = useMemo(() => new Map(tags.map((tag) => [tag.id, tag])), [tags]);
 
   const items = useMemo(
     () =>
       (workItemsQuery.data ?? [])
-        .map((item) => mapWorkItem(item, userById))
+        .map((item) => mapWorkItem(item, userById, tagById))
         .filter((item): item is WorkItemDetailDto => Boolean(item)),
-    [workItemsQuery.data, userById]
+    [workItemsQuery.data, userById, tagById]
   );
 
   const filteredItems = useMemo(() => {
@@ -172,7 +214,7 @@ export const useWorkItemsViewModel = () => {
         throw new Error('A sprint and creator user are required before creating work items.');
       }
 
-      const body: CreateWorkItemRequest = {
+      const body: CreateWorkItemPayload = {
         sprintId,
         createdByUserId,
         workType: dto.type,
@@ -184,6 +226,7 @@ export const useWorkItemsViewModel = () => {
         estimatedMinutes: dto.estimatedMinutes,
         dueDate: dto.dueDate,
         assigneeIds: dto.assigneeUserIds,
+        tagIds: dto.tagIds,
       };
 
       await createWorkItemMutation.mutateAsync(body);
@@ -193,7 +236,7 @@ export const useWorkItemsViewModel = () => {
 
   const handleUpdate = useCallback(
     async (id: string, dto: UpdateWorkItemDto) => {
-      const body: UpdateWorkItemRequest = {
+      const body: UpdateWorkItemPayload = {
         title: dto.title,
         description: dto.description,
         status: dto.status ? toBackendStatus(dto.status) : undefined,
@@ -203,6 +246,7 @@ export const useWorkItemsViewModel = () => {
         dueDate: dto.dueDate,
         completedAt: dto.completedAt,
         assigneeIds: dto.assigneeUserIds,
+        tagIds: dto.tagIds,
       };
 
       await updateWorkItemMutation.mutateAsync({ id, body });
@@ -295,11 +339,12 @@ export const useWorkItemsViewModel = () => {
   return {
     items: filteredItems,
     totalItemCount: () => items.length,
-    loading: workItemsQuery.isLoading || usersQuery.isLoading || sprintsQuery.isLoading,
+    loading: workItemsQuery.isLoading || usersQuery.isLoading || sprintsQuery.isLoading || tagsQuery.isLoading,
     viewMode,
     setViewMode,
     users,
     sprints,
+    tags,
 
     search: filters.search,
     statusFilter: filters.status,
