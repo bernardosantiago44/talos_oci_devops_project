@@ -15,6 +15,16 @@ import type { CreateWorkItemRequest, UpdateWorkItemRequest } from '@/api/generat
 import { apiQueryKeys } from './query-keys';
 import { readData } from './request';
 
+type CreateWorkItemPayload = Omit<CreateWorkItemRequest, 'priority'> & {
+  priority: string;
+  tagIds?: string[];
+};
+
+type UpdateWorkItemPayload = Omit<UpdateWorkItemRequest, 'priority'> & {
+  priority?: string;
+  tagIds?: string[];
+};
+
 export function useWorkItemList() {
   return useQuery({
     queryKey: apiQueryKeys.workItems.list(),
@@ -65,8 +75,8 @@ export function useWorkItemCreate() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (body: CreateWorkItemRequest) =>
-      readData(createWorkItem({ client: apiClient, body, throwOnError: true })),
+    mutationFn: (body: CreateWorkItemPayload) =>
+      readData(createWorkItem({ client: apiClient, body: body as CreateWorkItemRequest, throwOnError: true })),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: apiQueryKeys.workItems.all });
       queryClient.invalidateQueries({ queryKey: apiQueryKeys.analytics.all });
@@ -78,11 +88,11 @@ export function useWorkItemUpdate() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, body }: { id: string; body: UpdateWorkItemRequest }) =>
+    mutationFn: ({ id, body }: { id: string; body: UpdateWorkItemPayload }) =>
       readData(updateWorkItem({
         client: apiClient,
         path: { id },
-        body,
+        body: body as UpdateWorkItemRequest,
         throwOnError: true,
       })),
     onSuccess: (_data, variables) => {
