@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, ListIcon, LayoutGrid, Plus } from 'lucide-react';
+import { Search, ListIcon, LayoutGrid, Plus, Tags } from 'lucide-react';
 import type { WorkItemStatus } from '../../enums/work-item-status.enum';
 import type { UserSummaryDto } from '@/shared/dtos/user-summary.dto';
 import { WORK_ITEM_STATUSES } from '../../enums/work-item-status.enum';
@@ -16,6 +16,7 @@ interface DashboardToolbarProps {
     onAssigneeFilterChange: (v: string) => void;
     viewMode: ViewMode;
     onViewModeChange: (v: ViewMode) => void;
+    onManageTagsClick: () => void;
     onCreateClick: () => void;
     users: UserSummaryDto[];
 }
@@ -29,6 +30,7 @@ export function DashboardToolbar({
     onAssigneeFilterChange,
     viewMode,
     onViewModeChange,
+    onManageTagsClick,
     onCreateClick,
     users,
 }: DashboardToolbarProps) {
@@ -100,15 +102,27 @@ export function DashboardToolbar({
                 </button>
             </div>
 
-            {/* Create button */}
-            <button
-                type="button"
-                onClick={onCreateClick}
-                className="ml-auto flex items-center gap-2 rounded-xl bg-sky-500 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-sky-600 focus:outline-none focus:ring-2 focus:ring-sky-500/50 dark:hover:bg-sky-400"
-            >
-                <Plus className="h-4 w-4" />
-                New Task
-            </button>
+            <div className="ml-auto flex items-center gap-2">
+                {/* Tags button */}
+                <button
+                    type="button"
+                    onClick={onManageTagsClick}
+                    className="flex items-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-2 text-sm font-semibold text-zinc-700 transition-colors hover:bg-zinc-100 hover:text-zinc-900 focus:outline-none focus:ring-2 focus:ring-sky-500/30 dark:border-zinc-700/60 dark:bg-zinc-800/60 dark:text-zinc-300 dark:hover:bg-zinc-700 dark:hover:text-zinc-100"
+                >
+                    <Tags className="h-4 w-4" />
+                    Tags
+                </button>
+
+                {/* Create button */}
+                <button
+                    type="button"
+                    onClick={onCreateClick}
+                    className="flex items-center gap-2 rounded-xl bg-sky-500 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-sky-600 focus:outline-none focus:ring-2 focus:ring-sky-500/50 dark:hover:bg-sky-400"
+                >
+                    <Plus className="h-4 w-4" />
+                    New Task
+                </button>
+            </div>
         </div>
     );
 }

@@ -58,4 +58,15 @@ public class TagsController {
         
         return ResponseEntity.ok(response);
     }
+    
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Delete a tag by id", description = "Delete an existing tag.")
+    public ResponseEntity<Void> deleteTag(@PathVariable String id) {
+        tagsService.deleteTagById(id);
+        LOGGER.info("Deleted tag {}", id);
+        
+        return ResponseEntity
+                .noContent()
+                .build();
+    }
 }

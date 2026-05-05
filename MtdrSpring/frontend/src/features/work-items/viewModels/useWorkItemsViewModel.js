@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo } from 'react';
-import { useAppUserList, useSprintList, useTimeEntryCreate, useWorkItemCreate, useWorkItemList, useWorkItemUpdate } from '@/hooks/api';
+import { useAppUserList, useSprintList, useTagList, useTimeEntryCreate, useWorkItemCreate, useWorkItemList, useWorkItemUpdate } from '@/hooks/api';
 import { normalizeStatus, toBackendStatus } from '../enums/work-item-status.enum';
 function mapAppUser(user) {
     if (!user.userId || !user.name)
@@ -22,9 +22,10 @@ function mapSprint(sprint) {
         endDate: sprint.endDate,
     };
 }
-function mapWorkItem(row, userById) {
+function mapWorkItem(row, userById, tagById) {
     if (!row.workItemId || !row.title)
         return null;
+    const rowWithTags = row;
     const createdBy = row.createdByUserId && userById.has(row.createdByUserId)
         ? userById.get(row.createdByUserId)
         : {
@@ -53,6 +54,22 @@ function mapWorkItem(row, userById) {
         acc.push(assignee);
         return acc;
     }, []);
+    const tags = rowWithTags.tags?.reduce((acc, tag) => {
+        const id = tag.tagId ?? tag.id;
+        if (!id || !tag.name)
+            return acc;
+        acc.push({
+            id,
+            name: tag.name,
+            color: tag.color ?? '#3B82F6',
+            description: tag.description,
+        });
+        return acc;
+    }, []) ??
+        rowWithTags.tagIds
+            ?.map((tagId) => tagById.get(tagId))
+            .filter((tag) => Boolean(tag)) ??
+        [];
     return {
         id: row.workItemId,
         sprintId: row.sprintId,
@@ -70,13 +87,14 @@ function mapWorkItem(row, userById) {
         completedAt: row.completedAt,
         createdBy,
         assignees,
-        tags: [],
+        tags,
     };
 }
 export const useWorkItemsViewModel = () => {
     const workItemsQuery = useWorkItemList();
     const usersQuery = useAppUserList();
     const sprintsQuery = useSprintList();
+    const tagsQuery = useTagList();
     const createWorkItemMutation = useWorkItemCreate();
     const updateWorkItemMutation = useWorkItemUpdate();
     const createTimeEntryMutation = useTimeEntryCreate();
@@ -98,9 +116,11 @@ export const useWorkItemsViewModel = () => {
     const users = useMemo(() => (usersQuery.data ?? []).map(mapAppUser).filter((user) => Boolean(user)), [usersQuery.data]);
     const sprints = useMemo(() => (sprintsQuery.data ?? []).map(mapSprint).filter((sprint) => Boolean(sprint)), [sprintsQuery.data]);
     const userById = useMemo(() => new Map(users.map((user) => [user.userId, user])), [users]);
+    const tags = useMemo(() => tagsQuery.data ?? [], [tagsQuery.data]);
+    const tagById = useMemo(() => new Map(tags.map((tag) => [tag.id, tag])), [tags]);
     const items = useMemo(() => (workItemsQuery.data ?? [])
-        .map((item) => mapWorkItem(item, userById))
-        .filter((item) => Boolean(item)), [workItemsQuery.data, userById]);
+        .map((item) => mapWorkItem(item, userById, tagById))
+        .filter((item) => Boolean(item)), [workItemsQuery.data, userById, tagById]);
     const filteredItems = useMemo(() => {
         return items.filter((item) => {
             const matchesSearch = !filters.search ||
@@ -133,6 +153,7 @@ export const useWorkItemsViewModel = () => {
             estimatedMinutes: dto.estimatedMinutes,
             dueDate: dto.dueDate,
             assigneeIds: dto.assigneeUserIds,
+            tagIds: dto.tagIds,
         };
         await createWorkItemMutation.mutateAsync(body);
     }, [createWorkItemMutation, sprints, users]);
@@ -147,6 +168,7 @@ export const useWorkItemsViewModel = () => {
             dueDate: dto.dueDate,
             completedAt: dto.completedAt,
             assigneeIds: dto.assigneeUserIds,
+            tagIds: dto.tagIds,
         };
         await updateWorkItemMutation.mutateAsync({ id, body });
     }, [updateWorkItemMutation]);
@@ -219,11 +241,12 @@ export const useWorkItemsViewModel = () => {
     return {
         items: filteredItems,
         totalItemCount: () => items.length,
-        loading: workItemsQuery.isLoading || usersQuery.isLoading || sprintsQuery.isLoading,
+        loading: workItemsQuery.isLoading || usersQuery.isLoading || sprintsQuery.isLoading || tagsQuery.isLoading,
         viewMode,
         setViewMode,
         users,
         sprints,
+        tags,
         search: filters.search,
         statusFilter: filters.status,
         assigneeFilter: filters.assignee,

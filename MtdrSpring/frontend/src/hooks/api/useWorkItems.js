@@ -45,7 +45,7 @@ export function useWorkItemAssigneeList(id) {
 export function useWorkItemCreate() {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (body) => readData(createWorkItem({ client: apiClient, body, throwOnError: true })),
+        mutationFn: (body) => readData(createWorkItem({ client: apiClient, body: body, throwOnError: true })),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: apiQueryKeys.workItems.all });
             queryClient.invalidateQueries({ queryKey: apiQueryKeys.analytics.all });
@@ -58,7 +58,7 @@ export function useWorkItemUpdate() {
         mutationFn: ({ id, body }) => readData(updateWorkItem({
             client: apiClient,
             path: { id },
-            body,
+            body: body,
             throwOnError: true,
         })),
         onSuccess: (_data, variables) => {

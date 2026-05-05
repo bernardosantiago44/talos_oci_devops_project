@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/api/client';
-import { createTag, get as getTags, updateTag } from '@/api/generated';
+import { createTag, deleteTag, get as getTags, updateTag } from '@/api/generated';
 import type { CreateTagRequest, TagResponse, UpdateTagRequest } from '@/api/generated';
 import type { TagDto } from '@/shared/dtos/tag.dto';
 import { apiQueryKeys } from './query-keys';
@@ -67,6 +67,25 @@ export function useTagUpdate() {
         if (!current) return [tag];
         return current.map((item) => (item.id === tag.id ? tag : item));
       });
+    },
+  });
+}
+
+export function useTagDelete() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      await deleteTag({ client: apiClient, path: { id }, throwOnError: true });
+      return id;
+    },
+    onSuccess: (id) => {
+      queryClient.invalidateQueries({ queryKey: apiQueryKeys.tags.all });
+      queryClient.invalidateQueries({ queryKey: apiQueryKeys.workItems.all });
+      queryClient.removeQueries({ queryKey: apiQueryKeys.tags.detail(id) });
+      queryClient.setQueryData<TagDto[]>(apiQueryKeys.tags.list(), (current) =>
+        current?.filter((item) => item.id !== id) ?? []
+      );
     },
   });
 }
