@@ -20,6 +20,11 @@ export const apiQueryKeys = {
         all: ['appUsers'],
         list: () => [...apiQueryKeys.appUsers.all, 'list'],
     },
+    tags: {
+        all: ['tags'],
+        list: () => [...apiQueryKeys.tags.all, 'list'],
+        detail: (id) => [...apiQueryKeys.tags.all, 'detail', id],
+    },
     analytics: {
         all: ['analytics'],
         velocity: () => [...apiQueryKeys.analytics.all, 'velocity'],

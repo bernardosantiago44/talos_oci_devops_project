@@ -591,13 +591,13 @@ export type DeveloperSprintAnalytics = {
      * Completed task count for the developer and sprint.
      */
     tasksCompleted?: number;
-    TOTAL_HOURS_WORKED?: number;
-    TASKS_COMPLETED?: number;
     USER_ID?: string;
     DEVELOPER?: string;
     SPRINT?: string;
     SPRINT_NAME?: string;
     REAL_HOURS?: number;
+    TOTAL_HOURS_WORKED?: number;
+    TASKS_COMPLETED?: number;
 };
 
 export type DeleteToDoItemData = {
@@ -906,6 +906,24 @@ export type AddAssigneeResponses = {
 };
 
 export type AddAssigneeResponse = AddAssigneeResponses[keyof AddAssigneeResponses];
+
+export type DeleteTagData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/tags/{id}';
+};
+
+export type DeleteTagResponses = {
+    /**
+     * No Content
+     */
+    204: void;
+};
+
+export type DeleteTagResponse = DeleteTagResponses[keyof DeleteTagResponses];
 
 export type UpdateTagData = {
     body: UpdateTagRequest;

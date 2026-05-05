@@ -53,7 +53,7 @@ public class TagsService {
                 .orElseThrow(() -> new TagNotFoundException(id));
         
         if (request.getName() != null) {
-            validateTagNameDoesNotExist(request.getName());
+            validateTagNameDoesNotExistExcludingId(request.getName(), id);
         }
         
         TagMapper.applyUpdates(tag, request);
@@ -63,9 +63,21 @@ public class TagsService {
         return TagMapper.toResponse(tag);
     }
     
+    @Transactional
+    public void deleteTagById(String id) {
+        tagsRepository.deleteById(id);
+    }
+    
     private void validateTagNameDoesNotExist(String name) {
         if (tagsRepository.existsByName(name)) {
             LOGGER.error("A tag with the name {} already exists", name);
+            throw new BusinessRuleException("Tag with that name already exists.");
+        }
+    }
+    
+    private void validateTagNameDoesNotExistExcludingId(String name, String id) {
+        if (tagsRepository.existsByNameAndTagIdNot(name, id)) {
+            LOGGER.error("A tag with the name {} already exists and is not tag {}", name, id);
             throw new BusinessRuleException("Tag with that name already exists.");
         }
     }

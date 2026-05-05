@@ -2,7 +2,7 @@
 
 import type { Client, Options as Options2, TDataShape } from './client';
 import { client } from './client.gen';
-import type { AddAssigneeData, AddAssigneeResponses, AddToDoItemData, AddToDoItemResponses, CreateTagData, CreateTagResponses, CreateWorkItemData, CreateWorkItemResponses, DebugData, DebugResponses, DeleteToDoItemData, DeleteToDoItemResponses, DeleteWorkItemData, DeleteWorkItemResponses, GetAll1Data, GetAll1Responses, GetAllData, GetAllResponses, GetAllToDoItemsData, GetAllToDoItemsResponses, GetAllWorkItemsData, GetAllWorkItemsResponses, GetAssigneesData, GetAssigneesResponses, GetByIdData, GetByIdResponses, GetDashboardDataData, GetDashboardDataResponses, GetData, GetResponses, GetSprintData, GetSprintResponses, GetToDoItemByIdData, GetToDoItemByIdResponses, GetVelocityData, GetVelocityResponses, GetWorkItemsByTelegramUserData, GetWorkItemsByTelegramUserResponses, LogTimeData, LogTimeResponses, ReindexData, ReindexResponses, RemoveAssigneeData, RemoveAssigneeResponses, SearchData, SearchResponses, UpdateTagData, UpdateTagResponses, UpdateToDoItemData, UpdateToDoItemResponses, UpdateWorkItemData, UpdateWorkItemResponses } from './types.gen';
+import type { AddAssigneeData, AddAssigneeResponses, AddToDoItemData, AddToDoItemResponses, CreateTagData, CreateTagResponses, CreateWorkItemData, CreateWorkItemResponses, DebugData, DebugResponses, DeleteTagData, DeleteTagResponses, DeleteToDoItemData, DeleteToDoItemResponses, DeleteWorkItemData, DeleteWorkItemResponses, GetAll1Data, GetAll1Responses, GetAllData, GetAllResponses, GetAllToDoItemsData, GetAllToDoItemsResponses, GetAllWorkItemsData, GetAllWorkItemsResponses, GetAssigneesData, GetAssigneesResponses, GetByIdData, GetByIdResponses, GetDashboardDataData, GetDashboardDataResponses, GetData, GetResponses, GetSprintData, GetSprintResponses, GetToDoItemByIdData, GetToDoItemByIdResponses, GetVelocityData, GetVelocityResponses, GetWorkItemsByTelegramUserData, GetWorkItemsByTelegramUserResponses, LogTimeData, LogTimeResponses, ReindexData, ReindexResponses, RemoveAssigneeData, RemoveAssigneeResponses, SearchData, SearchResponses, UpdateTagData, UpdateTagResponses, UpdateToDoItemData, UpdateToDoItemResponses, UpdateWorkItemData, UpdateWorkItemResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -185,6 +185,13 @@ export const removeAssignee = <ThrowOnError extends boolean = false>(options: Op
  * Assigns a user to a work item.
  */
 export const addAssignee = <ThrowOnError extends boolean = false>(options: Options<AddAssigneeData, ThrowOnError>) => (options.client ?? client).patch<AddAssigneeResponses, unknown, ThrowOnError>({ url: '/api/workitems/{id}/assignees/{userId}', ...options });
+
+/**
+ * Delete a tag by id
+ *
+ * Delete an existing tag.
+ */
+export const deleteTag = <ThrowOnError extends boolean = false>(options: Options<DeleteTagData, ThrowOnError>) => (options.client ?? client).delete<DeleteTagResponses, unknown, ThrowOnError>({ url: '/api/tags/{id}', ...options });
 
 /**
  * Update an existing tag
