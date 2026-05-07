@@ -151,8 +151,8 @@ export const useWorkItemsViewModel = () => {
 
   const [filters, setFilters] = useState({
     search: '',
-    status: '' as WorkItemStatus | '',
-    assignee: '',
+    status: [] as WorkItemStatus[],
+    assignee: [] as string[],
   });
   const [viewMode, setViewMode] = useState<ViewMode>('list');
 
@@ -187,19 +187,6 @@ export const useWorkItemsViewModel = () => {
         .filter((item): item is WorkItemDetailDto => Boolean(item)),
     [workItemsQuery.data, userById, tagById]
   );
-
-  const filteredItems = useMemo(() => {
-    return items.filter((item) => {
-      const matchesSearch = !filters.search ||
-        item.title.toLowerCase().includes(filters.search.toLowerCase()) ||
-        (item.description ?? '').toLowerCase().includes(filters.search.toLowerCase());
-      const matchesStatus = !filters.status || item.status === filters.status;
-      const matchesAssignee = !filters.assignee ||
-        item.assignees.some((a) => a.user.userId === filters.assignee);
-
-      return matchesSearch && matchesStatus && matchesAssignee;
-    });
-  }, [items, filters]);
 
   const loadItems = useCallback(async () => {
     await workItemsQuery.refetch();
@@ -337,7 +324,7 @@ export const useWorkItemsViewModel = () => {
     : null;
 
   return {
-    items: filteredItems,
+    items,
     totalItemCount: () => items.length,
     loading: workItemsQuery.isLoading || usersQuery.isLoading || sprintsQuery.isLoading || tagsQuery.isLoading,
     viewMode,
@@ -350,8 +337,8 @@ export const useWorkItemsViewModel = () => {
     statusFilter: filters.status,
     assigneeFilter: filters.assignee,
     setSearch: (search: string) => setFilters(f => ({ ...f, search })),
-    setStatusFilter: (status: WorkItemStatus | '') => setFilters(f => ({ ...f, status })),
-    setAssigneeFilter: (assignee: string) => setFilters(f => ({ ...f, assignee })),
+    setStatusFilter: (status: WorkItemStatus[]) => setFilters(f => ({ ...f, status })),
+    setAssigneeFilter: (assignee: string[]) => setFilters(f => ({ ...f, assignee })),
 
     ...modals,
     detailItem,

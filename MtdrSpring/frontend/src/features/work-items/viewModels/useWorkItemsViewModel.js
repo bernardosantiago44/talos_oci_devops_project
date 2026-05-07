@@ -100,8 +100,8 @@ export const useWorkItemsViewModel = () => {
     const createTimeEntryMutation = useTimeEntryCreate();
     const [filters, setFilters] = useState({
         search: '',
-        status: '',
-        assignee: '',
+        status: [],
+        assignee: [],
     });
     const [viewMode, setViewMode] = useState('list');
     const [modals, setModals] = useState({
@@ -121,17 +121,6 @@ export const useWorkItemsViewModel = () => {
     const items = useMemo(() => (workItemsQuery.data ?? [])
         .map((item) => mapWorkItem(item, userById, tagById))
         .filter((item) => Boolean(item)), [workItemsQuery.data, userById, tagById]);
-    const filteredItems = useMemo(() => {
-        return items.filter((item) => {
-            const matchesSearch = !filters.search ||
-                item.title.toLowerCase().includes(filters.search.toLowerCase()) ||
-                (item.description ?? '').toLowerCase().includes(filters.search.toLowerCase());
-            const matchesStatus = !filters.status || item.status === filters.status;
-            const matchesAssignee = !filters.assignee ||
-                item.assignees.some((a) => a.user.userId === filters.assignee);
-            return matchesSearch && matchesStatus && matchesAssignee;
-        });
-    }, [items, filters]);
     const loadItems = useCallback(async () => {
         await workItemsQuery.refetch();
     }, [workItemsQuery]);
@@ -239,7 +228,7 @@ export const useWorkItemsViewModel = () => {
         ? items.find((item) => item.id === modals.detailItem?.id) ?? modals.detailItem
         : null;
     return {
-        items: filteredItems,
+        items,
         totalItemCount: () => items.length,
         loading: workItemsQuery.isLoading || usersQuery.isLoading || sprintsQuery.isLoading || tagsQuery.isLoading,
         viewMode,
