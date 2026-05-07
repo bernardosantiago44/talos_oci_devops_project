@@ -1,6 +1,7 @@
 package com.springboot.MyTodoList.model;
 
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import java.time.OffsetDateTime;
 
@@ -10,15 +11,23 @@ import java.time.OffsetDateTime;
  */
 @Entity
 @Table(name = "TODOITEM")
+@Schema(description = "Legacy todo item entity.")
 public class ToDoItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Schema(description = "Legacy todo item identifier.", example = "1")
     int ID;
+
     @Column(name = "DESCRIPTION")
+    @Schema(description = "Todo item description.", example = "Finish backend documentation")
     String description;
+
     @Column(name = "CREATION_TS")
+    @Schema(description = "Creation timestamp.", example = "2026-04-29T10:00:00-06:00")
     OffsetDateTime creation_ts;
+
     @Column(name = "done")
+    @Schema(description = "Whether the todo item is complete.", example = "false")
     boolean done;
     public ToDoItem(){
 

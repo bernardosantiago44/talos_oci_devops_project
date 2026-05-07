@@ -1,0 +1,1 @@
+export const ASSIGNMENT_ROLES = ['OWNER', 'ASSIGNEE', 'REVIEWER'];

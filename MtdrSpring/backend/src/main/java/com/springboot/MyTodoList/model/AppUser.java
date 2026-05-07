@@ -28,6 +28,6 @@ public class AppUser {
     @Column(name = "CREATED_AT")
     private OffsetDateTime createdAt;
 
-    public AppUser() {}
+    public   AppUser() {}
 
 }

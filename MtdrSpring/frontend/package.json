@@ -9,18 +9,21 @@
         "@mui/icons-material": "^5.8.0",
         "@mui/material": "^5.8.0",
         "@mui/styles": "^5.7.0",
+        "@tanstack/react-query": "^5.100.6",
         "lucide-react": "^1.8.0",
         "moment": "^2.29.3",
-        "react": "^17.0.2",
-        "react-dom": "^17.0.2",
+        "react": "^18.3.1",
+        "react-dom": "^18.3.1",
         "react-moment": "^1.1.2",
         "react-scripts": "5.0.0",
+        "react-select": "^5.10.2",
         "recharts": "^2.1.16"
     },
     "proxy": "http://localhost:8080",
     "scripts": {
         "start": "craco start",
-        "build": "craco build"
+        "build": "craco build",
+        "generate:api": "openapi-ts"
     },
     "eslintConfig": {
         "extends": "react-app"
@@ -30,6 +33,10 @@
     ],
     "homepage": ".",
     "devDependencies": {
+        "@hey-api/client-fetch": "^0.13.1",
+        "@hey-api/openapi-ts": "^0.97.0",
+        "@types/react": "^18.3.28",
+        "@types/react-dom": "^18.3.7",
         "autoprefixer": "^10.5.0",
         "postcss": "^8.5.10",
         "tailwindcss": "^3.4.19",

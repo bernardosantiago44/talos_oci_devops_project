@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { Layers, Sun, Moon, BarChart2, Sparkles } from 'lucide-react';
-import { mockTags } from '@/shared/mock/tags.mock';
 import { DashboardSummaryCards } from '../components/dashboard/dashboard-summary-cards';
 import { DashboardToolbar } from '../components/dashboard/dashboard-toolbar';
 import { WorkItemListView } from '../components/dashboard/work-item-list-view';
 import { KanbanView } from '../components/dashboard/kanban-view';
 import { WorkItemFormModal } from '../components/dashboard/work-item-form-modal';
 import { WorkItemDetailModal } from '../components/dashboard/work-item-detail-modal';
+import { WorkLogModal } from '../components/dashboard/work-log-modal';
+import { TagManagerModal } from '../components/dashboard/tag-manager-modal';
 import { useWorkItemsViewModel } from "@/features/work-items/viewModels/useWorkItemsViewModel";
 import type { IWorkItemsViewModel } from "@/features/work-items/viewModels/useWorkItemsViewModel";
 import { useTheme } from '@/contexts/theme-context';
@@ -19,6 +20,7 @@ export function WorkItemDashboardPage() {
   const viewModel: IWorkItemsViewModel = useWorkItemsViewModel();
   const { theme, toggle } = useTheme();
   const [activeTab, setActiveTab] = useState<Tab>('workitems');
+  const [tagManagerOpen, setTagManagerOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-zinc-50 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100">
@@ -131,6 +133,7 @@ export function WorkItemDashboardPage() {
                 onAssigneeFilterChange={viewModel.setAssigneeFilter}
                 viewMode={viewModel.viewMode}
                 onViewModeChange={viewModel.setViewMode}
+                onManageTagsClick={() => setTagManagerOpen(true)}
                 onCreateClick={viewModel.actions.openNew}
                 users={viewModel.users}
               />
@@ -172,10 +175,17 @@ export function WorkItemDashboardPage() {
         isOpen={viewModel.formOpen}
         item={viewModel.editingItem}
         users={viewModel.users}
-        tags={mockTags}
+        sprints={viewModel.sprints}
+        tags={viewModel.tags}
         onClose={viewModel.actions.closeAll}
         onCreate={viewModel.actions.handleCreate}
         onUpdate={viewModel.actions.handleUpdate}
+      />
+
+      <TagManagerModal
+        isOpen={tagManagerOpen}
+        tags={viewModel.tags}
+        onClose={() => setTagManagerOpen(false)}
       />
 
       {/* Detail preview modal */}
@@ -185,6 +195,17 @@ export function WorkItemDashboardPage() {
         onClose={viewModel.actions.closeAll}
         onEdit={viewModel.actions.handleEditFromDetail}
         onComplete={viewModel.actions.handleCompleteFromDetail}
+        onLogWork={viewModel.actions.handleLogWork}
+      />
+
+      {/* Time entry modal */}
+      <WorkLogModal
+        isOpen={viewModel.workLogOpen}
+        item={viewModel.workLogItem}
+        mode={viewModel.workLogMode}
+        users={viewModel.users}
+        onClose={viewModel.actions.closeWorkLog}
+        onSubmit={viewModel.actions.handleWorkLogSubmit}
       />
     </div>
   );

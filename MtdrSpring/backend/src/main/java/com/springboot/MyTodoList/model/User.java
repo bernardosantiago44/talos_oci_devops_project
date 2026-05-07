@@ -37,6 +37,9 @@ public class User {
     
     @Column(name = "NAME")
     private String name;
+    
+    @Column(name = "telegram_user_id")
+    private String telegramUserId;
 
     public User(){}
 
