@@ -2,7 +2,7 @@
 
 import type { Client, Options as Options2, TDataShape } from './client';
 import { client } from './client.gen';
-import type { AddAssigneeData, AddAssigneeResponses, AddToDoItemData, AddToDoItemResponses, CreateTagData, CreateTagResponses, CreateWorkItemData, CreateWorkItemResponses, DebugData, DebugResponses, DeleteTagData, DeleteTagResponses, DeleteToDoItemData, DeleteToDoItemResponses, DeleteWorkItemData, DeleteWorkItemResponses, GetAll1Data, GetAll1Responses, GetAllData, GetAllResponses, GetAllToDoItemsData, GetAllToDoItemsResponses, GetAllWorkItemsData, GetAllWorkItemsResponses, GetAssigneesData, GetAssigneesResponses, GetByIdData, GetByIdResponses, GetDashboardDataData, GetDashboardDataResponses, GetData, GetResponses, GetSprintData, GetSprintResponses, GetToDoItemByIdData, GetToDoItemByIdResponses, GetVelocityData, GetVelocityResponses, GetWorkItemsByTelegramUserData, GetWorkItemsByTelegramUserResponses, LogTimeData, LogTimeResponses, ReindexData, ReindexResponses, RemoveAssigneeData, RemoveAssigneeResponses, SearchData, SearchResponses, UpdateTagData, UpdateTagResponses, UpdateToDoItemData, UpdateToDoItemResponses, UpdateWorkItemData, UpdateWorkItemResponses } from './types.gen';
+import type { AddAssigneeData, AddAssigneeResponses, CreateTagData, CreateTagResponses, CreateWorkItemData, CreateWorkItemResponses, DebugData, DebugResponses, DeleteTagData, DeleteTagResponses, DeleteWorkItemData, DeleteWorkItemResponses, GetAll1Data, GetAll1Responses, GetAllData, GetAllResponses, GetAllWorkItemsData, GetAllWorkItemsResponses, GetAssigneesData, GetAssigneesResponses, GetByIdData, GetByIdResponses, GetDashboardDataData, GetDashboardDataResponses, GetData, GetResponses, GetSprintData, GetSprintResponses, GetVelocityData, GetVelocityResponses, GetWorkItemsByTelegramUserData, GetWorkItemsByTelegramUserResponses, LogTimeData, LogTimeResponses, ReindexData, ReindexResponses, RemoveAssigneeData, RemoveAssigneeResponses, SearchData, SearchResponses, UpdateTagData, UpdateTagResponses, UpdateWorkItemData, UpdateWorkItemResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -19,34 +19,6 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
 };
 
 /**
- * Delete legacy todo item
- *
- * Deletes a legacy todo item by numeric ID.
- */
-export const deleteToDoItem = <ThrowOnError extends boolean = false>(options: Options<DeleteToDoItemData, ThrowOnError>) => (options.client ?? client).delete<DeleteToDoItemResponses, unknown, ThrowOnError>({ url: '/api/todolist/{id}', ...options });
-
-/**
- * Get legacy todo item by ID
- *
- * Returns a legacy todo item by numeric ID.
- */
-export const getToDoItemById = <ThrowOnError extends boolean = false>(options: Options<GetToDoItemByIdData, ThrowOnError>) => (options.client ?? client).get<GetToDoItemByIdResponses, unknown, ThrowOnError>({ url: '/api/todolist/{id}', ...options });
-
-/**
- * Update legacy todo item
- *
- * Updates a legacy todo item by numeric ID.
- */
-export const updateToDoItem = <ThrowOnError extends boolean = false>(options: Options<UpdateToDoItemData, ThrowOnError>) => (options.client ?? client).put<UpdateToDoItemResponses, unknown, ThrowOnError>({
-    url: '/api/todolist/{id}',
-    ...options,
-    headers: {
-        'Content-Type': 'application/json',
-        ...options.headers
-    }
-});
-
-/**
  * List work items
  *
  * Returns all work items with assignment details.
@@ -60,27 +32,6 @@ export const getAllWorkItems = <ThrowOnError extends boolean = false>(options?: 
  */
 export const createWorkItem = <ThrowOnError extends boolean = false>(options: Options<CreateWorkItemData, ThrowOnError>) => (options.client ?? client).post<CreateWorkItemResponses, unknown, ThrowOnError>({
     url: '/api/workitems',
-    ...options,
-    headers: {
-        'Content-Type': 'application/json',
-        ...options.headers
-    }
-});
-
-/**
- * List legacy todo items
- *
- * Returns all legacy todo items.
- */
-export const getAllToDoItems = <ThrowOnError extends boolean = false>(options?: Options<GetAllToDoItemsData, ThrowOnError>) => (options?.client ?? client).get<GetAllToDoItemsResponses, unknown, ThrowOnError>({ url: '/api/todolist', ...options });
-
-/**
- * Create legacy todo item
- *
- * Creates a legacy todo item.
- */
-export const addToDoItem = <ThrowOnError extends boolean = false>(options: Options<AddToDoItemData, ThrowOnError>) => (options.client ?? client).post<AddToDoItemResponses, unknown, ThrowOnError>({
-    url: '/api/todolist',
     ...options,
     headers: {
         'Content-Type': 'application/json',

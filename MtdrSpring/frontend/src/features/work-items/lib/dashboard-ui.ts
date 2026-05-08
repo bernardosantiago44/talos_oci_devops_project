@@ -41,7 +41,6 @@ export function formatPriorityLabel(priority: WorkItemPriority): string {
         case 'LOW': return 'Low';
         case 'MEDIUM': return 'Medium';
         case 'HIGH': return 'High';
-        case 'CRITICAL': return 'Critical';
         default: return priority;
     }
 }
@@ -62,8 +61,6 @@ export function getStatusBadgeClasses(status: WorkItemStatus): string {
 
 export function getPriorityBadgeClasses(priority: WorkItemPriority): string {
     switch (priority) {
-        case 'CRITICAL':
-            return 'border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-400/30 dark:bg-rose-500/15 dark:text-rose-300';
         case 'HIGH':
             return 'border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-400/30 dark:bg-amber-500/15 dark:text-amber-300';
         case 'MEDIUM':

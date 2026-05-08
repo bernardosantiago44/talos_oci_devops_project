@@ -55,7 +55,7 @@ function mapWorkItem(row, userById, tagById) {
         return acc;
     }, []);
     const tags = rowWithTags.tags?.reduce((acc, tag) => {
-        const id = tag.tagId ?? tag.id;
+        const id = tag.tagId;
         if (!id || !tag.name)
             return acc;
         acc.push({
@@ -156,8 +156,9 @@ export const useWorkItemsViewModel = () => {
             estimatedMinutes: dto.estimatedMinutes,
             dueDate: dto.dueDate,
             completedAt: dto.completedAt,
-            assigneeIds: dto.assigneeUserIds,
+            assigneeIds: dto.assigneeIds,
             tagIds: dto.tagIds,
+            sprintId: dto.sprintId,
         };
         await updateWorkItemMutation.mutateAsync({ id, body });
     }, [updateWorkItemMutation]);

@@ -143,7 +143,7 @@ export function WorkItemFormModal({ isOpen, item, users, sprints, tags, onClose,
                     priority: form.priority,
                     dueDate: form.dueDate || undefined,
                     estimatedMinutes: minutes,
-                    assigneeUserIds: form.assigneeUserIds,
+                    assigneeIds: form.assigneeUserIds,
                     tagIds: form.tagIds,
                 };
                 await onUpdate(item.id, dto);

@@ -59,10 +59,10 @@ public class WorkItem {
     @Column(name = "COMPLETED_AT")
     private OffsetDateTime completedAt;
 
-    @OneToMany(mappedBy = "workItem", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "workItem", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<WorkItemAssignment> assignments = new HashSet<>();
     
-    @OneToMany(mappedBy = "workItem", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "workItem", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<WorkItemTag> tags = new HashSet<>();
 
     public WorkItem() {}

@@ -45,4 +45,7 @@ public final class UpdateWorkItemRequest {
 
     @Schema(description = "Replacement set of assigned user IDs.", example = "[\"user-1\", \"user-2\"]")
     private List<String> assigneeIds;
+    
+    @Schema(description = "Replacement set of tag IDs", example = "[\"tag-001\"]")
+    private List<String> tagIds;
 }

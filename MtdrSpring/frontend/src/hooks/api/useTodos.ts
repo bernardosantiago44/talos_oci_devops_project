@@ -1,33 +1,30 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { apiClient } from '@/api/client';
-import {
-  addToDoItem,
-  deleteToDoItem,
-  getAllToDoItems,
-  getToDoItemById,
-  updateToDoItem,
-} from '@/api/generated';
-import type { ToDoItem } from '@/api/generated';
 import { apiQueryKeys } from './query-keys';
-import { readData } from './request';
+
+export type LegacyToDoItem = {
+  description?: string;
+  creation_ts?: string;
+  done?: boolean;
+  id?: number;
+};
+
+function missingTodoApi(): never {
+  throw new Error('Legacy todo endpoints are not present in the generated OpenAPI client.');
+}
 
 export function useTodoList() {
   return useQuery({
     queryKey: apiQueryKeys.todos.list(),
-    queryFn: () => readData(getAllToDoItems({ client: apiClient, throwOnError: true })),
+    queryFn: missingTodoApi,
+    enabled: false,
   });
 }
 
 export function useTodoGet(id?: number) {
   return useQuery({
     queryKey: apiQueryKeys.todos.detail(id),
-    queryFn: () =>
-      readData(getToDoItemById({
-        client: apiClient,
-        path: { id: id as number },
-        throwOnError: true,
-      })),
-    enabled: id !== undefined,
+    queryFn: missingTodoApi,
+    enabled: false,
   });
 }
 
@@ -35,8 +32,7 @@ export function useTodoCreate() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (body: ToDoItem) =>
-      readData(addToDoItem({ client: apiClient, body, throwOnError: true })),
+    mutationFn: (_body: LegacyToDoItem) => missingTodoApi(),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: apiQueryKeys.todos.all });
     },
@@ -47,13 +43,7 @@ export function useTodoUpdate() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, body }: { id: number; body: ToDoItem }) =>
-      readData(updateToDoItem({
-        client: apiClient,
-        path: { id },
-        body,
-        throwOnError: true,
-      })),
+    mutationFn: (_variables: { id: number; body: LegacyToDoItem }) => missingTodoApi(),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: apiQueryKeys.todos.all });
       queryClient.invalidateQueries({ queryKey: apiQueryKeys.todos.detail(variables.id) });
@@ -65,8 +55,7 @@ export function useTodoDelete() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: number) =>
-      readData(deleteToDoItem({ client: apiClient, path: { id }, throwOnError: true })),
+    mutationFn: (_id: number) => missingTodoApi(),
     onSuccess: (_data, id) => {
       queryClient.invalidateQueries({ queryKey: apiQueryKeys.todos.all });
       queryClient.invalidateQueries({ queryKey: apiQueryKeys.todos.detail(id) });

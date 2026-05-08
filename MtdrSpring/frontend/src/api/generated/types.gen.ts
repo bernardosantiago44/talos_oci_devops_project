@@ -5,25 +5,6 @@ export type ClientOptions = {
 };
 
 /**
- * Legacy todo item entity.
- */
-export type ToDoItem = {
-    /**
-     * Todo item description.
-     */
-    description?: string;
-    /**
-     * Creation timestamp.
-     */
-    creation_ts?: string;
-    /**
-     * Whether the todo item is complete.
-     */
-    done?: boolean;
-    id?: number;
-};
-
-/**
  * Request payload for creating a work item.
  */
 export type CreateWorkItemRequest = {
@@ -75,6 +56,10 @@ export type CreateWorkItemRequest = {
      * Users to assign after creation.
      */
     assigneeIds?: Array<string>;
+    /**
+     * Tags to assign after creation.
+     */
+    tagIds?: Array<string>;
 };
 
 /**
@@ -97,6 +82,13 @@ export type AssignedUserDto = {
      * Telegram user identifier.
      */
     telegramUserId?: string;
+};
+
+export type TagResponse = {
+    tagId?: string;
+    name?: string;
+    color?: string;
+    description?: string;
 };
 
 /**
@@ -153,6 +145,10 @@ export type WorkItemResponse = {
      * Current assignees.
      */
     assignees?: Array<WorkItemAssignmentDto>;
+    /**
+     * Current assigned tags.
+     */
+    tags?: Array<TagResponse>;
     /**
      * Short title.
      */
@@ -257,14 +253,6 @@ export type CreateTagRequest = {
     description?: string;
 };
 
-export type TagResponse = {
-    tagId?: string;
-    name?: string;
-    color?: string;
-    description?: string;
-    createdAt?: string;
-};
-
 /**
  * Request payload for semantic work item search.
  */
@@ -367,6 +355,10 @@ export type UpdateWorkItemRequest = {
      * Replacement set of assigned user IDs.
      */
     assigneeIds?: Array<string>;
+    /**
+     * Replacement set of tag IDs
+     */
+    tagIds?: Array<string>;
 };
 
 /**
@@ -600,60 +592,6 @@ export type DeveloperSprintAnalytics = {
     TASKS_COMPLETED?: number;
 };
 
-export type DeleteToDoItemData = {
-    body?: never;
-    path: {
-        id: number;
-    };
-    query?: never;
-    url: '/api/todolist/{id}';
-};
-
-export type DeleteToDoItemResponses = {
-    /**
-     * OK
-     */
-    200: boolean;
-};
-
-export type DeleteToDoItemResponse = DeleteToDoItemResponses[keyof DeleteToDoItemResponses];
-
-export type GetToDoItemByIdData = {
-    body?: never;
-    path: {
-        id: number;
-    };
-    query?: never;
-    url: '/api/todolist/{id}';
-};
-
-export type GetToDoItemByIdResponses = {
-    /**
-     * OK
-     */
-    200: ToDoItem;
-};
-
-export type GetToDoItemByIdResponse = GetToDoItemByIdResponses[keyof GetToDoItemByIdResponses];
-
-export type UpdateToDoItemData = {
-    body: ToDoItem;
-    path: {
-        id: number;
-    };
-    query?: never;
-    url: '/api/todolist/{id}';
-};
-
-export type UpdateToDoItemResponses = {
-    /**
-     * OK
-     */
-    200: ToDoItem;
-};
-
-export type UpdateToDoItemResponse = UpdateToDoItemResponses[keyof UpdateToDoItemResponses];
-
 export type GetAllWorkItemsData = {
     body?: never;
     path?: never;
@@ -685,38 +623,6 @@ export type CreateWorkItemResponses = {
 };
 
 export type CreateWorkItemResponse = CreateWorkItemResponses[keyof CreateWorkItemResponses];
-
-export type GetAllToDoItemsData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/api/todolist';
-};
-
-export type GetAllToDoItemsResponses = {
-    /**
-     * OK
-     */
-    200: Array<ToDoItem>;
-};
-
-export type GetAllToDoItemsResponse = GetAllToDoItemsResponses[keyof GetAllToDoItemsResponses];
-
-export type AddToDoItemData = {
-    body: ToDoItem;
-    path?: never;
-    query?: never;
-    url: '/api/todolist';
-};
-
-export type AddToDoItemResponses = {
-    /**
-     * OK
-     */
-    200: ToDoItem;
-};
-
-export type AddToDoItemResponse = AddToDoItemResponses[keyof AddToDoItemResponses];
 
 export type LogTimeData = {
     body: TimeEntryRequest;
@@ -918,12 +824,10 @@ export type DeleteTagData = {
 
 export type DeleteTagResponses = {
     /**
-     * No Content
+     * OK
      */
-    204: void;
+    200: unknown;
 };
-
-export type DeleteTagResponse = DeleteTagResponses[keyof DeleteTagResponses];
 
 export type UpdateTagData = {
     body: UpdateTagRequest;

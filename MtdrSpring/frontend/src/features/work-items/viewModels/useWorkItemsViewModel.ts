@@ -3,8 +3,6 @@ import { useAppUserList, useSprintList, useTagList, useTimeEntryCreate, useWorkI
 import type { AppUserSummary, CreateWorkItemRequest, SprintResponse, TagResponse, UpdateWorkItemRequest, WorkItemResponse } from '@/api/generated';
 import type { ViewMode } from '@/features/work-items/components/dashboard/dashboard-toolbar';
 import type { WorkItemDetailDto, Assignee } from '../dtos/work-item-detail.dto';
-import type { CreateWorkItemDto } from '../dtos/create-work-item.dto';
-import type { UpdateWorkItemDto } from '../dtos/update-work-item.dto';
 import type { WorkLogDto, WorkLogMode } from '../dtos/work-log.dto';
 import type { WorkItemStatus } from '../enums/work-item-status.enum';
 import { normalizeStatus, toBackendStatus } from '../enums/work-item-status.enum';
@@ -14,19 +12,19 @@ import type { AssignmentRole } from '../enums/assignment-role.enum';
 import type { UserSummaryDto } from '@/shared/dtos/user-summary.dto';
 import type { TagDto } from '@/shared/dtos/tag.dto';
 
-type CreateWorkItemPayload = Omit<CreateWorkItemRequest, 'priority'> & {
-  priority: string;
-  tagIds?: string[];
+export type CreateWorkItemFormInput = Omit<
+  CreateWorkItemRequest,
+  'sprintId' | 'createdByUserId' | 'workType' | 'status' | 'priority' | 'assigneeIds'
+> & {
+  sprintId?: CreateWorkItemRequest['sprintId'];
+  type: WorkItemType;
+  status?: WorkItemStatus;
+  priority: WorkItemPriority;
+  assigneeUserIds?: CreateWorkItemRequest['assigneeIds'];
 };
-
-type UpdateWorkItemPayload = Omit<UpdateWorkItemRequest, 'priority'> & {
-  priority?: string;
-  tagIds?: string[];
-};
-
 type WorkItemWithTags = WorkItemResponse & {
   tagIds?: string[];
-  tags?: Array<TagResponse & { id?: string }>;
+  tags?: Array<TagResponse>;
 };
 
 export interface SprintDto {
@@ -59,7 +57,6 @@ function mapSprint(sprint: SprintResponse): SprintDto | null {
     endDate: sprint.endDate,
   };
 }
-
 function mapWorkItem(
   row: WorkItemResponse,
   userById: Map<string, UserSummaryDto>,
@@ -103,7 +100,7 @@ function mapWorkItem(
 
   const tags =
     rowWithTags.tags?.reduce<TagDto[]>((acc, tag) => {
-      const id = tag.tagId ?? tag.id;
+      const id = tag.tagId;
       if (!id || !tag.name) return acc;
 
       acc.push({
@@ -193,7 +190,7 @@ export const useWorkItemsViewModel = () => {
   }, [workItemsQuery]);
 
   const handleCreate = useCallback(
-    async (dto: CreateWorkItemDto) => {
+    async (dto: CreateWorkItemFormInput) => {
       const sprintId = dto.sprintId || sprints[0]?.sprintId;
       const createdByUserId = users[0]?.userId;
 
@@ -201,7 +198,7 @@ export const useWorkItemsViewModel = () => {
         throw new Error('A sprint and creator user are required before creating work items.');
       }
 
-      const body: CreateWorkItemPayload = {
+      const body: CreateWorkItemRequest = {
         sprintId,
         createdByUserId,
         workType: dto.type,
@@ -222,8 +219,8 @@ export const useWorkItemsViewModel = () => {
   );
 
   const handleUpdate = useCallback(
-    async (id: string, dto: UpdateWorkItemDto) => {
-      const body: UpdateWorkItemPayload = {
+    async (id: string, dto: UpdateWorkItemRequest) => {
+      const body: UpdateWorkItemRequest = {
         title: dto.title,
         description: dto.description,
         status: dto.status ? toBackendStatus(dto.status) : undefined,
@@ -232,8 +229,9 @@ export const useWorkItemsViewModel = () => {
         estimatedMinutes: dto.estimatedMinutes,
         dueDate: dto.dueDate,
         completedAt: dto.completedAt,
-        assigneeIds: dto.assigneeUserIds,
+        assigneeIds: dto.assigneeIds,
         tagIds: dto.tagIds,
+        sprintId: dto.sprintId,
       };
 
       await updateWorkItemMutation.mutateAsync({ id, body });

@@ -3,7 +3,6 @@ import { Loader2, Plus, X } from 'lucide-react';
 import { useTagCreate } from '@/hooks/api';
 import type { WorkItemDetailDto } from '../../dtos/work-item-detail.dto';
 import type { CreateWorkItemDto } from '../../dtos/create-work-item.dto';
-import type { UpdateWorkItemDto } from '../../dtos/update-work-item.dto';
 import type { WorkItemType } from '../../enums/work-item-type.enum';
 import type { WorkItemStatus } from '../../enums/work-item-status.enum';
 import type { WorkItemPriority } from '../../enums/work-item-priority.enum';
@@ -18,6 +17,7 @@ import {
     formatStatusLabel,
     formatPriorityLabel,
 } from '../../lib/dashboard-ui';
+import type {UpdateWorkItemRequest} from "@/api/generated";
 
 const HEX_COLOR_PATTERN = /^#[0-9A-Fa-f]{6}$/;
 const DEFAULT_TAG_COLOR = '#3B82F6';
@@ -31,7 +31,7 @@ interface WorkItemFormModalProps {
     tags: TagDto[];
     onClose: () => void;
     onCreate: (dto: CreateWorkItemDto) => Promise<void>;
-    onUpdate: (id: string, dto: UpdateWorkItemDto) => Promise<void>;
+    onUpdate: (id: string, dto: UpdateWorkItemRequest) => Promise<void>;
 }
 
 interface FormState {
@@ -313,15 +313,16 @@ export function WorkItemFormModal({
         try {
             const minutes = form.estimatedMinutes ? parseInt(form.estimatedMinutes, 10) : undefined;
             if (isEditing && item) {
-                const dto: UpdateWorkItemDto = {
+                const dto: UpdateWorkItemRequest = {
                     title: form.title.trim(),
                     description: form.description.trim() || undefined,
                     status: form.status,
                     priority: form.priority,
                     dueDate: form.dueDate || undefined,
                     estimatedMinutes: minutes,
-                    assigneeUserIds: form.assigneeUserIds,
+                    assigneeIds: form.assigneeUserIds,
                     tagIds: form.tagIds,
+                    sprintId: form.sprintId,
                 };
                 await onUpdate(item.id, dto);
             } else {

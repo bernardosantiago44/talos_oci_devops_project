@@ -89,8 +89,13 @@ public class WorkItemService {
         // Applies the non-null attributes of the request to the workItem
         WorkItemMapper.applyUpdates(workItem, request);
         WorkItem savedWorkItem = workItemRepository.save(workItem);
+        
         if (request.getAssigneeIds() != null) {
             assignmentService.replaceAssignees(savedWorkItem, request.getAssigneeIds());
+        }
+        
+        if (request.getTagIds() != null) {
+            tagAssignmentService.replaceTags(savedWorkItem, request.getTagIds());
         }
 
         log.info("Updated work item id={}", savedWorkItem.getWorkItemId());
