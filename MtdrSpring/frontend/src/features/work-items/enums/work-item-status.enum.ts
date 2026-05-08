@@ -1,6 +1,5 @@
 export const WORK_ITEM_STATUSES = [
     'TODO',
-    'NEW',
     'IN_PROGRESS',
     'BLOCKED',
     'DONE'

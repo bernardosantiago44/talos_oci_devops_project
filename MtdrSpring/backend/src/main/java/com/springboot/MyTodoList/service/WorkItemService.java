@@ -5,14 +5,18 @@ import com.springboot.MyTodoList.exception.AppUserNotFoundException;
 import com.springboot.MyTodoList.exception.BusinessRuleException;
 import com.springboot.MyTodoList.exception.WorkItemNotFoundException;
 import com.springboot.MyTodoList.model.WorkItem;
+import com.springboot.MyTodoList.query.WorkItemQuery;
 import com.springboot.MyTodoList.repository.AppUserRepository;
 import com.springboot.MyTodoList.repository.SprintRepository;
 import com.springboot.MyTodoList.repository.WorkItemRepository;
 import jakarta.transaction.Transactional;
+import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import java.util.stream.Stream;
 
 @Service
 public class WorkItemService {
@@ -44,6 +48,19 @@ public class WorkItemService {
                 .stream()
                 .map(WorkItemMapper::toResponse)
                 .toList();
+    }
+    
+    public List<WorkItemResponse> findByQuery(@NotNull WorkItemQuery query) {
+        Stream<WorkItemResponse> allItems = workItemRepository
+                .findAll()
+                .stream()
+                .map(WorkItemMapper::toResponse);
+        if (query.getStatus() != null) {
+            allItems = allItems
+                    .filter((item) -> item.status().equalsIgnoreCase(query.getStatus()));
+        }
+        
+        return allItems.toList();
     }
     
     public WorkItemResponse findById(String id) {

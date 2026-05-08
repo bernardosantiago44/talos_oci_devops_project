@@ -1,11 +1,13 @@
 package com.springboot.MyTodoList.controller;
 
 import com.springboot.MyTodoList.dto.WorkItem.*;
+import com.springboot.MyTodoList.query.WorkItemQuery;
 import com.springboot.MyTodoList.service.WorkItemAssignmentService;
 import com.springboot.MyTodoList.service.WorkItemService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,8 +33,9 @@ public class WorkItemController {
      */
     @GetMapping
     @Operation(summary = "List work items", description = "Returns all work items with assignment details.")
-    public ResponseEntity<List<WorkItemResponse>> getAllWorkItems() {
-        return ResponseEntity.ok(service.findAll());
+    public ResponseEntity<List<WorkItemResponse>> getAllWorkItems(@Nullable WorkItemQuery query) {
+        if (query == null || query.isEmpty()) return ResponseEntity.ok(service.findAll());
+        return ResponseEntity.ok(service.findByQuery(query));
     }
     
     @GetMapping("/{id}")

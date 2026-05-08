@@ -145,6 +145,7 @@ export function WorkItemFormModal({ isOpen, item, users, sprints, tags, onClose,
                     estimatedMinutes: minutes,
                     assigneeIds: form.assigneeUserIds,
                     tagIds: form.tagIds,
+                    sprintId: form.sprintId,
                 };
                 await onUpdate(item.id, dto);
             }

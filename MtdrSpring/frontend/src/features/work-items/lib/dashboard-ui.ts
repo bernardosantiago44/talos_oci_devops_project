@@ -18,7 +18,6 @@ export function getInitials(name: string): string {
 export function formatStatusLabel(status: WorkItemStatus): string {
     switch (status) {
         case 'TODO': return 'Todo';
-        case 'NEW': return 'Todo';
         case 'IN_PROGRESS': return 'In Progress';
         case 'BLOCKED': return 'Blocked';
         case 'DONE': return 'Done';
