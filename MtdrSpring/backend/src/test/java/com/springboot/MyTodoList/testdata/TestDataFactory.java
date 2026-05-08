@@ -19,7 +19,7 @@ public final class TestDataFactory {
     public static final String CREATOR_USER_ID = "creator-1";
     public static final String ASSIGNEE_USER_ID = "user-1";
     public static final String ASSIGNMENT_ID = "assignment-1";
-    public static final String TAG_ID = "B38E0341-AA9B-486D-81BD-8E7C0339A49F\n";
+    public static final String TAG_ID = "B38E0341-AA9B-486D-81BD-8E7C0339A49F";
 
     private TestDataFactory() {
     }

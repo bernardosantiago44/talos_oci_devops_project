@@ -43,6 +43,9 @@ class WorkItemServiceTest {
     @Mock
     private WorkItemAssignmentService assignmentService;
 
+    @Mock
+    private WorkItemTagAssignmentService tagAssignmentService;
+
     @InjectMocks
     private WorkItemService service;
 
@@ -76,6 +79,7 @@ class WorkItemServiceTest {
         assertThat(captor.getValue().getCreatedAt()).isNotNull();
         assertThat(captor.getValue().getUpdatedAt()).isNotNull();
         verify(assignmentService, never()).replaceAssignees(any(), any());
+        verify(tagAssignmentService, never()).replaceTags(any(), any());
     }
 
     @Test
@@ -90,6 +94,48 @@ class WorkItemServiceTest {
         service.createWorkItem(request);
 
         verify(assignmentService).replaceAssignees(any(WorkItem.class), eq(request.getAssigneeIds()));
+    }
+
+    @Test
+    void createWorkItemReplacesTagsWhenTwoTagIdsArePresent() {
+        CreateWorkItemRequest request = TestDataFactory.validCreateWorkItemRequest();
+        request.setTagIds(List.of("tag-1", "tag-2"));
+
+        when(appUserRepository.existsById(TestDataFactory.CREATOR_USER_ID)).thenReturn(true);
+        when(sprintRepository.existsById(TestDataFactory.SPRINT_ID)).thenReturn(true);
+        when(workItemRepository.save(any(WorkItem.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        service.createWorkItem(request);
+
+        verify(tagAssignmentService).replaceTags(any(WorkItem.class), eq(request.getTagIds()));
+    }
+
+    @Test
+    void createWorkItemReplacesTagsWhenOneRequestedTagDoesNotExist() {
+        CreateWorkItemRequest request = TestDataFactory.validCreateWorkItemRequest();
+        request.setTagIds(List.of("missing-tag"));
+
+        when(appUserRepository.existsById(TestDataFactory.CREATOR_USER_ID)).thenReturn(true);
+        when(sprintRepository.existsById(TestDataFactory.SPRINT_ID)).thenReturn(true);
+        when(workItemRepository.save(any(WorkItem.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        service.createWorkItem(request);
+
+        verify(tagAssignmentService).replaceTags(any(WorkItem.class), eq(request.getTagIds()));
+    }
+
+    @Test
+    void createWorkItemReplacesTagsWithEmptyList() {
+        CreateWorkItemRequest request = TestDataFactory.validCreateWorkItemRequest();
+        request.setTagIds(List.of());
+
+        when(appUserRepository.existsById(TestDataFactory.CREATOR_USER_ID)).thenReturn(true);
+        when(sprintRepository.existsById(TestDataFactory.SPRINT_ID)).thenReturn(true);
+        when(workItemRepository.save(any(WorkItem.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        service.createWorkItem(request);
+
+        verify(tagAssignmentService).replaceTags(any(WorkItem.class), eq(request.getTagIds()));
     }
 
     @Test
