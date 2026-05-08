@@ -1,5 +1,6 @@
 package com.springboot.MyTodoList.dto.WorkItem;
 
+import com.springboot.MyTodoList.dto.tag.TagResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.LocalDate;
@@ -18,6 +19,8 @@ public record WorkItemResponse(
         String workType,
         @Schema(description = "Current assignees.")
         List<WorkItemAssignmentDto> assignees,
+        @Schema(description = "Current assigned tags.")
+        List<TagResponse> tags,
         @Schema(description = "Short title.", example = "Build analytics dashboard")
         String title,
         @Schema(description = "Detailed description.", example = "Create charts and KPI cards for team analytics.")

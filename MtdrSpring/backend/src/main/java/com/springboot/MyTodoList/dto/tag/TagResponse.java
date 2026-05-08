@@ -5,7 +5,6 @@ import jakarta.annotation.Nullable;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Getter
@@ -17,21 +16,18 @@ public class TagResponse {
     private String color;
     @Nullable 
     private String description;
-    private OffsetDateTime createdAt;
 
     public TagResponse(Tag tag) {
         this.tagId = UUID.fromString(tag.getTagId());
         this.name = tag.getName();
         this.color = tag.getColor();
         this.description = tag.getDescription();
-        this.createdAt = tag.getCreatedAt();
     }
     
-    public TagResponse(UUID tagId, String name, @Nullable String color, @Nullable String description, OffsetDateTime createdAt) {
+    public TagResponse(UUID tagId, String name, @Nullable String color, @Nullable String description) {
         this.tagId = tagId;
         this.name = name;
         this.color = color;
         this.description = description;
-        this.createdAt = createdAt;
     }
 }

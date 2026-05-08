@@ -5,14 +5,13 @@ import com.springboot.MyTodoList.dto.WorkItem.CreateWorkItemRequest;
 import com.springboot.MyTodoList.dto.WorkItem.UpdateWorkItemRequest;
 import com.springboot.MyTodoList.dto.WorkItem.WorkItemAssignmentDto;
 import com.springboot.MyTodoList.dto.WorkItem.WorkItemResponse;
-import com.springboot.MyTodoList.model.AppUser;
-import com.springboot.MyTodoList.model.WorkItem;
-import com.springboot.MyTodoList.model.WorkItemAssignment;
-import com.springboot.MyTodoList.model.WorkItemPriority;
+import com.springboot.MyTodoList.dto.tag.TagResponse;
+import com.springboot.MyTodoList.model.*;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.UUID;
 
 public final class TestDataFactory {
     public static final String WORK_ITEM_ID = "wi-1";
@@ -20,6 +19,7 @@ public final class TestDataFactory {
     public static final String CREATOR_USER_ID = "creator-1";
     public static final String ASSIGNEE_USER_ID = "user-1";
     public static final String ASSIGNMENT_ID = "assignment-1";
+    public static final String TAG_ID = "B38E0341-AA9B-486D-81BD-8E7C0339A49F\n";
 
     private TestDataFactory() {
     }
@@ -104,6 +104,7 @@ public final class TestDataFactory {
                 CREATOR_USER_ID,
                 "TASK",
                 List.of(assignmentDto()),
+                List.of(tagResponse()),
                 "Build assignment tests",
                 "Add starter backend tests",
                 "NEW",
@@ -125,6 +126,15 @@ public final class TestDataFactory {
                 null,
                 assignedUserDto(),
                 null
+        );
+    }
+    
+    public static TagResponse tagResponse() {
+        return new TagResponse(
+                UUID.fromString(TAG_ID), 
+                "tag-1", 
+                "#112233", 
+                "Description"
         );
     }
 

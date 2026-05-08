@@ -6,7 +6,6 @@ import com.springboot.MyTodoList.dto.tag.TagResponse;
 import com.springboot.MyTodoList.dto.tag.UpdateTagRequest;
 import com.springboot.MyTodoList.exception.BusinessRuleException;
 import com.springboot.MyTodoList.exception.TagNotFoundException;
-import com.springboot.MyTodoList.repository.TagsRepository;
 import com.springboot.MyTodoList.service.TagsService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,8 +80,7 @@ class TagsControllerTest {
                 TAG_ID,
                 request.getName(),
                 "#ABC",
-                null,
-                createdAt()
+                null
         ));
 
         mockMvc.perform(post("/api/tags")
@@ -203,8 +201,7 @@ class TagsControllerTest {
                 TAG_ID,
                 "Important",
                 "#5BFFAE",
-                "High priority work",
-                createdAt()
+                "High priority work"
         );
     }
 

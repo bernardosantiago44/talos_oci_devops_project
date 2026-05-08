@@ -7,6 +7,7 @@ import com.springboot.MyTodoList.dto.tag.TagResponse;
 import com.springboot.MyTodoList.exception.BusinessRuleException;
 import com.springboot.MyTodoList.exception.TagNotFoundException;
 import com.springboot.MyTodoList.model.Tag;
+import com.springboot.MyTodoList.model.WorkItem;
 import com.springboot.MyTodoList.repository.TagsRepository;
 import com.springboot.MyTodoList.util.Validator;
 import jakarta.transaction.Transactional;
@@ -66,6 +67,13 @@ public class TagsService {
     @Transactional
     public void deleteTagById(String id) {
         tagsRepository.deleteById(id);
+    }
+    
+    @Transactional 
+    public void replaceTags(WorkItem workItem, List<String> tagIds) {
+        var tags = tagIds.stream().distinct().toList();
+        
+        List<Tag> tagList = tagsRepository.findAllById(tagIds);
     }
     
     private void validateTagNameDoesNotExist(String name) {

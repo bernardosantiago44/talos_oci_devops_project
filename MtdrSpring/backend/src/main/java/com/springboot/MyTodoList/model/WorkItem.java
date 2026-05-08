@@ -61,6 +61,9 @@ public class WorkItem {
 
     @OneToMany(mappedBy = "workItem", cascade = CascadeType.ALL)
     private Set<WorkItemAssignment> assignments = new HashSet<>();
+    
+    @OneToMany(mappedBy = "workItem", cascade = CascadeType.ALL)
+    private Set<WorkItemTag> tags = new HashSet<>();
 
     public WorkItem() {}
 }

@@ -142,7 +142,6 @@ class TagsServiceTest {
 
         when(tagsRepository.existsById(TAG_ID)).thenReturn(true);
         when(tagsRepository.findById(TAG_ID)).thenReturn(Optional.of(existing));
-        when(tagsRepository.existsByName("Backlog")).thenReturn(false);
         when(tagsRepository.save(existing)).thenReturn(existing);
 
         TagResponse response = service.updateTag(TAG_ID, request);
@@ -250,7 +249,7 @@ class TagsServiceTest {
 
         when(tagsRepository.existsById(TAG_ID)).thenReturn(true);
         when(tagsRepository.findById(TAG_ID)).thenReturn(Optional.of(tag()));
-        when(tagsRepository.existsByName("Backlog")).thenReturn(true);
+        when(tagsRepository.existsByNameAndTagIdNot("Backlog", TAG_ID)).thenReturn(true);
 
         assertThatThrownBy(() -> service.updateTag(TAG_ID, request))
                 .isInstanceOf(BusinessRuleException.class)

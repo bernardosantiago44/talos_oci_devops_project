@@ -20,10 +20,12 @@ public class WorkItemService {
     private final AppUserRepository appUserRepository;
     private final SprintRepository sprintRepository;
     private final WorkItemAssignmentService assignmentService;
+    private final WorkItemTagAssignmentService tagAssignmentService;
     private static final Logger log = LoggerFactory.getLogger(WorkItemService.class);
     private final AppUserRepository userRepository;
 
-    public WorkItemService(WorkItemRepository repository, 
+    public WorkItemService(WorkItemRepository repository,
+                           WorkItemTagAssignmentService tagAssignmentService,
                            AppUserRepository appUserRepository,
                            SprintRepository sprintRepository,
                            WorkItemAssignmentService assignmentService,
@@ -32,6 +34,7 @@ public class WorkItemService {
         this.appUserRepository = appUserRepository;
         this.sprintRepository = sprintRepository;
         this.assignmentService = assignmentService;
+        this.tagAssignmentService = tagAssignmentService;
         this.userRepository = userRepository;
     }
     
@@ -68,7 +71,11 @@ public class WorkItemService {
         if (request.getAssigneeIds() != null) {
             assignmentService.replaceAssignees(saved, request.getAssigneeIds());
         }
-
+        
+        if (request.getTagIds() != null) {
+            tagAssignmentService.replaceTags(saved, request.getTagIds());
+        }
+        
         return WorkItemMapper.toResponse(saved);
     }
     

@@ -1,8 +1,7 @@
 package com.springboot.MyTodoList.dto.WorkItem;
 
-import com.springboot.MyTodoList.model.AppUser;
-import com.springboot.MyTodoList.model.WorkItem;
-import com.springboot.MyTodoList.model.WorkItemAssignment;
+import com.springboot.MyTodoList.dto.tag.TagResponse;
+import com.springboot.MyTodoList.model.*;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -17,6 +16,11 @@ public final class WorkItemMapper {
                 .stream()
                 .map(WorkItemMapper::toAssignmentDto)
                 .toList();
+        List<TagResponse> tags = entity
+                .getTags()
+                .stream()
+                .map(WorkItemMapper::toTagDto)
+                .toList();
         
         return new WorkItemResponse(
                 entity.getWorkItemId(),
@@ -24,6 +28,7 @@ public final class WorkItemMapper {
                 entity.getCreatedByUserId(),
                 entity.getWorkType(),
                 assignments,
+                tags,
                 entity.getTitle(),
                 entity.getDescription(),
                 entity.getStatus(),
@@ -45,6 +50,15 @@ public final class WorkItemMapper {
                 assignment.getUnassignedAt(),
                 toUserDto(assignment.getAssignedUser()),
                 toUserDto(assignment.getAssignedByUser())
+        );
+    }
+    
+    public static TagResponse toTagDto(WorkItemTag tag) {
+        return new TagResponse(
+                UUID.fromString(tag.getTag().getTagId()), 
+                tag.getTag().getName(), 
+                tag.getTag().getColor(), 
+                tag.getTag().getDescription()
         );
     }
 

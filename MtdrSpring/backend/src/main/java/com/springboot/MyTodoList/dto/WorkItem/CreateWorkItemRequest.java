@@ -2,6 +2,7 @@ package com.springboot.MyTodoList.dto.WorkItem;
 
 import com.springboot.MyTodoList.model.WorkItemPriority;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -51,4 +52,8 @@ public class CreateWorkItemRequest {
 
         @Schema(description = "Users to assign after creation.", example = "[\"user-1\", \"user-2\"]")
         private List<String> assigneeIds;
+        
+        @Schema(description = "Tags to assign after creation.", example = "[\"tag-001\", \"tag-002\"]")
+        @Nullable
+        private List<String> tagIds;
 }
