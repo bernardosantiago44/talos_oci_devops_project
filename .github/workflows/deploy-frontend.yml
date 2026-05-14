@@ -5,7 +5,7 @@ on:
     branches: [ "main", "fix/deployment" ]
     paths: ["MtdrSpring/frontend/**", ".github/**"]
 env:
-  DOCKER_REGISTRY: ${{ vars.OCI_REGION }}/${{ vars.OCI_TENANCY_NAMESPACE }}/${{ vars.OCI_CONTAINER_REGISTRY }}
+  DOCKER_REGISTRY: ${{ vars.OCI_REGION }}/${{ vars.OCI_TENANCY_NAMESPACE }}/${{ vars.OCI_CONTAINER_REGISTRY_FRONTEND }}
 
 jobs:
 
