@@ -14,7 +14,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: frontend
-  namespace: mtdrworkshop
 spec:
   replicas: 1
   selector:
@@ -24,10 +23,12 @@ spec:
     metadata:
       labels:
         app: frontend
+        version: v1
     spec:
       containers:
       - name: react-app
         image: %DOCKER_REGISTRY%/talos-frontend:%IMAGE_VERSION%
+        imagePullPolicy: Always
         ports:
         - containerPort: 80
 ---
