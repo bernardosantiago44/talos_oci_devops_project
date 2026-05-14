@@ -27,7 +27,7 @@ spec:
     spec:
       containers:
       - name: react-app
-        image: your-oci-repo/frontend:latest
+        image: %DOCKER_REGISTRY%/talos-frontend:%IMAGE_VERSION%
         ports:
         - containerPort: 80
 ---

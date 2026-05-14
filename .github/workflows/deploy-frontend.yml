@@ -1,0 +1,80 @@
+name: Build and publish frontend
+
+on:
+  push:
+    branches: [ "main" ]
+    paths: ["MtdrSpring/frontend/**"]
+env:
+  DOCKER_REGISTRY: ${{ vars.OCI_REGION }}/${{ vars.OCI_TENANCY_NAMESPACE }}/${{ vars.OCI_CONTAINER_REGISTRY }}
+
+jobs:
+
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      timestamp: ${{ steps.set-date.outputs.datetime }}
+    steps:
+      - id: set-date
+        run: echo "datetime=$(date +'%Y_%m_%dT%H_%M_%S')" >> $GITHUB_OUTPUT
+
+  build:
+
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Login to container registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ vars.OCI_REGION }}
+        username: ${{ vars.OCI_USERNAME }}
+        password: ${{ secrets.OCI_TOKEN }}
+
+    - name: Build the Docker image
+      working-directory: MtdrSpring/frontend
+      run: |
+        export IMAGE_VERSION=${{ needs.setup.outputs.timestamp }}
+        export CI=false
+        export IMAGE_NAME=talos-frontend
+        export IMAGE=${DOCKER_REGISTRY}/${IMAGE_NAME}:${IMAGE_VERSION}
+        docker build -t $DOCKER_REGISTRY/${IMAGE}:${IMAGE_VERSION} .
+        docker push $IMAGE
+
+  deploy:
+    needs: 
+      - build
+      - setup
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure Kubectl for OKE
+        uses: oracle-actions/configure-kubectl-oke@v1.5.0
+        with:
+          cluster: ${{ vars.OKE_CLUSTER_OCID }}
+        env:
+          OCI_CLI_USER: ${{ vars.OCI_CLI_USER }}
+          OCI_CLI_TENANCY: ${{ vars.OCI_CLI_TENANCY }}
+          OCI_CLI_FINGERPRINT: ${{ secrets.OCI_CLI_FINGERPRINT }}
+          OCI_CLI_KEY_CONTENT: ${{ secrets.OCI_CLI_KEY_CONTENT }}
+          OCI_CLI_REGION: ${{ vars.OCI_CLI_REGION }}
+
+      - name: Deploy to OKE
+        working-directory: MtdrSpring/frontend
+        run: |
+          cp ./frontend.yaml ./ready-to-deploy.yaml
+          sed -i "s|%DOCKER_REGISTRY%|${{ env.DOCKER_REGISTRY }}|g" ./ready-to-deploy.yaml
+          sed -i "s|%IMAGE_VERSION%|${{ needs.setup.outputs.timestamp }}|g" ./ready-to-deploy.yaml
+          kubectl apply -f ./ready-to-deploy.yaml -n mtdrworkshop
+          rm ./ready-to-deploy.yaml
+          kubectl rollout status deployment/frontend -n mtdrworkshop
+        env:
+          OCI_CLI_USER: ${{ vars.OCI_CLI_USER }}
+          OCI_CLI_TENANCY: ${{ vars.OCI_CLI_TENANCY }}
+          OCI_CLI_FINGERPRINT: ${{ secrets.OCI_CLI_FINGERPRINT }}
+          OCI_CLI_KEY_CONTENT: ${{ secrets.OCI_CLI_KEY_CONTENT }}
+          OCI_CLI_REGION: ${{ vars.OCI_CLI_REGION }}
+
