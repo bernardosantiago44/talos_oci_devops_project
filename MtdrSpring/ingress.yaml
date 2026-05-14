@@ -3,9 +3,6 @@ kind: Ingress
 metadata:
   name: main-ingress
   namespace: mtdrworkshop
-  annotations:
-    # Use the rewrite-target for path-based routing
-    nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
   ingressClassName: nginx
   rules:
