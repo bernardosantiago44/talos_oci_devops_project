@@ -48,8 +48,9 @@ frontend/package-lock.json
 frontend/npm-debug.log*
 frontend/yarn-debug.log*
 frontend/yarn-error.log*
+frontend/**/*.js
 /MtdrSpring/backend/wallet
-/MtdrSpring/backend/src/main/resources/Wallet_chatbotBD/
+/MtdrSpring/backend/src/main/resources/Wallet*/
 *.gz
 /MtdrSpring/backend/*.log*
 # Playwright

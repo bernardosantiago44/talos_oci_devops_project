@@ -14,6 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
@@ -141,6 +142,17 @@ class WorkItemAssignmentServiceTest {
         assertThat(assignees.get(0).assignmentId()).isEqualTo("assignment-1");
         assertThat(assignees.get(0).user().userId()).isEqualTo("user-1");
     }
+    
+    @Test 
+    void getAssigneesThrowsNotFoundExceptionForInvalidWorkItem() {
+        when(workItemRepository.existsById("wi-1")).thenReturn(false);
+        
+        assertThatThrownBy(() -> service.getAssignees("wi-1"))
+                .isInstanceOf(WorkItemNotFoundException.class)
+                .hasMessage("Work Item not found: wi-1");
+        
+        verify(assignmentRepository, never()).findByWorkItem_WorkItemId("wi-1");
+    }
 
     @Test
     void replaceAssigneesDeletesExistingAndCreatesRequestedAssignments() {
@@ -156,7 +168,7 @@ class WorkItemAssignmentServiceTest {
 
         ArgumentCaptor<WorkItemAssignment> captor = ArgumentCaptor.forClass(WorkItemAssignment.class);
         verify(assignmentRepository).deleteByWorkItem_WorkItemId("wi-1");
-        verify(assignmentRepository, org.mockito.Mockito.times(2)).save(captor.capture());
+        verify(assignmentRepository, Mockito.times(2)).save(captor.capture());
 
         assertThat(captor.getAllValues()).hasSize(2);
         assertThat(captor.getAllValues())

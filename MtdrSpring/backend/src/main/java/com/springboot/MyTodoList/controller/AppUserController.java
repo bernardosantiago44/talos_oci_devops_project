@@ -1,24 +1,26 @@
 package com.springboot.MyTodoList.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
+import com.springboot.MyTodoList.model.AppUserSummary;
+import com.springboot.MyTodoList.service.AppUserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
-@RequestMapping("/appusers")
+@RequestMapping("/api/appusers")
+@Tag(name = "App Users", description = "Application users available for assignment and time tracking.")
 public class AppUserController {
+    private final AppUserService appUserService;
 
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
+    public AppUserController(AppUserService appUserService) {
+        this.appUserService = appUserService;
+    }
 
     @GetMapping
-    public List<Map<String, Object>> getAll() {
-        return jdbcTemplate.queryForList(
-            "SELECT USER_ID AS \"userId\", NAME AS \"name\", EMAIL AS \"email\", " +
-            "TELEGRAM_USER_ID AS \"telegramUserId\" FROM CHATBOT_USER.APP_USER ORDER BY NAME"
-        );
+    @Operation(summary = "List app users", description = "Returns all application users ordered by name.")
+    public List<AppUserSummary> getAll() {
+        return appUserService.findAll();
     }
 }

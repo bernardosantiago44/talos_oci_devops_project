@@ -1,17 +1,22 @@
 package com.springboot.MyTodoList.service;
 
 import com.springboot.MyTodoList.dto.WorkItem.*;
+import com.springboot.MyTodoList.exception.AppUserNotFoundException;
 import com.springboot.MyTodoList.exception.BusinessRuleException;
 import com.springboot.MyTodoList.exception.WorkItemNotFoundException;
 import com.springboot.MyTodoList.model.WorkItem;
+import com.springboot.MyTodoList.query.WorkItemQuery;
 import com.springboot.MyTodoList.repository.AppUserRepository;
 import com.springboot.MyTodoList.repository.SprintRepository;
 import com.springboot.MyTodoList.repository.WorkItemRepository;
 import jakarta.transaction.Transactional;
+import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import java.util.stream.Stream;
 
 @Service
 public class WorkItemService {
@@ -19,17 +24,22 @@ public class WorkItemService {
     private final AppUserRepository appUserRepository;
     private final SprintRepository sprintRepository;
     private final WorkItemAssignmentService assignmentService;
+    private final WorkItemTagAssignmentService tagAssignmentService;
     private static final Logger log = LoggerFactory.getLogger(WorkItemService.class);
-    
-    public WorkItemService(WorkItemRepository repository, 
+    private final AppUserRepository userRepository;
+
+    public WorkItemService(WorkItemRepository repository,
+                           WorkItemTagAssignmentService tagAssignmentService,
                            AppUserRepository appUserRepository,
                            SprintRepository sprintRepository,
-                           WorkItemAssignmentService assignmentService
-    ) {
+                           WorkItemAssignmentService assignmentService,
+                           AppUserRepository userRepository) {
         this.workItemRepository = repository;
         this.appUserRepository = appUserRepository;
         this.sprintRepository = sprintRepository;
         this.assignmentService = assignmentService;
+        this.tagAssignmentService = tagAssignmentService;
+        this.userRepository = userRepository;
     }
     
     public List<WorkItemResponse> findAll() {
@@ -40,6 +50,19 @@ public class WorkItemService {
                 .toList();
     }
     
+    public List<WorkItemResponse> findByQuery(@NotNull WorkItemQuery query) {
+        Stream<WorkItemResponse> allItems = workItemRepository
+                .findAll()
+                .stream()
+                .map(WorkItemMapper::toResponse);
+        if (query.getStatus() != null) {
+            allItems = allItems
+                    .filter((item) -> item.status().equalsIgnoreCase(query.getStatus()));
+        }
+        
+        return allItems.toList();
+    }
+    
     public WorkItemResponse findById(String id) {
         return workItemRepository
                 .findById(id)
@@ -47,9 +70,10 @@ public class WorkItemService {
                 .orElseThrow(() -> new WorkItemNotFoundException(id));
     }
     
-    public List<WorkItemResponse> findForUserId(String userId) {
+    public List<WorkItemResponse> findByTelegramUserId(String userId) {
+        ensureUserExistsByTelegramId(userId);
         return workItemRepository
-                .findForUserId(userId)
+                .findByTelegramUserId(userId)
                 .stream()
                 .map(WorkItemMapper::toResponse)
                 .toList();
@@ -64,7 +88,11 @@ public class WorkItemService {
         if (request.getAssigneeIds() != null) {
             assignmentService.replaceAssignees(saved, request.getAssigneeIds());
         }
-
+        
+        if (request.getTagIds() != null) {
+            tagAssignmentService.replaceTags(saved, request.getTagIds());
+        }
+        
         return WorkItemMapper.toResponse(saved);
     }
     
@@ -78,8 +106,13 @@ public class WorkItemService {
         // Applies the non-null attributes of the request to the workItem
         WorkItemMapper.applyUpdates(workItem, request);
         WorkItem savedWorkItem = workItemRepository.save(workItem);
+        
         if (request.getAssigneeIds() != null) {
             assignmentService.replaceAssignees(savedWorkItem, request.getAssigneeIds());
+        }
+        
+        if (request.getTagIds() != null) {
+            tagAssignmentService.replaceTags(savedWorkItem, request.getTagIds());
         }
 
         log.info("Updated work item id={}", savedWorkItem.getWorkItemId());
@@ -99,7 +132,7 @@ public class WorkItemService {
             throw new BusinessRuleException("Creator user does not exist: " + request.getCreatedByUserId());
         }
 
-        if (request.getSprintId() != null && !sprintRepository.existsById(request.getSprintId())) {
+        if (!sprintRepository.existsById(request.getSprintId())) {
             log.warn("Sprint does not exist: {}", request.getSprintId());
             throw new BusinessRuleException("Sprint does not exist: " + request.getSprintId());
         }
@@ -124,10 +157,6 @@ public class WorkItemService {
             throw new BusinessRuleException("Status cannot be blank");
         }
 
-        if (request.getPriority() != null && request.getPriority().isBlank()) {
-            throw new BusinessRuleException("Priority cannot be blank");
-        }
-
         if (request.getEstimatedMinutes() != null && request.getEstimatedMinutes() < 0) {
             throw new BusinessRuleException("Estimated minutes cannot be negative");
         }
@@ -140,6 +169,13 @@ public class WorkItemService {
         if (!workItemRepository.existsById(id)) {
             log.warn("Work item not found: {}", id);
             throw new WorkItemNotFoundException(id);
+        }
+    }
+    
+    private void ensureUserExistsByTelegramId(String id) {
+        if (userRepository.findByTelegramUserId(id).isEmpty()) {
+            log.warn("User with telegram id {} not found", id);
+            throw new AppUserNotFoundException("telegram::"+id);
         }
     }
 }

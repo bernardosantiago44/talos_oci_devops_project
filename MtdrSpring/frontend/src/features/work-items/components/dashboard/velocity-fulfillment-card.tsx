@@ -1,7 +1,23 @@
-import React, { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { TrendingUp, ChevronDown, ChevronUp } from 'lucide-react';
-import { analyticsService } from '@/shared/services/analytics.service';
-import type { VelocityData, SprintVelocity } from '@/shared/services/analytics.service';
+import { useAnalyticsVelocity } from '@/hooks/api';
+
+interface SprintVelocity {
+    sprintId: string;
+    sprintName: string;
+    sprintStatus: string;
+    startDate?: string;
+    endDate?: string;
+    totalTasks: number;
+    completedTasks: number;
+    fulfillmentPct: number;
+}
+
+interface VelocityData {
+    target: number;
+    overallPct: number;
+    sprints: SprintVelocity[];
+}
 
 function SprintRow({ sprint }: { sprint: SprintVelocity }) {
     const pct = sprint.fulfillmentPct;
@@ -31,16 +47,26 @@ function SprintRow({ sprint }: { sprint: SprintVelocity }) {
 }
 
 export function VelocityFulfillmentCard() {
-    const [data, setData] = useState<VelocityData | null>(null);
-    const [loading, setLoading] = useState(true);
     const [expanded, setExpanded] = useState(false);
+    const velocityQuery = useAnalyticsVelocity();
+    const loading = velocityQuery.isLoading;
 
-    useEffect(() => {
-        analyticsService.getVelocity().then((result) => {
-            if (result.success) setData(result.data);
-            setLoading(false);
-        });
-    }, []);
+    const data: VelocityData | null = velocityQuery.data
+        ? {
+            target: velocityQuery.data.target ?? 84,
+            overallPct: velocityQuery.data.overallPct ?? 0,
+            sprints: (velocityQuery.data.sprints ?? []).map((sprint) => ({
+                sprintId: sprint.sprintId ?? sprint.sprintName ?? 'unknown-sprint',
+                sprintName: sprint.sprintName ?? sprint.sprintId ?? 'Sprint',
+                sprintStatus: sprint.sprintStatus ?? '',
+                startDate: sprint.startDate,
+                endDate: sprint.endDate,
+                totalTasks: sprint.totalTasks ?? 0,
+                completedTasks: sprint.completedTasks ?? 0,
+                fulfillmentPct: sprint.fulfillmentPct ?? 0,
+            })),
+        }
+        : null;
 
     const pct = data?.overallPct ?? 0;
     const target = data?.target ?? 84;

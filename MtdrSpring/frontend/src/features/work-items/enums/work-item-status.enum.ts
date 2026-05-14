@@ -1,6 +1,5 @@
 export const WORK_ITEM_STATUSES = [
     'TODO',
-    'NEW',
     'IN_PROGRESS',
     'BLOCKED',
     'DONE'
@@ -18,6 +17,6 @@ export function normalizeStatus(raw: string | null | undefined): WorkItemStatus 
 }
 
 /** Convert frontend status back to backend format for API calls. */
-export function toBackendStatus(status: WorkItemStatus): string {
+export function toBackendStatus(status: string): string {
     return status === 'TODO' ? 'NEW' : status;
 }

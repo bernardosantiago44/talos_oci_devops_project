@@ -85,6 +85,11 @@
 			<version>1.18.44</version>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.jetbrains.kotlin</groupId>
+			<artifactId>kotlin-reflect</artifactId>
+			<version>1.9.22</version> <!-- Use the version compatible with your Spring Boot parent -->
+		</dependency>
  </dependencies>
 	<build>
 		<plugins>
@@ -125,6 +130,27 @@
 						</goals>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.springdoc</groupId>
+				<artifactId>springdoc-openapi-maven-plugin</artifactId>
+				<version>1.4</version>
+				<executions>
+					<execution>
+						<!-- mvn verify -->
+						<id>integration-test</id>
+						<phase>integration-test</phase>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<apiDocsUrl>http://localhost:8080/api-docs</apiDocsUrl>
+					<outputFileName>openapi.json</outputFileName>
+					<outputDir>${project.basedir}/../frontend/src/api-spec</outputDir>
+					<skip>false</skip>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Calendar, Flag, Clock, Tag, Users, CheckCircle2 } from 'lucide-react';
+import { X, Calendar, Flag, Clock, Tag, Users, CheckCircle2, Timer } from 'lucide-react';
 import type { WorkItemDetailDto } from '../../dtos/work-item-detail.dto';
 import {
     formatStatusLabel,
@@ -22,6 +22,7 @@ interface WorkItemDetailModalProps {
     onClose: () => void;
     onEdit: (item: WorkItemDetailDto) => void;
     onComplete: (item: WorkItemDetailDto) => void;
+    onLogWork: (item: WorkItemDetailDto) => void;
 }
 
 function DetailRow({ icon, label, children }: {
@@ -46,6 +47,7 @@ export function WorkItemDetailModal({
     onClose,
     onEdit,
     onComplete,
+    onLogWork,
 }: WorkItemDetailModalProps) {
     if (!isOpen || !item) return null;
 
@@ -218,6 +220,14 @@ export function WorkItemDetailModal({
 
                 {/* Footer */}
                 <div className="flex items-center justify-end gap-3 border-t border-zinc-100 px-6 py-4 dark:border-zinc-800">
+                    <button
+                        type="button"
+                        onClick={() => onLogWork(item)}
+                        className="inline-flex items-center gap-2 rounded-xl border border-cyan-200 bg-cyan-50 px-4 py-2 text-sm font-medium text-cyan-700 transition-colors hover:bg-cyan-100 hover:text-cyan-900 dark:border-cyan-500/20 dark:bg-cyan-500/10 dark:text-cyan-300 dark:hover:bg-cyan-500/20 dark:hover:text-cyan-200"
+                    >
+                        <Timer className="h-4 w-4" />
+                        Register Minutes
+                    </button>
                     <button
                         type="button"
                         onClick={() => onEdit(item)}

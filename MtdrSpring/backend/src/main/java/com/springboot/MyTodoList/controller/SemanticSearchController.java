@@ -3,6 +3,8 @@ package com.springboot.MyTodoList.controller;
 import com.springboot.MyTodoList.dto.search.SemanticSearchRequest;
 import com.springboot.MyTodoList.dto.search.SemanticSearchResultList;
 import com.springboot.MyTodoList.service.SemanticSearchService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 @RequestMapping("/api/semantic-search")
+@Tag(name = "Semantic Search", description = "AI-assisted semantic search over work items.")
 public class SemanticSearchController {
     private static final Logger log = LoggerFactory.getLogger(SemanticSearchController.class);
 
@@ -39,6 +42,7 @@ public class SemanticSearchController {
      * @return a list of work items ranked by semantic relevance
      */
     @PostMapping
+    @Operation(summary = "Search work items semantically", description = "Searches work items by natural-language meaning and falls back to keyword search when AI is unavailable.")
     public ResponseEntity<SemanticSearchResultList> search(
             @Valid @RequestBody SemanticSearchRequest request
     ) {
@@ -58,6 +62,7 @@ public class SemanticSearchController {
      * @apiNote POST /api/semantic-search/reindex
      */
     @PostMapping("/reindex")
+    @Operation(summary = "Rebuild semantic search index", description = "Re-indexes all work items for semantic search.")
     public ResponseEntity<String> reindex() {
         log.info("Manual re-index triggered");
         searchService.buildIndex();

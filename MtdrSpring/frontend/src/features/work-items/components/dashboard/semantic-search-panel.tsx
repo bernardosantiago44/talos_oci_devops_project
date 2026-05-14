@@ -1,8 +1,67 @@
 import { useState, useCallback } from 'react';
 import { Search, Sparkles, AlertTriangle, Loader2, ArrowRight, Zap } from 'lucide-react';
-import { semanticSearchService } from '../../services/semantic-search.service';
-import type { SemanticSearchResult, SemanticSearchResponse } from '../../services/semantic-search.service';
+import { useSemanticSearch } from '@/hooks/api';
+import type { SemanticSearchResultList, SemanticSearchResponse as ApiSemanticSearchResponse } from '@/api/generated';
 import type { WorkItemDetailDto } from '../../dtos/work-item-detail.dto';
+import type { WorkItemType } from '../../enums/work-item-type.enum';
+import type { WorkItemPriority } from '../../enums/work-item-priority.enum';
+import { normalizeStatus } from '../../enums/work-item-status.enum';
+
+interface SemanticSearchResult {
+    workItem: WorkItemDetailDto;
+    relevanceScore: number;
+}
+
+interface SemanticSearchResponse {
+    query: string;
+    totalResults: number;
+    aiAvailable: boolean;
+    fallbackMessage: string | null;
+    results: SemanticSearchResult[];
+}
+
+function mapSearchResult(result: ApiSemanticSearchResponse): SemanticSearchResult | null {
+    const workItem = result.workItem;
+    if (!workItem?.workItemId || !workItem.title) return null;
+
+    return {
+        workItem: {
+            id: workItem.workItemId,
+            sprintId: workItem.sprintId,
+            title: workItem.title,
+            description: workItem.description,
+            type: (workItem.workType ?? 'TASK') as WorkItemType,
+            status: normalizeStatus(workItem.status),
+            priority: (workItem.priority ?? 'MEDIUM') as WorkItemPriority,
+            externalLink: workItem.externalLink,
+            estimatedMinutes: workItem.estimatedMinutes,
+            totalLoggedMinutes: 0,
+            dueDate: workItem.dueDate ? String(workItem.dueDate).slice(0, 10) : undefined,
+            createdAt: workItem.createdAt ?? new Date().toISOString(),
+            updatedAt: workItem.updatedAt ?? workItem.createdAt ?? new Date().toISOString(),
+            completedAt: workItem.completedAt,
+            createdBy: {
+                userId: workItem.createdByUserId ?? 'system',
+                name: workItem.createdByUserId ?? 'System',
+            },
+            assignees: [],
+            tags: [],
+        },
+        relevanceScore: result.relevanceScore ?? 0,
+    };
+}
+
+function mapSearchResponse(response: SemanticSearchResultList, fallbackQuery: string): SemanticSearchResponse {
+    return {
+        query: response.query ?? fallbackQuery,
+        totalResults: response.totalResults ?? 0,
+        aiAvailable: response.aiAvailable ?? false,
+        fallbackMessage: response.fallbackMessage ?? null,
+        results: (response.results ?? [])
+            .map(mapSearchResult)
+            .filter((result): result is SemanticSearchResult => Boolean(result)),
+    };
+}
 
 /**
  * SemanticSearchPanel — RF-005 Semantic Task Search UI.
@@ -18,30 +77,24 @@ export function SemanticSearchPanel({
     onViewDetail?: (item: WorkItemDetailDto) => void;
 }) {
     const [query, setQuery] = useState('');
-    const [loading, setLoading] = useState(false);
     const [results, setResults] = useState<SemanticSearchResponse | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const searchMutation = useSemanticSearch();
+    const loading = searchMutation.isPending;
 
     const handleSearch = useCallback(async () => {
         const trimmed = query.trim();
         if (!trimmed || trimmed.length < 2) return;
 
-        setLoading(true);
         setError(null);
 
         try {
-            const res = await semanticSearchService.search(trimmed, 10);
-            if (res.success) {
-                setResults(res.data);
-            } else {
-                setError(res.message ?? 'Search failed');
-            }
+            const res = await searchMutation.mutateAsync({ query: trimmed, maxResults: 10 });
+            setResults(mapSearchResponse(res, trimmed));
         } catch (err) {
             setError('An unexpected error occurred');
-        } finally {
-            setLoading(false);
         }
-    }, [query]);
+    }, [query, searchMutation]);
 
     const handleKeyDown = useCallback(
         (e: React.KeyboardEvent) => {

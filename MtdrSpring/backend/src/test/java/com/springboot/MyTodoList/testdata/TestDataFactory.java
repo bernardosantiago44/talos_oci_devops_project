@@ -5,13 +5,13 @@ import com.springboot.MyTodoList.dto.WorkItem.CreateWorkItemRequest;
 import com.springboot.MyTodoList.dto.WorkItem.UpdateWorkItemRequest;
 import com.springboot.MyTodoList.dto.WorkItem.WorkItemAssignmentDto;
 import com.springboot.MyTodoList.dto.WorkItem.WorkItemResponse;
-import com.springboot.MyTodoList.model.AppUser;
-import com.springboot.MyTodoList.model.WorkItem;
-import com.springboot.MyTodoList.model.WorkItemAssignment;
+import com.springboot.MyTodoList.dto.tag.TagResponse;
+import com.springboot.MyTodoList.model.*;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.UUID;
 
 public final class TestDataFactory {
     public static final String WORK_ITEM_ID = "wi-1";
@@ -19,6 +19,7 @@ public final class TestDataFactory {
     public static final String CREATOR_USER_ID = "creator-1";
     public static final String ASSIGNEE_USER_ID = "user-1";
     public static final String ASSIGNMENT_ID = "assignment-1";
+    public static final String TAG_ID = "B38E0341-AA9B-486D-81BD-8E7C0339A49F";
 
     private TestDataFactory() {
     }
@@ -31,7 +32,7 @@ public final class TestDataFactory {
         request.setTitle("Build assignment tests");
         request.setDescription("Add starter backend tests");
         request.setStatus("NEW");
-        request.setPriority("HIGH");
+        request.setPriority(WorkItemPriority.HIGH);
         request.setExternalLink("https://example.com/work/wi-1");
         request.setEstimatedMinutes(30);
         request.setDueDate(LocalDate.of(2026, 5, 15));
@@ -42,7 +43,7 @@ public final class TestDataFactory {
         UpdateWorkItemRequest request = new UpdateWorkItemRequest();
         request.setTitle("Updated title");
         request.setStatus("IN_PROGRESS");
-        request.setPriority("MEDIUM");
+        request.setPriority(WorkItemPriority.MEDIUM);
         request.setEstimatedMinutes(45);
         return request;
     }
@@ -60,7 +61,7 @@ public final class TestDataFactory {
         workItem.setTitle("Build assignment tests");
         workItem.setDescription("Add starter backend tests");
         workItem.setStatus("NEW");
-        workItem.setPriority("HIGH");
+        workItem.setPriority(WorkItemPriority.HIGH);
         workItem.setEstimatedMinutes(30);
         workItem.setDueDate(LocalDate.of(2026, 5, 15));
         workItem.setCreatedAt(OffsetDateTime.parse("2026-04-29T10:00:00-06:00"));
@@ -103,6 +104,7 @@ public final class TestDataFactory {
                 CREATOR_USER_ID,
                 "TASK",
                 List.of(assignmentDto()),
+                List.of(tagResponse()),
                 "Build assignment tests",
                 "Add starter backend tests",
                 "NEW",
@@ -124,6 +126,15 @@ public final class TestDataFactory {
                 null,
                 assignedUserDto(),
                 null
+        );
+    }
+    
+    public static TagResponse tagResponse() {
+        return new TagResponse(
+                UUID.fromString(TAG_ID), 
+                "tag-1", 
+                "#112233", 
+                "Description"
         );
     }
 

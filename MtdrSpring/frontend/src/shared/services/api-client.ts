@@ -6,12 +6,19 @@ import type { ApiResult } from '../dtos/api-result.dto';
  * forwards all unmatched requests to the backend, so we use relative URLs.
  */
 
+const API_BASE_PATH = '/api';
+
+function withApiBasePath(url: string): string {
+    if (/^https?:\/\//i.test(url) || url.startsWith(API_BASE_PATH)) return url;
+    return `${API_BASE_PATH}${url.startsWith('/') ? url : `/${url}`}`;
+}
+
 async function request<T>(
     url: string,
     options: RequestInit = {}
 ): Promise<ApiResult<T>> {
     try {
-        const res = await fetch(url, {
+        const res = await fetch(withApiBasePath(url), {
             headers: { 'Content-Type': 'application/json', ...options.headers },
             ...options,
         });

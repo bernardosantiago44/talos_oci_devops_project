@@ -49,6 +49,13 @@ public class WorkItemAssignmentService {
             throw new BusinessRuleException("User is already assigned to this work item");
         }
 
+        WorkItemAssignment savedAssignment = saveAssignmentToRepository(workItem, user);
+        log.info("Added assignee userId={} to workItemId={}", userId, workItemId);
+
+        return WorkItemMapper.toAssignmentDto(savedAssignment);
+    }
+
+    private WorkItemAssignment saveAssignmentToRepository(WorkItem workItem, AppUser user) {
         WorkItemAssignment assignment = new WorkItemAssignment();
         assignment.setAssignmentId(UUID.randomUUID().toString());
         assignment.setWorkItem(workItem);
@@ -56,10 +63,7 @@ public class WorkItemAssignmentService {
         assignment.setAssignmentRole(ASSIGNEE_ROLE);
         assignment.setAssignedAt(OffsetDateTime.now());
 
-        WorkItemAssignment savedAssignment = assignmentRepository.save(assignment);
-        log.info("Added assignee userId={} to workItemId={}", userId, workItemId);
-
-        return WorkItemMapper.toAssignmentDto(savedAssignment);
+        return assignmentRepository.save(assignment);
     }
 
     @Transactional
@@ -85,14 +89,7 @@ public class WorkItemAssignmentService {
         workItem.getAssignments().clear();
 
         for (AppUser user : users) {
-            WorkItemAssignment assignment = new WorkItemAssignment();
-            assignment.setAssignmentId(UUID.randomUUID().toString());
-            assignment.setWorkItem(workItem);
-            assignment.setAssignedUser(user);
-            assignment.setAssignmentRole(ASSIGNEE_ROLE);
-            assignment.setAssignedAt(OffsetDateTime.now());
-
-            WorkItemAssignment savedAssignment = assignmentRepository.save(assignment);
+            WorkItemAssignment savedAssignment = saveAssignmentToRepository(workItem, user);
             workItem.getAssignments().add(savedAssignment);
         }
 
