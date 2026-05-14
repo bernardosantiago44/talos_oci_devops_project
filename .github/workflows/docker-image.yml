@@ -2,7 +2,7 @@ name: Build and publish backend
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main" , "fix/deployment" ]
     paths: ["MtdrSpring/backend/**"]
   pull_request:
     branches: [ "main" ]
