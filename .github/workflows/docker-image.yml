@@ -56,6 +56,7 @@ jobs:
           unzip wallet.zip -d ./wallet
           export CI=false
           docker build -f Dockerfile -t ${IMAGE} .
+          docker push $IMAGE
         else
           echo "PR detected: Skipping docker build and push."
         fi
