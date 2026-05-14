@@ -2,8 +2,11 @@ name: Build and publish frontend
 
 on:
   push:
-    branches: [ "main", "fix/deployment" ]
-    paths: ["MtdrSpring/frontend/**", ".github/**"]
+    branches: [ "main" ]
+    paths: ["MtdrSpring/frontend/**", ".github/workflows/deploy-frontend.yml"]
+  pull_request:
+    branches: [ "main" ]
+    paths: ["MtdrSpring/frontend/**", ".github/workflows/deploy-frontend.yml"]
 env:
   DOCKER_REGISTRY: ${{ vars.OCI_REGION }}/${{ vars.OCI_TENANCY_NAMESPACE }}/${{ vars.OCI_CONTAINER_REGISTRY_FRONTEND }}
 
@@ -26,6 +29,7 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Login to container registry
+      if: github.event_name == 'push'
       uses: docker/login-action@v3
       with:
         registry: ${{ vars.OCI_REGION }}
@@ -40,9 +44,14 @@ jobs:
         export IMAGE_NAME=talos-frontend
         export IMAGE=${DOCKER_REGISTRY}/${IMAGE_NAME}:${IMAGE_VERSION}
         docker build -t ${IMAGE} .
-        docker push ${IMAGE}
+        if [[ "${{ github.event_name }}" == "push" ]]; then
+          docker push ${IMAGE}
+        else
+          echo "PR detected: Skipping docker push."
+        fi
 
   deploy:
+    if: github.event_name == 'push'
     needs: 
       - build
       - setup

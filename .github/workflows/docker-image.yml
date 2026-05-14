@@ -2,8 +2,11 @@ name: Build and publish backend
 
 on:
   push:
-    branches: [ "main" , "fix/deployment" ]
-    paths: ["MtdrSpring/backend/**", ".github/**"]
+    branches: [ "main" ]
+    paths: ["MtdrSpring/backend/**", ".github/workflows/docker-image.yml"]
+  pull_request:
+    branches: [ "main" ]
+    paths: ["MtdrSpring/backend/**", ".github/workflows/docker-image.yml"]
 env:
   DOCKER_REGISTRY: ${{ vars.OCI_REGION }}/${{ vars.OCI_TENANCY_NAMESPACE }}/${{ vars.OCI_CONTAINER_REGISTRY }}
 
@@ -26,6 +29,7 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Login to container registry
+      if: github.event_name == 'push'
       uses: docker/login-action@v3
       with:
         registry: ${{ vars.OCI_REGION }}
@@ -37,16 +41,23 @@ jobs:
       run: |
         sudo apt update && sudo apt install openjdk-25-jdk
         export JAVA_HOME=/usr/lib/jvm/java-25-openjdk-amd64
-        export PATH=$JAVA_HOME/bin:$PATH
-        export DOCKER_REGISTRY=$DOCKER_REGISTRY
-        export IMAGE_VERSION=${{ needs.setup.outputs.timestamp }}
-        chmod +x build.sh
-        echo ${{ secrets.DB_WALLET }} | base64 -d > wallet.zip
-        unzip wallet.zip -d ./wallet
-        export CI=false
-        ./build.sh
+        export PATH=$JAVA_HOME/bin:$
+        mvn clean package spring-boot:repackage
+
+        if [[ "${{ github.event_name }}" == "push" ]]; then
+          export IMAGE_NAME=todolistapp-springboot
+          export IMAGE_VERSION=${{ needs.setup.outputs.timestamp }}
+          export IMAGE=${DOCKER_REGISTRY}/${IMAGE_NAME}:${IMAGE_VERSION}
+          echo ${{ secrets.DB_WALLET }} | base64 -d > wallet.zip
+          unzip wallet.zip -d ./wallet
+          export CI=false
+          docker build -f Dockerfile -t ${IMAGE} .
+        else
+          echo "PR detected: Skipping docker build and push."
+        fi
 
   deploy:
+    if: github.event_name == 'push'
     needs: 
       - build
       - setup
