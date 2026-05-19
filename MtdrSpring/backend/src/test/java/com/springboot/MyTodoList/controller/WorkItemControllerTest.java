@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.springboot.MyTodoList.dto.WorkItem.CreateWorkItemRequest;
 import com.springboot.MyTodoList.exception.BusinessRuleException;
 import com.springboot.MyTodoList.exception.WorkItemNotFoundException;
+import com.springboot.MyTodoList.query.WorkItemQuery;
 import com.springboot.MyTodoList.service.WorkItemAssignmentService;
 import com.springboot.MyTodoList.service.WorkItemService;
 import com.springboot.MyTodoList.testdata.TestDataFactory;
@@ -17,7 +18,9 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -50,6 +53,46 @@ class WorkItemControllerTest {
                 .andExpect(jsonPath("$[0].workItemId").value(TestDataFactory.WORK_ITEM_ID))
                 .andExpect(jsonPath("$[0].title").value("Build assignment tests"))
                 .andExpect(jsonPath("$[0].assignees[0].user.userId").value(TestDataFactory.ASSIGNEE_USER_ID));
+    }
+
+    @Test
+    void getAllWorkItemsWithQueryDelegatesToFilteredLookup() throws Exception {
+        when(workItemService.findByQuery(any(WorkItemQuery.class)))
+                .thenReturn(List.of(TestDataFactory.workItemResponse()));
+
+        mockMvc.perform(get("/api/workitems")
+                        .queryParam("status", "inProgress", "done")
+                        .queryParam("assignees", "user-1", "user-2")
+                        .queryParam("sprints", "sprint-1", "sprint-2")
+                        .queryParam("workType", "bug")
+                        .queryParam("priority", "high")
+                        .queryParam("search", "login"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].workItemId").value(TestDataFactory.WORK_ITEM_ID));
+
+        verify(workItemService).findByQuery(argThat(query -> {
+            assertThat(query.getStatus()).containsExactly("inProgress", "done");
+            assertThat(query.getAssignees()).containsExactly("user-1", "user-2");
+            assertThat(query.getSprints()).containsExactly("sprint-1", "sprint-2");
+            assertThat(query.getWorkType()).isEqualTo("bug");
+            assertThat(query.getPriority()).isEqualTo("high");
+            assertThat(query.getSearch()).isEqualTo("login");
+            return true;
+        }));
+        verify(workItemService, never()).findAll();
+    }
+
+    @Test
+    void getAllWorkItemsWithEmptyAssigneesReturnsAllWorkItems() throws Exception {
+        when(workItemService.findAll()).thenReturn(List.of(TestDataFactory.workItemResponse()));
+
+        mockMvc.perform(get("/api/workitems")
+                        .queryParam("assignees", ""))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].workItemId").value(TestDataFactory.WORK_ITEM_ID));
+
+        verify(workItemService).findAll();
+        verify(workItemService, never()).findByQuery(any());
     }
 
     @Test

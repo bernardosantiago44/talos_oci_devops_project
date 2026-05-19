@@ -8,6 +8,7 @@ import com.springboot.MyTodoList.exception.BusinessRuleException;
 import com.springboot.MyTodoList.exception.WorkItemNotFoundException;
 import com.springboot.MyTodoList.model.WorkItem;
 import com.springboot.MyTodoList.model.WorkItemPriority;
+import com.springboot.MyTodoList.query.WorkItemQuery;
 import com.springboot.MyTodoList.repository.AppUserRepository;
 import com.springboot.MyTodoList.repository.SprintRepository;
 import com.springboot.MyTodoList.repository.WorkItemRepository;
@@ -18,6 +19,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.jpa.domain.Specification;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -363,6 +365,63 @@ class WorkItemServiceTest {
     }
 
     @Test
+    void findByQueryUsesRepositorySpecification() {
+        WorkItemQuery query = new WorkItemQuery();
+        query.setStatus(List.of("inProgress", "done"));
+        query.setSprints(List.of("sprint-1"));
+        query.setAssignees(List.of("user-1", "user-2"));
+        query.setWorkType("task");
+        query.setPriority("high");
+        query.setSearch("assignment");
+
+        when(workItemRepository.findAll(anyWorkItemSpecification()))
+                .thenReturn(List.of(TestDataFactory.workItem()));
+
+        List<WorkItemResponse> response = service.findByQuery(query);
+
+        assertThat(response).hasSize(1);
+        assertThat(response.getFirst().workItemId()).isEqualTo(TestDataFactory.WORK_ITEM_ID);
+        verify(workItemRepository).findAll(anyWorkItemSpecification());
+        verify(workItemRepository, never()).findAll();
+    }
+
+    @Test
+    void findByQueryReturnsEmptyForInvalidPriorityWithoutError() {
+        WorkItemQuery query = new WorkItemQuery();
+        query.setPriority("urgent");
+
+        List<WorkItemResponse> response = service.findByQuery(query);
+
+        assertThat(response).isEmpty();
+        verify(workItemRepository, never()).findAll(anyWorkItemSpecification());
+        verify(workItemRepository, never()).findAll();
+    }
+
+    @Test
+    void findByQueryReturnsEmptyForInvalidStatusWithoutError() {
+        WorkItemQuery query = new WorkItemQuery();
+        query.setStatus(List.of("working"));
+
+        List<WorkItemResponse> response = service.findByQuery(query);
+
+        assertThat(response).isEmpty();
+        verify(workItemRepository, never()).findAll(anyWorkItemSpecification());
+        verify(workItemRepository, never()).findAll();
+    }
+
+    @Test
+    void findByQueryReturnsEmptyForInvalidWorkTypeWithoutError() {
+        WorkItemQuery query = new WorkItemQuery();
+        query.setWorkType("chore");
+
+        List<WorkItemResponse> response = service.findByQuery(query);
+
+        assertThat(response).isEmpty();
+        verify(workItemRepository, never()).findAll(anyWorkItemSpecification());
+        verify(workItemRepository, never()).findAll();
+    }
+
+    @Test
     void findByIdReturnsNotFoundException() {
         when(workItemRepository.findById(any())).thenReturn(Optional.empty());
         
@@ -411,6 +470,10 @@ class WorkItemServiceTest {
                 .hasMessage("Work Item not found: missing");
 
         verify(workItemRepository, never()).deleteById(any());
+    }
+
+    private Specification<WorkItem> anyWorkItemSpecification() {
+        return any();
     }
 
 }
