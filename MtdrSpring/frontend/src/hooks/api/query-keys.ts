@@ -6,7 +6,7 @@ export const apiQueryKeys = {
   },
   workItems: {
     all: ['workItems'] as const,
-    list: () => [...apiQueryKeys.workItems.all, 'list'] as const,
+    list: (filters?: unknown) => [...apiQueryKeys.workItems.all, 'list', filters] as const,
     detail: (id: string | undefined) => [...apiQueryKeys.workItems.all, 'detail', id] as const,
     assignees: (id: string | undefined) => [...apiQueryKeys.workItems.detail(id), 'assignees'] as const,
     byTelegramUser: (telegramUserId: string | undefined) =>

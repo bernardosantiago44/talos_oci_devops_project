@@ -3,10 +3,31 @@ import { apiClient } from '@/api/client';
 import { addAssignee, createWorkItem, deleteWorkItem, getAllWorkItems, getAssignees, getById, getWorkItemsByTelegramUser, removeAssignee, updateWorkItem, } from '@/api/generated';
 import { apiQueryKeys } from './query-keys';
 import { readData } from './request';
-export function useWorkItemList() {
+function uniqueWorkItems(items) {
+    const byId = new Map();
+    items.forEach((item) => {
+        if (item.workItemId) {
+            byId.set(item.workItemId, item);
+        }
+    });
+    return Array.from(byId.values());
+}
+async function getWorkItemsByQuery(query) {
+    return readData(getAllWorkItems({
+        client: apiClient,
+        // Spring binds WorkItemQuery from top-level query params: status, assignees, workType, etc.
+        query: query,
+        throwOnError: true,
+    }));
+}
+export function useWorkItemList(queries = [{}]) {
     return useQuery({
-        queryKey: apiQueryKeys.workItems.list(),
-        queryFn: () => readData(getAllWorkItems({ client: apiClient, throwOnError: true })),
+        queryKey: apiQueryKeys.workItems.list(queries),
+        queryFn: async () => {
+            const results = await Promise.all(queries.map(getWorkItemsByQuery));
+            return uniqueWorkItems(results.flat());
+        },
+        gcTime: 0,
     });
 }
 export function useWorkItemGet(id) {

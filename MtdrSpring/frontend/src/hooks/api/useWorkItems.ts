@@ -11,7 +11,7 @@ import {
   removeAssignee,
   updateWorkItem,
 } from '@/api/generated';
-import type { CreateWorkItemRequest, UpdateWorkItemRequest } from '@/api/generated';
+import type { CreateWorkItemRequest, GetAllWorkItemsData, UpdateWorkItemRequest, WorkItemQuery, WorkItemResponse } from '@/api/generated';
 import { apiQueryKeys } from './query-keys';
 import { readData } from './request';
 
@@ -25,10 +25,35 @@ type UpdateWorkItemPayload = Omit<UpdateWorkItemRequest, 'priority'> & {
   tagIds?: string[];
 };
 
-export function useWorkItemList() {
+function uniqueWorkItems(items: WorkItemResponse[]): WorkItemResponse[] {
+  const byId = new Map<string, WorkItemResponse>();
+
+  items.forEach((item) => {
+    if (item.workItemId) {
+      byId.set(item.workItemId, item);
+    }
+  });
+
+  return Array.from(byId.values());
+}
+
+async function getWorkItemsByQuery(query?: WorkItemQuery): Promise<WorkItemResponse[]> {
+  return readData(getAllWorkItems({
+    client: apiClient,
+    // Spring binds WorkItemQuery from top-level query params: status, assignees, workType, etc.
+    query: query as GetAllWorkItemsData['query'],
+    throwOnError: true,
+  }));
+}
+
+export function useWorkItemList(queries: WorkItemQuery[] = [{}]) {
   return useQuery({
-    queryKey: apiQueryKeys.workItems.list(),
-    queryFn: () => readData(getAllWorkItems({ client: apiClient, throwOnError: true })),
+    queryKey: apiQueryKeys.workItems.list(queries),
+    queryFn: async () => {
+      const results = await Promise.all(queries.map(getWorkItemsByQuery));
+      return uniqueWorkItems(results.flat());
+    },
+    gcTime: 0,
   });
 }
 

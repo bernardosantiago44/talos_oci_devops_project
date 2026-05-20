@@ -5,21 +5,30 @@ import com.springboot.MyTodoList.exception.AppUserNotFoundException;
 import com.springboot.MyTodoList.exception.BusinessRuleException;
 import com.springboot.MyTodoList.exception.WorkItemNotFoundException;
 import com.springboot.MyTodoList.model.WorkItem;
+import com.springboot.MyTodoList.model.WorkItemAssignment;
+import com.springboot.MyTodoList.model.WorkItemPriority;
 import com.springboot.MyTodoList.query.WorkItemQuery;
 import com.springboot.MyTodoList.repository.AppUserRepository;
 import com.springboot.MyTodoList.repository.SprintRepository;
 import com.springboot.MyTodoList.repository.WorkItemRepository;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Subquery;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Stream;
+import java.util.Locale;
+import java.util.Set;
 
 @Service
 public class WorkItemService {
+    private static final Set<String> VALID_STATUSES = Set.of("NEW", "TODO", "IN_PROGRESS", "BLOCKED", "DONE");
+    private static final Set<String> VALID_WORK_TYPES = Set.of("FEATURE", "ISSUE", "BUG", "TASK");
     private final WorkItemRepository workItemRepository;
     private final AppUserRepository appUserRepository;
     private final SprintRepository sprintRepository;
@@ -51,16 +60,32 @@ public class WorkItemService {
     }
     
     public List<WorkItemResponse> findByQuery(@NotNull WorkItemQuery query) {
-        Stream<WorkItemResponse> allItems = workItemRepository
-                .findAll()
-                .stream()
-                .map(WorkItemMapper::toResponse);
-        if (query.getStatus() != null) {
-            allItems = allItems
-                    .filter((item) -> item.status().equalsIgnoreCase(query.getStatus()));
+        WorkItemPriority priority = null;
+        if (hasText(query.getPriority())) {
+            priority = parsePriority(query.getPriority());
+            if (priority == null) {
+                return List.of();
+            }
         }
-        
-        return allItems.toList();
+
+        List<String> statuses = normalizeStatuses(query.getStatus());
+        if (statuses == null) {
+            return List.of();
+        }
+
+        String workType = null;
+        if (hasText(query.getWorkType())) {
+            workType = normalizeUpperSnake(query.getWorkType());
+            if (!VALID_WORK_TYPES.contains(workType)) {
+                return List.of();
+            }
+        }
+
+        return workItemRepository
+                .findAll(toSpecification(query, priority, statuses, workType))
+                .stream()
+                .map(WorkItemMapper::toResponse)
+                .toList();
     }
     
     public WorkItemResponse findById(String id) {
@@ -177,5 +202,141 @@ public class WorkItemService {
             log.warn("User with telegram id {} not found", id);
             throw new AppUserNotFoundException("telegram::"+id);
         }
+    }
+
+    private Specification<WorkItem> toSpecification(
+            WorkItemQuery query,
+            WorkItemPriority priority,
+            List<String> statuses,
+            String workType
+    ) {
+        return (root, criteriaQuery, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            if (!statuses.isEmpty()) {
+                predicates.add(criteriaBuilder.upper(root.get("status")).in(statuses));
+            }
+
+            List<String> sprintIds = normalizeIdValues(query.getSprints());
+            if (hasText(query.getSprintId())) {
+                sprintIds.add(query.getSprintId().trim());
+            }
+            if (!sprintIds.isEmpty()) {
+                predicates.add(root.get("sprintId").in(sprintIds));
+            }
+
+            List<String> assigneeIds = normalizeIdValues(query.getAssignees());
+            if (!assigneeIds.isEmpty()) {
+                assert criteriaQuery != null;
+                Subquery<String> assigneeSubquery = criteriaQuery.subquery(String.class);
+                Root<WorkItemAssignment> assignment = assigneeSubquery.from(WorkItemAssignment.class);
+                assigneeSubquery
+                        .select(assignment.get("workItem").get("workItemId"))
+                        .where(
+                                criteriaBuilder.equal(
+                                        assignment.get("workItem").get("workItemId"),
+                                        root.get("workItemId")
+                                ),
+                                assignment.get("assignedUser").get("userId").in(assigneeIds),
+                                criteriaBuilder.isNull(assignment.get("unassignedAt"))
+                        );
+
+                predicates.add(criteriaBuilder.exists(assigneeSubquery));
+            }
+
+            if (workType != null) {
+                predicates.add(criteriaBuilder.equal(
+                        criteriaBuilder.upper(root.get("workType")),
+                        workType
+                ));
+            }
+
+            if (priority != null) {
+                predicates.add(criteriaBuilder.equal(root.get("priority"), priority));
+            }
+
+            if (hasText(query.getSearch())) {
+                String pattern = "%" + escapeLike(query.getSearch().trim().toLowerCase(Locale.ROOT)) + "%";
+                Predicate titleContainsSearch = criteriaBuilder.like(
+                        criteriaBuilder.lower(root.get("title")),
+                        pattern,
+                        '\\'
+                );
+                Predicate descriptionContainsSearch = criteriaBuilder.and(
+                        criteriaBuilder.isNotNull(root.get("description")),
+                        criteriaBuilder.like(
+                                criteriaBuilder.lower(root.get("description")),
+                                pattern,
+                                '\\'
+                        )
+                );
+                predicates.add(criteriaBuilder.or(titleContainsSearch, descriptionContainsSearch));
+            }
+
+            return criteriaBuilder.and(predicates.toArray(Predicate[]::new));
+        };
+    }
+
+    private WorkItemPriority parsePriority(String priority) {
+        try {
+            return WorkItemPriority.valueOf(normalizeUpperSnake(priority));
+        } catch (IllegalArgumentException exception) {
+            return null;
+        }
+    }
+
+    private List<String> normalizeStatuses(List<String> values) {
+        if (values == null) {
+            return new ArrayList<>();
+        }
+
+        List<String> statuses = values
+                .stream()
+                .filter(this::hasText)
+                .map(this::normalizeUpperSnake)
+                .distinct()
+                .collect(java.util.stream.Collectors.toCollection(ArrayList::new));
+
+        if (!VALID_STATUSES.containsAll(statuses)) {
+            return null;
+        }
+
+        return statuses
+                .stream()
+                .map(status -> status.equals("TODO") ? "NEW" : status)
+                .distinct()
+                .collect(java.util.stream.Collectors.toCollection(ArrayList::new));
+    }
+
+    private List<String> normalizeIdValues(List<String> values) {
+        if (values == null) {
+            return new ArrayList<>();
+        }
+
+        return values
+                .stream()
+                .filter(this::hasText)
+                .map(String::trim)
+                .distinct()
+                .collect(java.util.stream.Collectors.toCollection(ArrayList::new));
+    }
+
+    private String normalizeUpperSnake(String value) {
+        return value
+                .trim()
+                .replaceAll("([a-z0-9])([A-Z])", "$1_$2")
+                .replaceAll("[\\s-]+", "_")
+                .toUpperCase(Locale.ROOT);
+    }
+
+    private String escapeLike(String value) {
+        return value
+                .replace("\\", "\\\\")
+                .replace("%", "\\%")
+                .replace("_", "\\_");
+    }
+
+    private boolean hasText(String value) {
+        return value != null && !value.isBlank();
     }
 }

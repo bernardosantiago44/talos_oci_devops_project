@@ -379,6 +379,17 @@ export type UpdateTagRequest = {
     description?: string;
 };
 
+export type WorkItemQuery = {
+    status?: Array<string>;
+    sprintId?: string;
+    sprints?: Array<string>;
+    assignees?: Array<string>;
+    workType?: string;
+    priority?: string;
+    search?: string;
+    empty?: boolean;
+};
+
 /**
  * Sprint details returned by the API.
  */
@@ -595,7 +606,9 @@ export type DeveloperSprintAnalytics = {
 export type GetAllWorkItemsData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        query?: WorkItemQuery;
+    };
     url: '/api/workitems';
 };
 
