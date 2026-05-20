@@ -2,10 +2,15 @@ import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import Select from 'react-select';
 import { Search, ListIcon, LayoutGrid, Plus, Tags } from 'lucide-react';
 import { WORK_ITEM_STATUSES } from '../../enums/work-item-status.enum';
-import { formatStatusLabel } from '../../lib/dashboard-ui';
+import { WORK_ITEM_TYPES } from '../../enums/work-item-type.enum';
+import { formatStatusLabel, formatTypeLabel } from '../../lib/dashboard-ui';
 const statusOptions = WORK_ITEM_STATUSES.map((status) => ({
     value: status,
     label: formatStatusLabel(status),
+}));
+const typeOptions = WORK_ITEM_TYPES.map((type) => ({
+    value: type,
+    label: formatTypeLabel(type),
 }));
 const selectClassNames = {
     control: ({ isFocused }) => `min-h-[38px] rounded-xl border bg-white text-sm shadow-none dark:bg-zinc-800/60 ${isFocused
@@ -25,14 +30,20 @@ const selectClassNames = {
             ? 'bg-zinc-100 text-zinc-900 dark:bg-zinc-700 dark:text-zinc-100'
             : 'bg-white text-zinc-700 dark:bg-zinc-800 dark:text-zinc-200'}`,
 };
-export function DashboardToolbar({ search, onSearchChange, statusFilter, onStatusFilterChange, assigneeFilter, onAssigneeFilterChange, viewMode, onViewModeChange, onManageTagsClick, onCreateClick, users, }) {
+export function DashboardToolbar({ search, onSearchChange, statusFilter, onStatusFilterChange, assigneeFilter, onAssigneeFilterChange, typeFilter, onTypeFilterChange, sprintFilter, onSprintFilterChange, viewMode, onViewModeChange, onManageTagsClick, onCreateClick, users, sprints, }) {
     const assigneeOptions = users.map((user) => ({
         value: user.userId,
         label: user.name,
     }));
+    const sprintOptions = sprints.map((sprint) => ({
+        value: sprint.sprintId,
+        label: sprint.name,
+    }));
     const selectedStatuses = statusOptions.filter((option) => statusFilter.includes(option.value));
     const selectedAssignees = assigneeOptions.filter((option) => assigneeFilter.includes(option.value));
-    return (_jsxs("div", { className: "flex flex-wrap items-center gap-3", children: [_jsxs("div", { className: "relative min-w-[200px] flex-1", children: [_jsx(Search, { className: "pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400 dark:text-zinc-500" }), _jsx("input", { type: "text", placeholder: "Search tasks\u2026", value: search, onChange: (e) => onSearchChange(e.target.value), className: "w-full rounded-xl border border-zinc-200 bg-white py-2 pl-9 pr-4 text-sm text-zinc-800 placeholder-zinc-400 outline-none focus:border-sky-400/60 focus:ring-1 focus:ring-sky-400/30 dark:border-zinc-700/60 dark:bg-zinc-800/60 dark:text-zinc-200 dark:placeholder-zinc-500 dark:focus:border-sky-500/60 dark:focus:ring-sky-500/30" })] }), _jsx("div", { className: "min-w-[180px]", children: _jsx(Select, { isMulti: true, options: statusOptions, value: selectedStatuses, onChange: (options) => onStatusFilterChange(options.map((option) => option.value)), placeholder: "All statuses", classNames: selectClassNames, unstyled: true }) }), _jsx("div", { className: "min-w-[200px]", children: _jsx(Select, { isMulti: true, options: assigneeOptions, value: selectedAssignees, onChange: (options) => onAssigneeFilterChange(options.map((option) => option.value)), placeholder: "All assignees", classNames: selectClassNames, unstyled: true }) }), _jsxs("div", { className: "flex items-center rounded-xl border border-zinc-200 bg-zinc-100 p-1 dark:border-zinc-700/60 dark:bg-zinc-800/60", children: [_jsxs("button", { type: "button", onClick: () => onViewModeChange('list'), className: `flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${viewMode === 'list'
+    const selectedTypes = typeOptions.filter((option) => typeFilter.includes(option.value));
+    const selectedSprints = sprintOptions.filter((option) => sprintFilter.includes(option.value));
+    return (_jsxs("div", { className: "flex flex-wrap items-center gap-3", children: [_jsxs("div", { className: "relative min-w-[200px] flex-1", children: [_jsx(Search, { className: "pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400 dark:text-zinc-500" }), _jsx("input", { type: "text", placeholder: "Search tasks\u2026", value: search, onChange: (e) => onSearchChange(e.target.value), className: "w-full rounded-xl border border-zinc-200 bg-white py-2 pl-9 pr-4 text-sm text-zinc-800 placeholder-zinc-400 outline-none focus:border-sky-400/60 focus:ring-1 focus:ring-sky-400/30 dark:border-zinc-700/60 dark:bg-zinc-800/60 dark:text-zinc-200 dark:placeholder-zinc-500 dark:focus:border-sky-500/60 dark:focus:ring-sky-500/30" })] }), _jsx("div", { className: "min-w-[180px]", children: _jsx(Select, { isMulti: true, options: statusOptions, value: selectedStatuses, onChange: (options) => onStatusFilterChange(options.map((option) => option.value)), placeholder: "All statuses", classNames: selectClassNames, unstyled: true }) }), _jsx("div", { className: "min-w-[200px]", children: _jsx(Select, { isMulti: true, options: typeOptions, value: selectedTypes, onChange: (options) => onTypeFilterChange(options.map((option) => option.value)), placeholder: "All types", classNames: selectClassNames, unstyled: true }) }), _jsx("div", { className: "min-w-[200px]", children: _jsx(Select, { isMulti: true, options: sprintOptions, value: selectedSprints, onChange: (options) => onSprintFilterChange(options.map((option) => option.value)), placeholder: "All sprints", classNames: selectClassNames, unstyled: true }) }), _jsx("div", { className: "min-w-[200px]", children: _jsx(Select, { isMulti: true, options: assigneeOptions, value: selectedAssignees, onChange: (options) => onAssigneeFilterChange(options.map((option) => option.value)), placeholder: "All assignees", classNames: selectClassNames, unstyled: true }) }), _jsxs("div", { className: "flex items-center rounded-xl border border-zinc-200 bg-zinc-100 p-1 dark:border-zinc-700/60 dark:bg-zinc-800/60", children: [_jsxs("button", { type: "button", onClick: () => onViewModeChange('list'), className: `flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${viewMode === 'list'
                             ? 'bg-white text-zinc-800 shadow-sm dark:bg-zinc-700 dark:text-white dark:shadow-none'
                             : 'text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200'}`, title: "List view", children: [_jsx(ListIcon, { className: "h-4 w-4" }), _jsx("span", { children: "List" })] }), _jsxs("button", { type: "button", onClick: () => onViewModeChange('kanban'), className: `flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${viewMode === 'kanban'
                             ? 'bg-white text-zinc-800 shadow-sm dark:bg-zinc-700 dark:text-white dark:shadow-none'

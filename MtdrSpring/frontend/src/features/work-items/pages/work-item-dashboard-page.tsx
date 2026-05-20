@@ -131,11 +131,16 @@ export function WorkItemDashboardPage() {
                 onStatusFilterChange={viewModel.setStatusFilter}
                 assigneeFilter={viewModel.assigneeFilter}
                 onAssigneeFilterChange={viewModel.setAssigneeFilter}
+                typeFilter={viewModel.typeFilter}
+                onTypeFilterChange={viewModel.setTypeFilter}
+                sprintFilter={viewModel.sprintFilter}
+                onSprintFilterChange={viewModel.setSprintFilter}
                 viewMode={viewModel.viewMode}
                 onViewModeChange={viewModel.setViewMode}
                 onManageTagsClick={() => setTagManagerOpen(true)}
                 onCreateClick={viewModel.actions.openNew}
                 users={viewModel.users}
+                sprints={viewModel.sprints}
               />
             </div>
 

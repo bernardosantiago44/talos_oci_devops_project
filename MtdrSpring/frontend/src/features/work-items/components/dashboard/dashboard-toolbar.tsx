@@ -2,9 +2,12 @@ import React from 'react';
 import Select, { MultiValue } from 'react-select';
 import { Search, ListIcon, LayoutGrid, Plus, Tags } from 'lucide-react';
 import type { WorkItemStatus } from '../../enums/work-item-status.enum';
+import type { WorkItemType } from '../../enums/work-item-type.enum';
+import type { SprintDto } from '../../viewModels/useWorkItemsViewModel';
 import type { UserSummaryDto } from '@/shared/dtos/user-summary.dto';
 import { WORK_ITEM_STATUSES } from '../../enums/work-item-status.enum';
-import { formatStatusLabel } from '../../lib/dashboard-ui';
+import { WORK_ITEM_TYPES } from '../../enums/work-item-type.enum';
+import { formatStatusLabel, formatTypeLabel } from '../../lib/dashboard-ui';
 
 export type ViewMode = 'list' | 'kanban';
 
@@ -15,11 +18,16 @@ interface DashboardToolbarProps {
     onStatusFilterChange: (v: WorkItemStatus[]) => void;
     assigneeFilter: string[];
     onAssigneeFilterChange: (v: string[]) => void;
+    typeFilter: WorkItemType[];
+    onTypeFilterChange: (v: WorkItemType[]) => void;
+    sprintFilter: string[];
+    onSprintFilterChange: (v: string[]) => void;
     viewMode: ViewMode;
     onViewModeChange: (v: ViewMode) => void;
     onManageTagsClick: () => void;
     onCreateClick: () => void;
     users: UserSummaryDto[];
+    sprints: SprintDto[];
 }
 
 type SelectOption<T extends string = string> = {
@@ -30,6 +38,11 @@ type SelectOption<T extends string = string> = {
 const statusOptions: SelectOption<WorkItemStatus>[] = WORK_ITEM_STATUSES.map((status) => ({
     value: status,
     label: formatStatusLabel(status),
+}));
+
+const typeOptions: SelectOption<WorkItemType>[] = WORK_ITEM_TYPES.map((type) => ({
+    value: type,
+    label: formatTypeLabel(type),
 }));
 
 const selectClassNames = {
@@ -64,18 +77,29 @@ export function DashboardToolbar({
     onStatusFilterChange,
     assigneeFilter,
     onAssigneeFilterChange,
+    typeFilter,
+    onTypeFilterChange,
+    sprintFilter,
+    onSprintFilterChange,
     viewMode,
     onViewModeChange,
     onManageTagsClick,
     onCreateClick,
     users,
+    sprints,
 }: DashboardToolbarProps) {
     const assigneeOptions = users.map((user) => ({
         value: user.userId,
         label: user.name,
     }));
+    const sprintOptions = sprints.map((sprint) => ({
+        value: sprint.sprintId,
+        label: sprint.name,
+    }));
     const selectedStatuses = statusOptions.filter((option) => statusFilter.includes(option.value));
     const selectedAssignees = assigneeOptions.filter((option) => assigneeFilter.includes(option.value));
+    const selectedTypes = typeOptions.filter((option) => typeFilter.includes(option.value));
+    const selectedSprints = sprintOptions.filter((option) => sprintFilter.includes(option.value));
 
     return (
         <div className="flex flex-wrap items-center gap-3">
@@ -100,6 +124,34 @@ export function DashboardToolbar({
                         onStatusFilterChange(options.map((option) => option.value))
                     }
                     placeholder="All statuses"
+                    classNames={selectClassNames}
+                    unstyled
+                />
+            </div>
+
+            <div className="min-w-[200px]">
+                <Select<SelectOption<WorkItemType>, true>
+                    isMulti
+                    options={typeOptions}
+                    value={selectedTypes}
+                    onChange={(options: MultiValue<SelectOption<WorkItemType>>) =>
+                        onTypeFilterChange(options.map((option) => option.value))
+                    }
+                    placeholder="All types"
+                    classNames={selectClassNames}
+                    unstyled
+                />
+            </div>
+
+            <div className="min-w-[200px]">
+                <Select<SelectOption, true>
+                    isMulti
+                    options={sprintOptions}
+                    value={selectedSprints}
+                    onChange={(options: MultiValue<SelectOption>) =>
+                        onSprintFilterChange(options.map((option) => option.value))
+                    }
+                    placeholder="All sprints"
                     classNames={selectClassNames}
                     unstyled
                 />

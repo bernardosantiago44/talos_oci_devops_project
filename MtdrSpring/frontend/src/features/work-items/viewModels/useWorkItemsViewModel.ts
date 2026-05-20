@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo } from 'react';
 import { useAppUserList, useSprintList, useTagList, useTimeEntryCreate, useWorkItemCreate, useWorkItemList, useWorkItemUpdate } from '@/hooks/api';
-import type { AppUserSummary, CreateWorkItemRequest, SprintResponse, TagResponse, UpdateWorkItemRequest, WorkItemResponse } from '@/api/generated';
+import type { AppUserSummary, CreateWorkItemRequest, SprintResponse, TagResponse, UpdateWorkItemRequest, WorkItemQuery, WorkItemResponse } from '@/api/generated';
 import type { ViewMode } from '@/features/work-items/components/dashboard/dashboard-toolbar';
 import type { WorkItemDetailDto, Assignee } from '../dtos/work-item-detail.dto';
 import type { WorkLogDto, WorkLogMode } from '../dtos/work-log.dto';
@@ -57,6 +57,46 @@ function mapSprint(sprint: SprintResponse): SprintDto | null {
     endDate: sprint.endDate,
   };
 }
+
+function compactFilterList<T extends string>(values: T[]): T[] | undefined {
+  const filteredValues = values.filter(Boolean);
+  return filteredValues.length > 0 ? filteredValues : undefined;
+}
+
+function buildBaseWorkItemQuery(filters: {
+  search: string;
+  status: WorkItemStatus[];
+  assignee: string[];
+  sprint: string[];
+}): WorkItemQuery {
+  return {
+    search: filters.search.trim() || undefined,
+    status: compactFilterList(filters.status),
+    assignees: compactFilterList(filters.assignee),
+    sprints: compactFilterList(filters.sprint),
+  };
+}
+
+function buildWorkItemQueries(filters: {
+  search: string;
+  status: WorkItemStatus[];
+  assignee: string[];
+  sprint: string[];
+  type: WorkItemType[];
+}): WorkItemQuery[] {
+  const baseQuery = buildBaseWorkItemQuery(filters);
+  const selectedTypes = compactFilterList(filters.type);
+
+  if (!selectedTypes) {
+    return [baseQuery];
+  }
+
+  return selectedTypes.map((workType) => ({
+    ...baseQuery,
+    workType,
+  }));
+}
+
 function mapWorkItem(
   row: WorkItemResponse,
   userById: Map<string, UserSummaryDto>,
@@ -138,20 +178,23 @@ function mapWorkItem(
 }
 
 export const useWorkItemsViewModel = () => {
-  const workItemsQuery = useWorkItemList();
+  const [filters, setFilters] = useState({
+    search: '',
+    status: [] as WorkItemStatus[],
+    assignee: [] as string[],
+    sprint: [] as string[],
+    type: [] as WorkItemType[],
+  });
+  const [viewMode, setViewMode] = useState<ViewMode>('list');
+
+  const workItemQueries = useMemo(() => buildWorkItemQueries(filters), [filters]);
+  const workItemsQuery = useWorkItemList(workItemQueries);
   const usersQuery = useAppUserList();
   const sprintsQuery = useSprintList();
   const tagsQuery = useTagList();
   const createWorkItemMutation = useWorkItemCreate();
   const updateWorkItemMutation = useWorkItemUpdate();
   const createTimeEntryMutation = useTimeEntryCreate();
-
-  const [filters, setFilters] = useState({
-    search: '',
-    status: [] as WorkItemStatus[],
-    assignee: [] as string[],
-  });
-  const [viewMode, setViewMode] = useState<ViewMode>('list');
 
   const [modals, setModals] = useState({
     formOpen: false,
@@ -334,9 +377,13 @@ export const useWorkItemsViewModel = () => {
     search: filters.search,
     statusFilter: filters.status,
     assigneeFilter: filters.assignee,
+    typeFilter: filters.type,
+    sprintFilter: filters.sprint,
     setSearch: (search: string) => setFilters(f => ({ ...f, search })),
     setStatusFilter: (status: WorkItemStatus[]) => setFilters(f => ({ ...f, status })),
     setAssigneeFilter: (assignee: string[]) => setFilters(f => ({ ...f, assignee })),
+    setTypeFilter: (type: WorkItemType[]) => setFilters(f => ({ ...f, type })),
+    setSprintFilter: (sprint: string[]) => setFilters(f => ({ ...f, sprint })),
 
     ...modals,
     detailItem,

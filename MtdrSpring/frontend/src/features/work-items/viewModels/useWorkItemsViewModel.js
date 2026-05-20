@@ -22,6 +22,29 @@ function mapSprint(sprint) {
         endDate: sprint.endDate,
     };
 }
+function compactFilterList(values) {
+    const filteredValues = values.filter(Boolean);
+    return filteredValues.length > 0 ? filteredValues : undefined;
+}
+function buildBaseWorkItemQuery(filters) {
+    return {
+        search: filters.search.trim() || undefined,
+        status: compactFilterList(filters.status),
+        assignees: compactFilterList(filters.assignee),
+        sprints: compactFilterList(filters.sprint),
+    };
+}
+function buildWorkItemQueries(filters) {
+    const baseQuery = buildBaseWorkItemQuery(filters);
+    const selectedTypes = compactFilterList(filters.type);
+    if (!selectedTypes) {
+        return [baseQuery];
+    }
+    return selectedTypes.map((workType) => ({
+        ...baseQuery,
+        workType,
+    }));
+}
 function mapWorkItem(row, userById, tagById) {
     if (!row.workItemId || !row.title)
         return null;
@@ -91,19 +114,22 @@ function mapWorkItem(row, userById, tagById) {
     };
 }
 export const useWorkItemsViewModel = () => {
-    const workItemsQuery = useWorkItemList();
+    const [filters, setFilters] = useState({
+        search: '',
+        status: [],
+        assignee: [],
+        sprint: [],
+        type: [],
+    });
+    const [viewMode, setViewMode] = useState('list');
+    const workItemQueries = useMemo(() => buildWorkItemQueries(filters), [filters]);
+    const workItemsQuery = useWorkItemList(workItemQueries);
     const usersQuery = useAppUserList();
     const sprintsQuery = useSprintList();
     const tagsQuery = useTagList();
     const createWorkItemMutation = useWorkItemCreate();
     const updateWorkItemMutation = useWorkItemUpdate();
     const createTimeEntryMutation = useTimeEntryCreate();
-    const [filters, setFilters] = useState({
-        search: '',
-        status: [],
-        assignee: [],
-    });
-    const [viewMode, setViewMode] = useState('list');
     const [modals, setModals] = useState({
         formOpen: false,
         detailOpen: false,
@@ -240,9 +266,13 @@ export const useWorkItemsViewModel = () => {
         search: filters.search,
         statusFilter: filters.status,
         assigneeFilter: filters.assignee,
+        typeFilter: filters.type,
+        sprintFilter: filters.sprint,
         setSearch: (search) => setFilters(f => ({ ...f, search })),
         setStatusFilter: (status) => setFilters(f => ({ ...f, status })),
         setAssigneeFilter: (assignee) => setFilters(f => ({ ...f, assignee })),
+        setTypeFilter: (type) => setFilters(f => ({ ...f, type })),
+        setSprintFilter: (sprint) => setFilters(f => ({ ...f, sprint })),
         ...modals,
         detailItem,
         editingItem: modals.editingItem,

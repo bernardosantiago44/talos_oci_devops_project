@@ -6,7 +6,7 @@ export const apiQueryKeys = {
     },
     workItems: {
         all: ['workItems'],
-        list: () => [...apiQueryKeys.workItems.all, 'list'],
+        list: (filters) => [...apiQueryKeys.workItems.all, 'list', filters],
         detail: (id) => [...apiQueryKeys.workItems.all, 'detail', id],
         assignees: (id) => [...apiQueryKeys.workItems.detail(id), 'assignees'],
         byTelegramUser: (telegramUserId) => [...apiQueryKeys.workItems.all, 'telegramUser', telegramUserId],

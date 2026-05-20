@@ -125,7 +125,6 @@ export function WorkItemListView({ items, onEdit, onComplete, onViewDetail }: Wo
                                 >
                                     {item.title}
                                 </button>
-                                <span className="text-xs text-zinc-400 dark:text-zinc-600">{item.id}</span>
                             </div>
 
                             {/* Type */}
