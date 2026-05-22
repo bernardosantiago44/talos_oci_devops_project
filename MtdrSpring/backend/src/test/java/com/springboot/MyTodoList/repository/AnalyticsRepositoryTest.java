@@ -44,8 +44,9 @@ class AnalyticsRepositoryTest {
         assertThat(sqlCaptor.getValue())
                 .contains("NVL(SUM(te.MINUTES), 0) / 60.0 AS total_hours_worked")
                 .contains("COUNT(DISTINCT CASE")
-                .contains("LEFT JOIN CHATBOT_USER.TIME_ENTRY te ON u.USER_ID = te.USER_ID")
-                .contains("GROUP BY u.USER_ID, u.NAME, S.SPRINT_ID, S.NAME");
+                .contains("LEFT JOIN CHATBOT_USER.WORK_ITEM_ASSIGNMENT wia")
+                .contains("LEFT JOIN CHATBOT_USER.TIME_ENTRY te")
+                .contains("GROUP BY u.USER_ID, u.NAME, s.SPRINT_ID, s.NAME");
 
         ResultSet resultSet = mock(ResultSet.class);
         when(resultSet.getString("USER_ID")).thenReturn("user-1");
