@@ -186,6 +186,9 @@ public class WorkItemService {
             throw new BusinessRuleException("Estimated minutes cannot be negative");
         }
 
+        if (existingWorkItem.getCompletedAt() != null) {
+            throw new BusinessRuleException("Completed work items cannot be updated");
+        }
     }
     private void ensureWorkItemExistsById(String id) {
         if (!workItemRepository.existsById(id)) {

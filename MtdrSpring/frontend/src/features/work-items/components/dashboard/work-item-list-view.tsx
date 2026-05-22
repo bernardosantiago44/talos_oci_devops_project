@@ -174,14 +174,16 @@ export function WorkItemListView({ items, onEdit, onComplete, onViewDetail, onDe
                                 >
                                     <Eye className="h-3.5 w-3.5" />
                                 </button>
-                                <button
-                                    type="button"
-                                    onClick={() => onEdit(item)}
-                                    title="Edit task"
-                                    className="rounded-lg p-1.5 text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-700 dark:text-zinc-500 dark:hover:bg-zinc-700 dark:hover:text-zinc-200"
-                                >
-                                    <Pencil className="h-3.5 w-3.5" />
-                                </button>
+                                {!isDone && (
+                                    <button
+                                        type="button"
+                                        onClick={() => onEdit(item)}
+                                        title="Edit task"
+                                        className="rounded-lg p-1.5 text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-700 dark:text-zinc-500 dark:hover:bg-zinc-700 dark:hover:text-zinc-200"
+                                    >
+                                        <Pencil className="h-3.5 w-3.5" />
+                                    </button>
+                                )}
                                 {!isDone && (
                                     <button
                                         type="button"
