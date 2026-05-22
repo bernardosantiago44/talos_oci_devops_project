@@ -14,23 +14,32 @@ import java.util.Map;
 @Repository
 public class AnalyticsRepository {
     private static final String DEVELOPER_SPRINT_ANALYTICS_SQL = """
+            WITH hours_by_user_sprint AS (
+                SELECT te.USER_ID, wi.SPRINT_ID, SUM(te.MINUTES) / 60.0 AS total_hours
+                FROM CHATBOT_USER.TIME_ENTRY te
+                JOIN CHATBOT_USER.WORK_ITEM wi ON te.WORK_ITEM_ID = wi.WORK_ITEM_ID
+                WHERE wi.SPRINT_ID IS NOT NULL
+                GROUP BY te.USER_ID, wi.SPRINT_ID
+            ),
+            tasks_by_user_sprint AS (
+                SELECT wia.USER_ID, wi.SPRINT_ID, COUNT(DISTINCT wi.WORK_ITEM_ID) AS tasks_completed
+                FROM CHATBOT_USER.WORK_ITEM_ASSIGNMENT wia
+                JOIN CHATBOT_USER.WORK_ITEM wi ON wia.WORK_ITEM_ID = wi.WORK_ITEM_ID
+                WHERE wia.UNASSIGNED_AT IS NULL
+                  AND wi.STATUS IN ('DONE', 'COMPLETED', 'CLOSED')
+                GROUP BY wia.USER_ID, wi.SPRINT_ID
+            )
             SELECT
                 u.USER_ID,
                 u.NAME AS developer,
                 s.NAME AS sprint,
-                NVL(SUM(te.MINUTES), 0) / 60.0 AS total_hours_worked,
-                COUNT(DISTINCT CASE
-                                   WHEN wi.STATUS IN ('DONE', 'COMPLETED', 'CLOSED')
-                                       THEN wi.WORK_ITEM_ID
-                    END) AS tasks_completed
+                NVL(h.total_hours, 0) AS total_hours_worked,
+                NVL(t.tasks_completed, 0) AS tasks_completed
             FROM APP_USER u
-                     LEFT JOIN CHATBOT_USER.WORK_ITEM_ASSIGNMENT wia
-                         ON u.USER_ID = wia.USER_ID AND wia.UNASSIGNED_AT IS NULL
-                     LEFT JOIN CHATBOT_USER.WORK_ITEM wi ON wia.WORK_ITEM_ID = wi.WORK_ITEM_ID
-                     LEFT JOIN CHATBOT_USER.SPRINT s ON wi.SPRINT_ID = s.SPRINT_ID
-                     LEFT JOIN CHATBOT_USER.TIME_ENTRY te
-                         ON te.WORK_ITEM_ID = wi.WORK_ITEM_ID AND te.USER_ID = u.USER_ID
-            GROUP BY u.USER_ID, u.NAME, s.SPRINT_ID, s.NAME
+            JOIN CHATBOT_USER.SPRINT s ON 1=1
+            LEFT JOIN hours_by_user_sprint h ON h.USER_ID = u.USER_ID AND h.SPRINT_ID = s.SPRINT_ID
+            LEFT JOIN tasks_by_user_sprint t ON t.USER_ID = u.USER_ID AND t.SPRINT_ID = s.SPRINT_ID
+            WHERE h.USER_ID IS NOT NULL OR t.USER_ID IS NOT NULL
             ORDER BY u.NAME, s.NAME
             """;
 

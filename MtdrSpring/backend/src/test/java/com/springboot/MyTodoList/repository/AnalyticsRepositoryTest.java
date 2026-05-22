@@ -42,11 +42,12 @@ class AnalyticsRepositoryTest {
         verify(jdbcTemplate).query(sqlCaptor.capture(), mapperCaptor.capture());
 
         assertThat(sqlCaptor.getValue())
-                .contains("NVL(SUM(te.MINUTES), 0) / 60.0 AS total_hours_worked")
-                .contains("COUNT(DISTINCT CASE")
-                .contains("LEFT JOIN CHATBOT_USER.WORK_ITEM_ASSIGNMENT wia")
-                .contains("LEFT JOIN CHATBOT_USER.TIME_ENTRY te")
-                .contains("GROUP BY u.USER_ID, u.NAME, s.SPRINT_ID, s.NAME");
+                .contains("hours_by_user_sprint")
+                .contains("tasks_by_user_sprint")
+                .contains("SUM(te.MINUTES) / 60.0 AS total_hours")
+                .contains("WORK_ITEM_ASSIGNMENT wia")
+                .contains("NVL(h.total_hours, 0) AS total_hours_worked")
+                .contains("NVL(t.tasks_completed, 0) AS tasks_completed");
 
         ResultSet resultSet = mock(ResultSet.class);
         when(resultSet.getString("USER_ID")).thenReturn("user-1");
