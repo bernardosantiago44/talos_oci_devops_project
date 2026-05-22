@@ -103,7 +103,6 @@ export function WorkItemDetailModal({
                             <h2 className="mt-2 text-base font-semibold leading-snug text-zinc-900 dark:text-zinc-100">
                                 {item.title}
                             </h2>
-                            <p className="mt-0.5 text-xs text-zinc-400 dark:text-zinc-600">{item.id}</p>
                         </div>
                         <button
                             type="button"
