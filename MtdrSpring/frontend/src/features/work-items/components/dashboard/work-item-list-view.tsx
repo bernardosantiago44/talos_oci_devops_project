@@ -1,5 +1,5 @@
 import React from 'react';
-import { CheckCircle2, Pencil, Eye } from 'lucide-react';
+import { CheckCircle2, Pencil, Eye, Trash2 } from 'lucide-react';
 import type { WorkItemDetailDto } from '../../dtos/work-item-detail.dto';
 import {
     formatStatusLabel,
@@ -21,6 +21,7 @@ interface WorkItemListViewProps {
     onEdit: (item: WorkItemDetailDto) => void;
     onComplete: (item: WorkItemDetailDto) => void;
     onViewDetail: (item: WorkItemDetailDto) => void;
+    onDelete: (item: WorkItemDetailDto) => void;
 }
 
 function Pill({ children, className }: { children: React.ReactNode; className?: string }) {
@@ -74,7 +75,7 @@ function ProgressBar({ value }: { value: number }) {
     );
 }
 
-export function WorkItemListView({ items, onEdit, onComplete, onViewDetail }: WorkItemListViewProps) {
+export function WorkItemListView({ items, onEdit, onComplete, onViewDetail, onDelete }: WorkItemListViewProps) {
     if (items.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center rounded-2xl border border-zinc-200 bg-zinc-50 py-16 text-center dark:border-zinc-800 dark:bg-zinc-900/40">
@@ -191,6 +192,14 @@ export function WorkItemListView({ items, onEdit, onComplete, onViewDetail }: Wo
                                         <CheckCircle2 className="h-3.5 w-3.5" />
                                     </button>
                                 )}
+                                <button
+                                    type="button"
+                                    onClick={() => onDelete(item)}
+                                    title="Delete task"
+                                    className="rounded-lg p-1.5 text-zinc-400 transition-colors hover:bg-rose-50 hover:text-rose-600 dark:text-zinc-500 dark:hover:bg-rose-500/20 dark:hover:text-rose-400"
+                                >
+                                    <Trash2 className="h-3.5 w-3.5" />
+                                </button>
                             </div>
                         </div>
                     );

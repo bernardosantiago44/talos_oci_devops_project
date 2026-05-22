@@ -162,6 +162,7 @@ export function WorkItemDashboardPage() {
                 onEdit={viewModel.actions.handleEdit}
                 onComplete={viewModel.actions.handleComplete}
                 onViewDetail={viewModel.actions.openDetail}
+                onDelete={viewModel.actions.handleDelete}
               />
             ) : (
               <KanbanView
