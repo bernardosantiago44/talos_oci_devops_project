@@ -78,7 +78,7 @@ public class AnalyticsRepository {
         List<Map<String, Object>> assignments = jdbcTemplate.queryForList(
                 "SELECT ASSIGNMENT_ID, WORK_ITEM_ID, USER_ID FROM CHATBOT_USER.WORK_ITEM_ASSIGNMENT ORDER BY ASSIGNED_AT DESC FETCH FIRST 20 ROWS ONLY");
         List<Map<String, Object>> timeEntries = jdbcTemplate.queryForList(
-                "SELECT TIME_ENTRY_ID, WORK_ITEM_ID, MINUTES FROM CHATBOT_USER.TIME_ENTRY ORDER BY TIME_ENTRY_ID DESC FETCH FIRST 20 ROWS ONLY");
+                "SELECT TIME_ENTRY_ID, WORK_ITEM_ID, USER_ID, MINUTES FROM CHATBOT_USER.TIME_ENTRY ORDER BY CREATED_AT DESC FETCH FIRST 30 ROWS ONLY");
 
         return new AnalyticsDebug(workItems, assignments, timeEntries);
     }
