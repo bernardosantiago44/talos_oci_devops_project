@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -340,18 +341,17 @@ class WorkItemServiceTest {
     }
 
     @Test
-    void updateWorkItemRejectsCompletedWorkItem() {
+    void updateWorkItemAllowsCompletedWorkItem() {
         WorkItem existing = TestDataFactory.workItem();
         existing.setCompletedAt(OffsetDateTime.parse("2026-04-29T12:00:00-06:00"));
         UpdateWorkItemRequest request = TestDataFactory.validUpdateWorkItemRequest();
 
         when(workItemRepository.findById(TestDataFactory.WORK_ITEM_ID)).thenReturn(Optional.of(existing));
+        when(workItemRepository.save(any())).thenReturn(existing);
 
-        assertThatThrownBy(() -> service.updateWorkItem(TestDataFactory.WORK_ITEM_ID, request))
-                .isInstanceOf(BusinessRuleException.class)
-                .hasMessage("Completed work items cannot be updated");
+        assertThatNoException().isThrownBy(() -> service.updateWorkItem(TestDataFactory.WORK_ITEM_ID, request));
 
-        verify(workItemRepository, never()).save(any());
+        verify(workItemRepository).save(any());
     }
 
     @Test
