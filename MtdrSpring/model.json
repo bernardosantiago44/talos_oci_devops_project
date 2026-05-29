@@ -1,0 +1,1629 @@
+{
+  "configuration" : { },
+  "description" : "C4 architecture documentation for the MtdrSpring todo and work management application.",
+  "documentation" : { },
+  "id" : 1,
+  "lastModifiedDate" : "2026-05-29T21:25:14Z",
+  "model" : {
+    "deploymentNodes" : [ {
+      "children" : [ {
+        "children" : [ {
+          "children" : [ {
+            "containerInstances" : [ {
+              "containerId" : "9",
+              "environment" : "Production",
+              "id" : "83",
+              "instanceId" : 1,
+              "properties" : {
+                "structurizr.dsl.identifier" : "production.prodOci.prodVcn.prodOke.prodFrontendPod.prodFrontend"
+              },
+              "relationships" : [ {
+                "description" : "Calls REST APIs",
+                "destinationId" : "85",
+                "id" : "87",
+                "linkedRelationshipId" : "34",
+                "sourceId" : "83",
+                "technology" : "JSON/HTTPS"
+              } ],
+              "tags" : "Container Instance"
+            } ],
+            "description" : "Runs the React static site served by Nginx.",
+            "environment" : "Production",
+            "id" : "82",
+            "instances" : "1",
+            "name" : "Frontend Pod",
+            "properties" : {
+              "structurizr.dsl.identifier" : "production.prodOci.prodVcn.prodOke.prodFrontendPod"
+            },
+            "tags" : "Element,Deployment Node",
+            "technology" : "Kubernetes Pod"
+          }, {
+            "containerInstances" : [ {
+              "containerId" : "10",
+              "environment" : "Production",
+              "id" : "85",
+              "instanceId" : 1,
+              "properties" : {
+                "structurizr.dsl.identifier" : "production.prodOci.prodVcn.prodOke.prodBackendPod.prodBackend"
+              },
+              "relationships" : [ {
+                "description" : "Returns API responses",
+                "destinationId" : "83",
+                "id" : "86",
+                "linkedRelationshipId" : "52",
+                "sourceId" : "85",
+                "technology" : "JSON/HTTPS"
+              }, {
+                "description" : "Reads and writes project data",
+                "destinationId" : "89",
+                "id" : "90",
+                "linkedRelationshipId" : "36",
+                "sourceId" : "85",
+                "technology" : "JDBC"
+              } ],
+              "tags" : "Container Instance"
+            } ],
+            "description" : "Runs the Spring Boot monolith.",
+            "environment" : "Production",
+            "id" : "84",
+            "instances" : "1",
+            "name" : "Backend Pod",
+            "properties" : {
+              "structurizr.dsl.identifier" : "production.prodOci.prodVcn.prodOke.prodBackendPod"
+            },
+            "relationships" : [ {
+              "description" : "Mounts database wallet",
+              "destinationId" : "81",
+              "id" : "95",
+              "sourceId" : "84",
+              "tags" : "Relationship"
+            } ],
+            "tags" : "Element,Deployment Node",
+            "technology" : "Kubernetes Pod"
+          } ],
+          "description" : "Kubernetes cluster provisioned by Terraform.",
+          "environment" : "Production",
+          "id" : "77",
+          "infrastructureNodes" : [ {
+            "description" : "Routes /api traffic to the backend service and / traffic to the frontend service.",
+            "environment" : "Production",
+            "id" : "78",
+            "name" : "main-ingress",
+            "properties" : {
+              "structurizr.dsl.identifier" : "production.prodOci.prodVcn.prodOke.prodIngress"
+            },
+            "relationships" : [ {
+              "description" : "Routes /",
+              "destinationId" : "79",
+              "id" : "91",
+              "sourceId" : "78",
+              "tags" : "Relationship"
+            }, {
+              "description" : "Routes /api",
+              "destinationId" : "80",
+              "id" : "92",
+              "sourceId" : "78",
+              "tags" : "Relationship"
+            } ],
+            "tags" : "Element,Infrastructure Node",
+            "technology" : "Kubernetes Ingress"
+          }, {
+            "description" : "Cluster service exposing the frontend pod.",
+            "environment" : "Production",
+            "id" : "79",
+            "name" : "frontend-service",
+            "properties" : {
+              "structurizr.dsl.identifier" : "production.prodOci.prodVcn.prodOke.prodFrontendService"
+            },
+            "relationships" : [ {
+              "description" : "Selects frontend pod",
+              "destinationId" : "82",
+              "id" : "93",
+              "sourceId" : "79",
+              "tags" : "Relationship"
+            } ],
+            "tags" : "Element,Infrastructure Node",
+            "technology" : "Kubernetes Service"
+          }, {
+            "description" : "Cluster service exposing the backend pod.",
+            "environment" : "Production",
+            "id" : "80",
+            "name" : "backend-service",
+            "properties" : {
+              "structurizr.dsl.identifier" : "production.prodOci.prodVcn.prodOke.prodBackendService"
+            },
+            "relationships" : [ {
+              "description" : "Selects backend pod",
+              "destinationId" : "84",
+              "id" : "94",
+              "sourceId" : "80",
+              "tags" : "Relationship"
+            } ],
+            "tags" : "Element,Infrastructure Node",
+            "technology" : "Kubernetes Service"
+          }, {
+            "description" : "Kubernetes secret mounted into the backend pod for database wallet credentials.",
+            "environment" : "Production",
+            "id" : "81",
+            "name" : "db-wallet-secret",
+            "properties" : {
+              "structurizr.dsl.identifier" : "production.prodOci.prodVcn.prodOke.prodDbWalletSecret"
+            },
+            "tags" : "Element,Infrastructure Node",
+            "technology" : "Kubernetes Secret"
+          } ],
+          "instances" : "1",
+          "name" : "OKE Cluster",
+          "properties" : {
+            "structurizr.dsl.identifier" : "production.prodOci.prodVcn.prodOke"
+          },
+          "tags" : "Element,Deployment Node",
+          "technology" : "Oracle Kubernetes Engine"
+        } ],
+        "description" : "Network boundary for OKE, ingress, and managed services.",
+        "environment" : "Production",
+        "id" : "76",
+        "instances" : "1",
+        "name" : "Virtual Cloud Network",
+        "properties" : {
+          "structurizr.dsl.identifier" : "production.prodOci.prodVcn"
+        },
+        "tags" : "Element,Deployment Node",
+        "technology" : "OCI VCN"
+      }, {
+        "containerInstances" : [ {
+          "containerId" : "22",
+          "environment" : "Production",
+          "id" : "89",
+          "instanceId" : 1,
+          "properties" : {
+            "structurizr.dsl.identifier" : "production.prodOci.prodDatabaseNode.prodDatabase"
+          },
+          "tags" : "Container Instance"
+        } ],
+        "description" : "Managed relational database for project data.",
+        "environment" : "Production",
+        "id" : "88",
+        "instances" : "1",
+        "name" : "Autonomous Database",
+        "properties" : {
+          "structurizr.dsl.identifier" : "production.prodOci.prodDatabaseNode"
+        },
+        "tags" : "Element,Deployment Node",
+        "technology" : "Oracle Autonomous Database"
+      } ],
+      "description" : "Production OCI tenancy and region.",
+      "environment" : "Production",
+      "id" : "73",
+      "infrastructureNodes" : [ {
+        "description" : "Stores backend and frontend container images.",
+        "environment" : "Production",
+        "id" : "74",
+        "name" : "OCI Container Registry",
+        "properties" : {
+          "structurizr.dsl.identifier" : "production.prodOci.prodRegistry"
+        },
+        "tags" : "Element,Infrastructure Node",
+        "technology" : "OCI Artifacts Container Registry"
+      }, {
+        "description" : "Stores database wallet and deployment artifacts where required.",
+        "environment" : "Production",
+        "id" : "75",
+        "name" : "Object Storage Bucket",
+        "properties" : {
+          "structurizr.dsl.identifier" : "production.prodOci.prodObjectStorage"
+        },
+        "relationships" : [ {
+          "description" : "Provides wallet/artifact storage",
+          "destinationId" : "88",
+          "id" : "96",
+          "sourceId" : "75",
+          "tags" : "Relationship"
+        } ],
+        "tags" : "Element,Infrastructure Node",
+        "technology" : "OCI Object Storage"
+      } ],
+      "instances" : "1",
+      "name" : "Oracle Cloud Infrastructure Region",
+      "properties" : {
+        "structurizr.dsl.identifier" : "production.prodOci"
+      },
+      "tags" : "Element,Deployment Node",
+      "technology" : "OCI"
+    } ],
+    "people" : [ {
+      "description" : "Plans sprints, assigns work, monitors team progress, and analyzes KPIs.",
+      "id" : "1",
+      "name" : "Manager",
+      "properties" : {
+        "structurizr.dsl.identifier" : "manager"
+      },
+      "relationships" : [ {
+        "description" : "Plans and monitors work",
+        "destinationId" : "8",
+        "id" : "23",
+        "sourceId" : "1",
+        "tags" : "Relationship"
+      }, {
+        "description" : "Uses",
+        "destinationId" : "9",
+        "id" : "27",
+        "sourceId" : "1",
+        "tags" : "Relationship",
+        "technology" : "HTTPS"
+      } ],
+      "tags" : "Element,Person"
+    }, {
+      "description" : "Manages assigned work, tracks time, reports progress or blockers, and uses Telegram for quick task interactions.",
+      "id" : "2",
+      "name" : "Developer",
+      "properties" : {
+        "structurizr.dsl.identifier" : "developer"
+      },
+      "relationships" : [ {
+        "description" : "Manages tasks and tracks progress",
+        "destinationId" : "8",
+        "id" : "24",
+        "sourceId" : "2",
+        "tags" : "Relationship"
+      }, {
+        "description" : "Uses",
+        "destinationId" : "9",
+        "id" : "28",
+        "sourceId" : "2",
+        "tags" : "Relationship",
+        "technology" : "HTTPS"
+      }, {
+        "description" : "Sends bot commands",
+        "destinationId" : "4",
+        "id" : "29",
+        "sourceId" : "2",
+        "tags" : "Relationship",
+        "technology" : "HTTPS"
+      } ],
+      "tags" : "Element,Person"
+    }, {
+      "description" : "Represents automated deployment, metric computation, activity logging, and project data storage concerns.",
+      "id" : "3",
+      "name" : "System",
+      "properties" : {
+        "structurizr.dsl.identifier" : "systemActor"
+      },
+      "relationships" : [ {
+        "description" : "Triggers automated operational workflows",
+        "destinationId" : "8",
+        "id" : "25",
+        "sourceId" : "3",
+        "tags" : "Relationship"
+      }, {
+        "description" : "Triggers builds and deployments",
+        "destinationId" : "7",
+        "id" : "30",
+        "sourceId" : "3",
+        "tags" : "Relationship"
+      } ],
+      "tags" : "Element,Person"
+    } ],
+    "softwareSystems" : [ {
+      "description" : "External messaging platform used by developers to interact with the bot.",
+      "documentation" : { },
+      "id" : "4",
+      "name" : "Telegram Bot API",
+      "properties" : {
+        "structurizr.dsl.identifier" : "telegram"
+      },
+      "relationships" : [ {
+        "description" : "Delivers bot updates",
+        "destinationId" : "10",
+        "id" : "32",
+        "sourceId" : "4",
+        "tags" : "Relationship",
+        "technology" : "HTTPS"
+      }, {
+        "description" : "Delivers bot updates",
+        "destinationId" : "8",
+        "id" : "33",
+        "linkedRelationshipId" : "32",
+        "sourceId" : "4",
+        "technology" : "HTTPS"
+      }, {
+        "description" : "Delivers bot updates",
+        "destinationId" : "15",
+        "id" : "53",
+        "sourceId" : "4",
+        "tags" : "Relationship",
+        "technology" : "HTTPS"
+      }, {
+        "description" : "Displays bot responses",
+        "destinationId" : "2",
+        "id" : "54",
+        "sourceId" : "4",
+        "tags" : "Relationship"
+      } ],
+      "tags" : "Element,Software System,External"
+    }, {
+      "description" : "External AI and embedding providers used for semantic search and assistant capabilities.",
+      "documentation" : { },
+      "id" : "5",
+      "name" : "AI Providers",
+      "properties" : {
+        "structurizr.dsl.identifier" : "aiProviders"
+      },
+      "tags" : "Element,Software System,External"
+    }, {
+      "description" : "Cloud platform that hosts the containerized application, Kubernetes cluster, networking, registry, object storage, and database.",
+      "documentation" : { },
+      "id" : "6",
+      "name" : "Oracle Cloud Infrastructure",
+      "properties" : {
+        "structurizr.dsl.identifier" : "ociPlatform"
+      },
+      "relationships" : [ {
+        "description" : "Hosts container",
+        "destinationId" : "9",
+        "id" : "41",
+        "sourceId" : "6",
+        "tags" : "Relationship"
+      }, {
+        "description" : "Hosts container",
+        "destinationId" : "8",
+        "id" : "42",
+        "linkedRelationshipId" : "41",
+        "sourceId" : "6"
+      }, {
+        "description" : "Hosts container",
+        "destinationId" : "10",
+        "id" : "43",
+        "sourceId" : "6",
+        "tags" : "Relationship"
+      }, {
+        "description" : "Provides managed database",
+        "destinationId" : "22",
+        "id" : "44",
+        "sourceId" : "6",
+        "tags" : "Relationship"
+      } ],
+      "tags" : "Element,Software System,External"
+    }, {
+      "description" : "Builds, packages, and deploys application containers and infrastructure definitions.",
+      "documentation" : { },
+      "id" : "7",
+      "name" : "CI/CD Pipeline",
+      "properties" : {
+        "structurizr.dsl.identifier" : "ciCdPipeline"
+      },
+      "relationships" : [ {
+        "description" : "Publishes images and applies infrastructure changes",
+        "destinationId" : "6",
+        "id" : "31",
+        "sourceId" : "7",
+        "tags" : "Relationship",
+        "technology" : "OCI APIs, kubectl, Terraform"
+      } ],
+      "tags" : "Element,Software System,External"
+    }, {
+      "containers" : [ {
+        "description" : "Browser-based UI for work items, sprints, tags, assignments, time entries, and analytics dashboards.",
+        "documentation" : { },
+        "id" : "9",
+        "name" : "Frontend Web Application",
+        "properties" : {
+          "structurizr.dsl.identifier" : "mtdrSpring.frontend"
+        },
+        "relationships" : [ {
+          "description" : "Calls REST APIs",
+          "destinationId" : "10",
+          "id" : "34",
+          "sourceId" : "9",
+          "tags" : "Relationship",
+          "technology" : "JSON/HTTPS"
+        }, {
+          "description" : "Sends API requests",
+          "destinationId" : "11",
+          "id" : "35",
+          "sourceId" : "9",
+          "tags" : "Relationship",
+          "technology" : "JSON/HTTPS"
+        } ],
+        "tags" : "Element,Container",
+        "technology" : "React, TypeScript, Nginx"
+      }, {
+        "components" : [ {
+          "description" : "HTTP entrypoints for work items, users, sprints, tags, time entries, analytics, and semantic search.",
+          "documentation" : { },
+          "id" : "11",
+          "name" : "REST Controllers",
+          "properties" : {
+            "structurizr.dsl.identifier" : "mtdrSpring.backend.restControllers"
+          },
+          "relationships" : [ {
+            "description" : "Routes work item requests",
+            "destinationId" : "12",
+            "id" : "45",
+            "sourceId" : "11",
+            "tags" : "Relationship"
+          }, {
+            "description" : "Routes time entry requests",
+            "destinationId" : "13",
+            "id" : "46",
+            "sourceId" : "11",
+            "tags" : "Relationship"
+          }, {
+            "description" : "Routes sprint requests",
+            "destinationId" : "16",
+            "id" : "47",
+            "sourceId" : "11",
+            "tags" : "Relationship"
+          }, {
+            "description" : "Routes assignment requests",
+            "destinationId" : "17",
+            "id" : "48",
+            "sourceId" : "11",
+            "tags" : "Relationship"
+          }, {
+            "description" : "Routes analytics requests",
+            "destinationId" : "18",
+            "id" : "49",
+            "sourceId" : "11",
+            "tags" : "Relationship"
+          }, {
+            "description" : "Routes semantic search requests",
+            "destinationId" : "19",
+            "id" : "50",
+            "sourceId" : "11",
+            "tags" : "Relationship"
+          }, {
+            "description" : "Returns API responses",
+            "destinationId" : "9",
+            "id" : "51",
+            "sourceId" : "11",
+            "tags" : "Relationship",
+            "technology" : "JSON/HTTPS"
+          } ],
+          "tags" : "Element,Component",
+          "technology" : "Spring MVC Controllers"
+        }, {
+          "description" : "Creates, updates, searches, organizes, and deletes work items such as tasks, issues, bugs, and features.",
+          "documentation" : { },
+          "id" : "12",
+          "name" : "Work Management",
+          "properties" : {
+            "structurizr.dsl.identifier" : "mtdrSpring.backend.workManagement"
+          },
+          "relationships" : [ {
+            "description" : "Coordinates assignee changes",
+            "destinationId" : "17",
+            "id" : "58",
+            "sourceId" : "12",
+            "tags" : "Relationship"
+          }, {
+            "description" : "Validates sprint references",
+            "destinationId" : "16",
+            "id" : "59",
+            "sourceId" : "12",
+            "tags" : "Relationship"
+          }, {
+            "description" : "Records work item changes",
+            "destinationId" : "14",
+            "id" : "60",
+            "sourceId" : "12",
+            "tags" : "Relationship"
+          }, {
+            "description" : "Persists work item state",
+            "destinationId" : "20",
+            "id" : "66",
+            "sourceId" : "12",
+            "tags" : "Relationship"
+          } ],
+          "tags" : "Element,Component",
+          "technology" : "Spring Service"
+        }, {
+          "description" : "Registers estimates, actual time, work sessions, and time notes for assigned work.",
+          "documentation" : { },
+          "id" : "13",
+          "name" : "Time Tracking",
+          "properties" : {
+            "structurizr.dsl.identifier" : "mtdrSpring.backend.timeTracking"
+          },
+          "relationships" : [ {
+            "description" : "Records time-entry activity",
+            "destinationId" : "14",
+            "id" : "62",
+            "sourceId" : "13",
+            "tags" : "Relationship"
+          }, {
+            "description" : "Persists time entries",
+            "destinationId" : "20",
+            "id" : "67",
+            "sourceId" : "13",
+            "tags" : "Relationship"
+          } ],
+          "tags" : "Element,Component",
+          "technology" : "Spring Service"
+        }, {
+          "description" : "Records relevant user actions, status changes, comments, blockers, and system activity for visibility.",
+          "documentation" : { },
+          "id" : "14",
+          "name" : "Activity Tracking",
+          "properties" : {
+            "structurizr.dsl.identifier" : "mtdrSpring.backend.activityTracking"
+          },
+          "relationships" : [ {
+            "description" : "Persists activity records",
+            "destinationId" : "20",
+            "id" : "70",
+            "sourceId" : "14",
+            "tags" : "Relationship"
+          } ],
+          "tags" : "Element,Component",
+          "technology" : "Spring Service / Logging"
+        }, {
+          "description" : "Receives Telegram commands and translates them into backend use cases.",
+          "documentation" : { },
+          "id" : "15",
+          "name" : "Bot Interface",
+          "properties" : {
+            "structurizr.dsl.identifier" : "mtdrSpring.backend.botInterface"
+          },
+          "relationships" : [ {
+            "description" : "Looks up developer work",
+            "destinationId" : "12",
+            "id" : "55",
+            "sourceId" : "15",
+            "tags" : "Relationship"
+          }, {
+            "description" : "Records time from bot commands",
+            "destinationId" : "13",
+            "id" : "56",
+            "sourceId" : "15",
+            "tags" : "Relationship"
+          }, {
+            "description" : "Sends command responses",
+            "destinationId" : "4",
+            "id" : "57",
+            "sourceId" : "15",
+            "tags" : "Relationship",
+            "technology" : "HTTPS"
+          } ],
+          "tags" : "Element,Component",
+          "technology" : "Telegram Bots Spring Boot"
+        }, {
+          "description" : "Reads sprint definitions, goals, scope, and sprint status used by planning and work workflows.",
+          "documentation" : { },
+          "id" : "16",
+          "name" : "Sprint Management",
+          "properties" : {
+            "structurizr.dsl.identifier" : "mtdrSpring.backend.sprintManagement"
+          },
+          "relationships" : [ {
+            "description" : "Reads sprint data",
+            "destinationId" : "20",
+            "id" : "68",
+            "sourceId" : "16",
+            "tags" : "Relationship"
+          } ],
+          "tags" : "Element,Component",
+          "technology" : "Spring Service"
+        }, {
+          "description" : "Assigns and unassigns work items to team members with ownership tracking.",
+          "documentation" : { },
+          "id" : "17",
+          "name" : "Assignment Management",
+          "properties" : {
+            "structurizr.dsl.identifier" : "mtdrSpring.backend.assignmentManagement"
+          },
+          "relationships" : [ {
+            "description" : "Records assignment activity",
+            "destinationId" : "14",
+            "id" : "61",
+            "sourceId" : "17",
+            "tags" : "Relationship"
+          }, {
+            "description" : "Persists assignments",
+            "destinationId" : "20",
+            "id" : "69",
+            "sourceId" : "17",
+            "tags" : "Relationship"
+          } ],
+          "tags" : "Element,Component",
+          "technology" : "Spring Service"
+        }, {
+          "description" : "Calculates and exposes productivity indicators, sprint velocity, team progress, and estimate-vs-actual data.",
+          "documentation" : { },
+          "id" : "18",
+          "name" : "Reporting and KPI Analytics",
+          "properties" : {
+            "structurizr.dsl.identifier" : "mtdrSpring.backend.reportingAnalytics"
+          },
+          "relationships" : [ {
+            "description" : "Queries metrics and reporting data",
+            "destinationId" : "20",
+            "id" : "63",
+            "sourceId" : "18",
+            "tags" : "Relationship"
+          } ],
+          "tags" : "Element,Component",
+          "technology" : "Spring Service"
+        }, {
+          "description" : "Builds an in-memory vector index, requests embeddings, and returns semantically relevant work items.",
+          "documentation" : { },
+          "id" : "19",
+          "name" : "Semantic Search and AI Integration",
+          "properties" : {
+            "structurizr.dsl.identifier" : "mtdrSpring.backend.semanticSearch"
+          },
+          "relationships" : [ {
+            "description" : "Reads work items for indexing and search results",
+            "destinationId" : "20",
+            "id" : "64",
+            "sourceId" : "19",
+            "tags" : "Relationship"
+          }, {
+            "description" : "Generates text embeddings",
+            "destinationId" : "5",
+            "id" : "65",
+            "sourceId" : "19",
+            "tags" : "Relationship",
+            "technology" : "HTTPS"
+          } ],
+          "tags" : "Element,Component",
+          "technology" : "Spring Service"
+        }, {
+          "description" : "Encapsulates database access for users, work items, assignments, tags, sprints, time entries, and analytics queries.",
+          "documentation" : { },
+          "id" : "20",
+          "name" : "Persistence Repositories",
+          "properties" : {
+            "structurizr.dsl.identifier" : "mtdrSpring.backend.persistenceRepositories"
+          },
+          "relationships" : [ {
+            "description" : "Maps database rows to domain entities",
+            "destinationId" : "21",
+            "id" : "71",
+            "sourceId" : "20",
+            "tags" : "Relationship"
+          }, {
+            "description" : "Reads and writes",
+            "destinationId" : "22",
+            "id" : "72",
+            "sourceId" : "20",
+            "tags" : "Relationship",
+            "technology" : "JPA/JDBC"
+          } ],
+          "tags" : "Element,Component",
+          "technology" : "Spring Data JPA"
+        }, {
+          "description" : "JPA entities and DTO mappers representing work items, users, assignments, tags, sprints, time entries, and analytics projections.",
+          "documentation" : { },
+          "id" : "21",
+          "name" : "Domain Model",
+          "properties" : {
+            "structurizr.dsl.identifier" : "mtdrSpring.backend.domainModel"
+          },
+          "tags" : "Element,Component",
+          "technology" : "Java, JPA"
+        } ],
+        "description" : "Single Spring Boot deployable containing REST APIs, business services, Telegram bot integration, analytics, semantic search, and persistence access.",
+        "documentation" : { },
+        "id" : "10",
+        "name" : "Backend API Monolith",
+        "properties" : {
+          "structurizr.dsl.identifier" : "mtdrSpring.backend"
+        },
+        "relationships" : [ {
+          "description" : "Reads and writes project data",
+          "destinationId" : "22",
+          "id" : "36",
+          "sourceId" : "10",
+          "tags" : "Relationship",
+          "technology" : "JDBC"
+        }, {
+          "description" : "Sends bot responses",
+          "destinationId" : "4",
+          "id" : "37",
+          "sourceId" : "10",
+          "tags" : "Relationship",
+          "technology" : "HTTPS"
+        }, {
+          "description" : "Requests chat assistance and embeddings",
+          "destinationId" : "5",
+          "id" : "39",
+          "sourceId" : "10",
+          "tags" : "Relationship",
+          "technology" : "HTTPS"
+        }, {
+          "description" : "Returns API responses",
+          "destinationId" : "9",
+          "id" : "52",
+          "linkedRelationshipId" : "51",
+          "sourceId" : "10",
+          "technology" : "JSON/HTTPS"
+        } ],
+        "tags" : "Element,Container",
+        "technology" : "Java 25, Spring Boot"
+      }, {
+        "description" : "Persists users, work items, assignments, tags, sprints, time entries, activity history, and analytics data.",
+        "documentation" : { },
+        "id" : "22",
+        "name" : "Oracle Autonomous Database",
+        "properties" : {
+          "structurizr.dsl.identifier" : "mtdrSpring.database"
+        },
+        "tags" : "Element,Container",
+        "technology" : "Oracle Autonomous Database"
+      } ],
+      "description" : "Todo and work management platform for sprint planning, work assignment, time tracking, analytics, and Telegram interactions.",
+      "documentation" : { },
+      "id" : "8",
+      "name" : "MtdrSpring",
+      "properties" : {
+        "structurizr.dsl.identifier" : "mtdrSpring"
+      },
+      "relationships" : [ {
+        "description" : "Runs on",
+        "destinationId" : "6",
+        "id" : "26",
+        "sourceId" : "8",
+        "tags" : "Relationship"
+      }, {
+        "description" : "Sends bot responses",
+        "destinationId" : "4",
+        "id" : "38",
+        "linkedRelationshipId" : "37",
+        "sourceId" : "8",
+        "technology" : "HTTPS"
+      }, {
+        "description" : "Requests chat assistance and embeddings",
+        "destinationId" : "5",
+        "id" : "40",
+        "linkedRelationshipId" : "39",
+        "sourceId" : "8",
+        "technology" : "HTTPS"
+      } ],
+      "tags" : "Element,Software System"
+    } ]
+  },
+  "name" : "MtdrSpring Architecture",
+  "properties" : {
+    "structurizr.inspection.error" : "41",
+    "structurizr.inspection.info" : "0",
+    "structurizr.inspection.ignore" : "0",
+    "structurizr.inspection.warning" : "0"
+  },
+  "views" : {
+    "componentViews" : [ {
+      "automaticLayout" : {
+        "edgeSeparation" : 50,
+        "nodeSeparation" : 50,
+        "rankDirection" : "LeftRight",
+        "rankSeparation" : 100,
+        "vertices" : true
+      },
+      "containerId" : "10",
+      "elements" : [ {
+        "id" : "4",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "5",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "9",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "11",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "12",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "13",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "14",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "15",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "16",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "17",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "18",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "19",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "20",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "21",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "22",
+        "x" : 0,
+        "y" : 0
+      } ],
+      "externalContainerBoundariesVisible" : false,
+      "key" : "BackendComponents",
+      "name" : "Component View: MtdrSpring - Backend API Monolith",
+      "order" : 4,
+      "relationships" : [ {
+        "id" : "35"
+      }, {
+        "id" : "45"
+      }, {
+        "id" : "46"
+      }, {
+        "id" : "47"
+      }, {
+        "id" : "48"
+      }, {
+        "id" : "49"
+      }, {
+        "id" : "50"
+      }, {
+        "id" : "51"
+      }, {
+        "id" : "53"
+      }, {
+        "id" : "55"
+      }, {
+        "id" : "56"
+      }, {
+        "id" : "57"
+      }, {
+        "id" : "58"
+      }, {
+        "id" : "59"
+      }, {
+        "id" : "60"
+      }, {
+        "id" : "61"
+      }, {
+        "id" : "62"
+      }, {
+        "id" : "63"
+      }, {
+        "id" : "64"
+      }, {
+        "id" : "65"
+      }, {
+        "id" : "66"
+      }, {
+        "id" : "67"
+      }, {
+        "id" : "68"
+      }, {
+        "id" : "69"
+      }, {
+        "id" : "70"
+      }, {
+        "id" : "71"
+      }, {
+        "id" : "72"
+      } ]
+    } ],
+    "configuration" : {
+      "styles" : {
+        "elements" : [ {
+          "background" : "#4c6f92",
+          "color" : "#ffffff",
+          "tag" : "Component"
+        }, {
+          "background" : "#2b4c7e",
+          "color" : "#ffffff",
+          "tag" : "Container"
+        }, {
+          "background" : "#f3f4f6",
+          "color" : "#111827",
+          "tag" : "Deployment Node"
+        }, {
+          "background" : "#6b7280",
+          "color" : "#ffffff",
+          "tag" : "External"
+        }, {
+          "background" : "#dbeafe",
+          "color" : "#111827",
+          "tag" : "Infrastructure Node"
+        }, {
+          "background" : "#0b6bcb",
+          "color" : "#ffffff",
+          "shape" : "Person",
+          "tag" : "Person"
+        }, {
+          "background" : "#116149",
+          "color" : "#ffffff",
+          "tag" : "Software System"
+        } ]
+      },
+      "terminology" : { }
+    },
+    "containerViews" : [ {
+      "automaticLayout" : {
+        "edgeSeparation" : 50,
+        "nodeSeparation" : 50,
+        "rankDirection" : "LeftRight",
+        "rankSeparation" : 100,
+        "vertices" : true
+      },
+      "elements" : [ {
+        "id" : "1",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "2",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "4",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "5",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "6",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "9",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "10",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "22",
+        "x" : 0,
+        "y" : 0
+      } ],
+      "externalSoftwareSystemBoundariesVisible" : false,
+      "key" : "Containers",
+      "name" : "Container View: MtdrSpring",
+      "order" : 3,
+      "relationships" : [ {
+        "id" : "27"
+      }, {
+        "id" : "28"
+      }, {
+        "id" : "29"
+      }, {
+        "id" : "32"
+      }, {
+        "id" : "34"
+      }, {
+        "id" : "36"
+      }, {
+        "id" : "37"
+      }, {
+        "id" : "39"
+      }, {
+        "id" : "41"
+      }, {
+        "id" : "43"
+      }, {
+        "id" : "44"
+      }, {
+        "id" : "52"
+      }, {
+        "id" : "54"
+      } ],
+      "softwareSystemId" : "8"
+    } ],
+    "deploymentViews" : [ {
+      "automaticLayout" : {
+        "edgeSeparation" : 50,
+        "nodeSeparation" : 50,
+        "rankDirection" : "TopBottom",
+        "rankSeparation" : 100,
+        "vertices" : true
+      },
+      "elements" : [ {
+        "id" : "73",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "74",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "75",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "76",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "77",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "78",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "79",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "80",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "81",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "82",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "83",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "84",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "85",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "88",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "89",
+        "x" : 0,
+        "y" : 0
+      } ],
+      "environment" : "Production",
+      "key" : "ProductionDeployment",
+      "name" : "Deployment View: MtdrSpring - Production",
+      "order" : 5,
+      "relationships" : [ {
+        "id" : "86"
+      }, {
+        "id" : "87"
+      }, {
+        "id" : "90"
+      }, {
+        "id" : "91"
+      }, {
+        "id" : "92"
+      }, {
+        "id" : "93"
+      }, {
+        "id" : "94"
+      }, {
+        "id" : "95"
+      }, {
+        "id" : "96"
+      } ],
+      "softwareSystemId" : "8"
+    } ],
+    "dynamicViews" : [ {
+      "automaticLayout" : {
+        "edgeSeparation" : 50,
+        "nodeSeparation" : 50,
+        "rankDirection" : "LeftRight",
+        "rankSeparation" : 100,
+        "vertices" : true
+      },
+      "description" : "Manager assigns a developer to a work item.",
+      "elementId" : "10",
+      "elements" : [ {
+        "id" : "1",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "9",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "11",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "14",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "17",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "20",
+        "x" : 0,
+        "y" : 0
+      } ],
+      "externalBoundariesVisible" : false,
+      "key" : "DynamicAssignWork",
+      "name" : "Dynamic View: MtdrSpring - Backend API Monolith",
+      "order" : 6,
+      "relationships" : [ {
+        "description" : "Chooses a work item and assignee",
+        "id" : "27",
+        "order" : "1",
+        "response" : false
+      }, {
+        "description" : "PATCH /api/workitems/{id}/assignees/{userId}",
+        "id" : "35",
+        "order" : "2",
+        "response" : false
+      }, {
+        "description" : "Add assignee",
+        "id" : "48",
+        "order" : "3",
+        "response" : false
+      }, {
+        "description" : "Validate user and work item",
+        "id" : "69",
+        "order" : "4",
+        "response" : false
+      }, {
+        "description" : "Save assignment",
+        "id" : "69",
+        "order" : "5",
+        "response" : false
+      }, {
+        "description" : "Record assignment activity",
+        "id" : "61",
+        "order" : "6",
+        "response" : false
+      }, {
+        "description" : "Return assignment response",
+        "id" : "51",
+        "order" : "7",
+        "response" : false
+      } ]
+    }, {
+      "automaticLayout" : {
+        "edgeSeparation" : 50,
+        "nodeSeparation" : 50,
+        "rankDirection" : "LeftRight",
+        "rankSeparation" : 100,
+        "vertices" : true
+      },
+      "description" : "Developer records time against assigned work.",
+      "elementId" : "10",
+      "elements" : [ {
+        "id" : "2",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "9",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "11",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "13",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "14",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "20",
+        "x" : 0,
+        "y" : 0
+      } ],
+      "externalBoundariesVisible" : false,
+      "key" : "DynamicTrackTime",
+      "name" : "Dynamic View: MtdrSpring - Backend API Monolith",
+      "order" : 7,
+      "relationships" : [ {
+        "description" : "Submits time entry",
+        "id" : "28",
+        "order" : "1",
+        "response" : false
+      }, {
+        "description" : "POST /api/time-entries",
+        "id" : "35",
+        "order" : "2",
+        "response" : false
+      }, {
+        "description" : "Create time entry",
+        "id" : "46",
+        "order" : "3",
+        "response" : false
+      }, {
+        "description" : "Validate work item and user",
+        "id" : "67",
+        "order" : "4",
+        "response" : false
+      }, {
+        "description" : "Save time entry",
+        "id" : "67",
+        "order" : "5",
+        "response" : false
+      }, {
+        "description" : "Record time-entry activity",
+        "id" : "62",
+        "order" : "6",
+        "response" : false
+      }, {
+        "description" : "Return created entry",
+        "id" : "51",
+        "order" : "7",
+        "response" : false
+      } ]
+    }, {
+      "automaticLayout" : {
+        "edgeSeparation" : 50,
+        "nodeSeparation" : 50,
+        "rankDirection" : "LeftRight",
+        "rankSeparation" : 100,
+        "vertices" : true
+      },
+      "description" : "Developer asks the bot for assigned tasks.",
+      "elementId" : "10",
+      "elements" : [ {
+        "id" : "2",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "4",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "12",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "15",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "20",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "22",
+        "x" : 0,
+        "y" : 0
+      } ],
+      "externalBoundariesVisible" : false,
+      "key" : "DynamicTelegramTaskLookup",
+      "name" : "Dynamic View: MtdrSpring - Backend API Monolith",
+      "order" : 8,
+      "relationships" : [ {
+        "description" : "Sends task lookup command",
+        "id" : "29",
+        "order" : "1",
+        "response" : false
+      }, {
+        "description" : "Delivers update",
+        "id" : "53",
+        "order" : "2",
+        "response" : false
+      }, {
+        "description" : "Find tasks by Telegram user",
+        "id" : "55",
+        "order" : "3",
+        "response" : false
+      }, {
+        "description" : "Read user and assigned work",
+        "id" : "66",
+        "order" : "4",
+        "response" : false
+      }, {
+        "description" : "Query assignments",
+        "id" : "72",
+        "order" : "5",
+        "response" : false
+      }, {
+        "description" : "Send task summary",
+        "id" : "57",
+        "order" : "6",
+        "response" : false
+      }, {
+        "description" : "Displays response",
+        "id" : "54",
+        "order" : "7",
+        "response" : false
+      } ]
+    }, {
+      "automaticLayout" : {
+        "edgeSeparation" : 50,
+        "nodeSeparation" : 50,
+        "rankDirection" : "LeftRight",
+        "rankSeparation" : 100,
+        "vertices" : true
+      },
+      "description" : "Manager opens the analytics dashboard.",
+      "elementId" : "10",
+      "elements" : [ {
+        "id" : "1",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "9",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "11",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "18",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "20",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "22",
+        "x" : 0,
+        "y" : 0
+      } ],
+      "externalBoundariesVisible" : false,
+      "key" : "DynamicAnalyticsDashboard",
+      "name" : "Dynamic View: MtdrSpring - Backend API Monolith",
+      "order" : 9,
+      "relationships" : [ {
+        "description" : "Opens analytics dashboard",
+        "id" : "27",
+        "order" : "1",
+        "response" : false
+      }, {
+        "description" : "GET /api/analytics/dashboard",
+        "id" : "35",
+        "order" : "2",
+        "response" : false
+      }, {
+        "description" : "Request dashboard metrics",
+        "id" : "49",
+        "order" : "3",
+        "response" : false
+      }, {
+        "description" : "Query sprint, work, and time data",
+        "id" : "63",
+        "order" : "4",
+        "response" : false
+      }, {
+        "description" : "Read analytics data",
+        "id" : "72",
+        "order" : "5",
+        "response" : false
+      }, {
+        "description" : "Return KPIs and charts",
+        "id" : "51",
+        "order" : "6",
+        "response" : false
+      } ]
+    }, {
+      "automaticLayout" : {
+        "edgeSeparation" : 50,
+        "nodeSeparation" : 50,
+        "rankDirection" : "LeftRight",
+        "rankSeparation" : 100,
+        "vertices" : true
+      },
+      "description" : "System deploys a new application version.",
+      "elementId" : "8",
+      "elements" : [ {
+        "id" : "3",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "6",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "7",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "9",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "10",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "22",
+        "x" : 0,
+        "y" : 0
+      } ],
+      "externalBoundariesVisible" : false,
+      "key" : "DynamicDeploymentUpdate",
+      "name" : "Dynamic View: MtdrSpring",
+      "order" : 10,
+      "relationships" : [ {
+        "description" : "Triggers build and deployment",
+        "id" : "30",
+        "order" : "1",
+        "response" : false
+      }, {
+        "description" : "Builds and pushes container images",
+        "id" : "31",
+        "order" : "2",
+        "response" : false
+      }, {
+        "description" : "Applies Terraform and Kubernetes manifests",
+        "id" : "31",
+        "order" : "3",
+        "response" : false
+      }, {
+        "description" : "Runs updated frontend container",
+        "id" : "41",
+        "order" : "4",
+        "response" : false
+      }, {
+        "description" : "Runs updated backend container",
+        "id" : "43",
+        "order" : "5",
+        "response" : false
+      }, {
+        "description" : "Uses existing persistent data",
+        "id" : "36",
+        "order" : "6",
+        "response" : false
+      } ]
+    } ],
+    "systemContextViews" : [ {
+      "automaticLayout" : {
+        "edgeSeparation" : 50,
+        "nodeSeparation" : 50,
+        "rankDirection" : "LeftRight",
+        "rankSeparation" : 100,
+        "vertices" : true
+      },
+      "elements" : [ {
+        "id" : "1",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "2",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "3",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "4",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "5",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "6",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "8",
+        "x" : 0,
+        "y" : 0
+      } ],
+      "enterpriseBoundaryVisible" : true,
+      "key" : "SystemContext",
+      "name" : "System Context View: MtdrSpring",
+      "order" : 2,
+      "relationships" : [ {
+        "id" : "23"
+      }, {
+        "id" : "24"
+      }, {
+        "id" : "25"
+      }, {
+        "id" : "26"
+      }, {
+        "id" : "29"
+      }, {
+        "id" : "33"
+      }, {
+        "id" : "38"
+      }, {
+        "id" : "40"
+      }, {
+        "id" : "42"
+      }, {
+        "id" : "54"
+      } ],
+      "softwareSystemId" : "8"
+    } ],
+    "systemLandscapeViews" : [ {
+      "automaticLayout" : {
+        "edgeSeparation" : 50,
+        "nodeSeparation" : 50,
+        "rankDirection" : "LeftRight",
+        "rankSeparation" : 100,
+        "vertices" : true
+      },
+      "elements" : [ {
+        "id" : "1",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "2",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "3",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "4",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "5",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "6",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "7",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "8",
+        "x" : 0,
+        "y" : 0
+      } ],
+      "enterpriseBoundaryVisible" : true,
+      "key" : "SystemLandscape",
+      "name" : "System Landscape View",
+      "order" : 1,
+      "relationships" : [ {
+        "id" : "23"
+      }, {
+        "id" : "24"
+      }, {
+        "id" : "25"
+      }, {
+        "id" : "26"
+      }, {
+        "id" : "29"
+      }, {
+        "id" : "30"
+      }, {
+        "id" : "31"
+      }, {
+        "id" : "33"
+      }, {
+        "id" : "38"
+      }, {
+        "id" : "40"
+      }, {
+        "id" : "42"
+      }, {
+        "id" : "54"
+      } ]
+    } ]
+  }
+}
