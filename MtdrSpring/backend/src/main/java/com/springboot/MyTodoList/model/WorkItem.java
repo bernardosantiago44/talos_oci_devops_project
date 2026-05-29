@@ -61,9 +61,12 @@ public class WorkItem {
 
     @OneToMany(mappedBy = "workItem", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<WorkItemAssignment> assignments = new HashSet<>();
-    
+
     @OneToMany(mappedBy = "workItem", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<WorkItemTag> tags = new HashSet<>();
+
+    @OneToMany(mappedBy = "workItem", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<TimeEntry> timeEntries = new HashSet<>();
 
     public WorkItem() {}
 }

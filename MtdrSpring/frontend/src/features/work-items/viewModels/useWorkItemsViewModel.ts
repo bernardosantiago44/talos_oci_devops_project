@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo } from 'react';
-import { useAppUserList, useSprintList, useTagList, useTimeEntryCreate, useWorkItemCreate, useWorkItemList, useWorkItemUpdate } from '@/hooks/api';
+import { useAppUserList, useSprintList, useTagList, useTimeEntryCreate, useWorkItemCreate, useWorkItemDelete, useWorkItemList, useWorkItemUpdate } from '@/hooks/api';
 import type { AppUserSummary, CreateWorkItemRequest, SprintResponse, TagResponse, UpdateWorkItemRequest, WorkItemQuery, WorkItemResponse } from '@/api/generated';
 import type { ViewMode } from '@/features/work-items/components/dashboard/dashboard-toolbar';
 import type { WorkItemDetailDto, Assignee } from '../dtos/work-item-detail.dto';
@@ -194,6 +194,7 @@ export const useWorkItemsViewModel = () => {
   const tagsQuery = useTagList();
   const createWorkItemMutation = useWorkItemCreate();
   const updateWorkItemMutation = useWorkItemUpdate();
+  const deleteWorkItemMutation = useWorkItemDelete();
   const createTimeEntryMutation = useTimeEntryCreate();
 
   const [modals, setModals] = useState({
@@ -281,6 +282,11 @@ export const useWorkItemsViewModel = () => {
     },
     [updateWorkItemMutation]
   );
+
+  const handleDelete = useCallback(async (item: WorkItemDetailDto) => {
+    if (!window.confirm(`¿Eliminar "${item.title}"?`)) return;
+    await deleteWorkItemMutation.mutateAsync(item.id);
+  }, [deleteWorkItemMutation]);
 
   const handleEdit = useCallback((item: WorkItemDetailDto) => {
     setModals(prev => ({
@@ -397,6 +403,7 @@ export const useWorkItemsViewModel = () => {
       handleComplete,
       handleLogWork,
       handleWorkLogSubmit,
+      handleDelete,
       handleEdit,
       handleEditFromDetail,
       handleCompleteFromDetail,
