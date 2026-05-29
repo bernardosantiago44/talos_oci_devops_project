@@ -1,0 +1,10 @@
+services:
+  structurizr:
+    image: structurizr/structurizr:latest
+    container_name: mtdrspring-structurizr
+    command: local
+    ports:
+      - "8081:8080"
+    volumes:
+      - ./:/usr/local/structurizr
+    restart: unless-stopped
