@@ -18,7 +18,7 @@ model {
 
     mtdrSpring = softwareSystem "MtdrSpring" "Todo and work management platform for sprint planning, work assignment, time tracking, analytics, and Telegram interactions." {
         frontend = container "Frontend Web Application" "Browser-based UI for work items, sprints, tags, assignments, time entries, and analytics dashboards." "React, TypeScript, Nginx"
-        backend = container "Backend API Monolith" "Single Spring Boot deployable containing REST APIs, business services, Telegram bot integration, analytics, semantic search, and persistence access." "Java 25, Spring Boot" {
+        backend = container "Backend API Layered Monolith" "Single Spring Boot deployable containing REST APIs, business services, Telegram bot integration, analytics, semantic search, and persistence access." "Java 25, Spring Boot" {
             restControllers = component "REST Controllers" "HTTP entrypoints for work items, users, sprints, tags, time entries, analytics, and semantic search." "Spring MVC Controllers"
             workManagement = component "Work Management" "Creates, updates, searches, organizes, and deletes work items such as tasks, issues, bugs, and features." "Spring Service"
             timeTracking = component "Time Tracking" "Registers estimates, actual time, work sessions, and time notes for assigned work." "Spring Service"
@@ -49,7 +49,6 @@ model {
     mtdrSpring.frontend -> mtdrSpring.backend "Calls REST APIs" "JSON/HTTPS"
     mtdrSpring.frontend -> mtdrSpring.backend.restControllers "Sends API requests" "JSON/HTTPS"
     mtdrSpring.backend -> mtdrSpring.database "Reads and writes project data" "JDBC"
-    mtdrSpring.backend -> telegram "Sends bot responses" "HTTPS"
     mtdrSpring.backend -> aiProviders "Requests chat assistance and embeddings" "HTTPS"
     ociPlatform -> mtdrSpring.frontend "Hosts container"
     ociPlatform -> mtdrSpring.backend "Hosts container"
@@ -61,12 +60,9 @@ model {
     mtdrSpring.backend.restControllers -> mtdrSpring.backend.assignmentManagement "Routes assignment requests"
     mtdrSpring.backend.restControllers -> mtdrSpring.backend.reportingAnalytics "Routes analytics requests"
     mtdrSpring.backend.restControllers -> mtdrSpring.backend.semanticSearch "Routes semantic search requests"
-    mtdrSpring.backend.restControllers -> mtdrSpring.frontend "Returns API responses" "JSON/HTTPS"
     telegram -> mtdrSpring.backend.botInterface "Delivers bot updates" "HTTPS"
-    telegram -> developer "Displays bot responses"
     mtdrSpring.backend.botInterface -> mtdrSpring.backend.workManagement "Looks up developer work"
     mtdrSpring.backend.botInterface -> mtdrSpring.backend.timeTracking "Records time from bot commands"
-    mtdrSpring.backend.botInterface -> telegram "Sends command responses" "HTTPS"
     mtdrSpring.backend.workManagement -> mtdrSpring.backend.assignmentManagement "Coordinates assignee changes"
     mtdrSpring.backend.workManagement -> mtdrSpring.backend.sprintManagement "Validates sprint references"
     mtdrSpring.backend.workManagement -> mtdrSpring.backend.activityTracking "Records work item changes"
