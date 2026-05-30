@@ -48,13 +48,17 @@ jobs:
 
     - name: Build the Docker image
       working-directory: MtdrSpring/frontend
+      env:
+        EVENT_NAME: ${{ github.event_name }}
+        ENV_INPUT: ${{ inputs.environment }}
+      
       run: |
         export IMAGE_VERSION=${{ needs.setup.outputs.timestamp }}
         export CI=false
         export IMAGE_NAME=talos-frontend
         export IMAGE=${DOCKER_REGISTRY}/${IMAGE_NAME}:${IMAGE_VERSION}
         docker build -t ${IMAGE} .
-        if [[ "${{ github.event_name }}" == "push" -o "${{ inputs.environment }}" == 'deploy' ]]; then
+        if [[ "$EVENT_NAME" == "push" || "$ENV_INPUT" == "deploy" ]]; then
           docker push ${IMAGE}
         else
           echo "PR detected: Skipping docker push."

@@ -55,10 +55,13 @@ jobs:
 
     - name: Build the Docker image
       working-directory: MtdrSpring/backend
+      env:
+        EVENT_NAME: ${{ github.event_name }}
+        ENV_INPUT: ${{ inputs.environment }}
       run: |
         mvn clean package spring-boot:repackage
 
-        if [[ "${{ github.event_name }}" == "push"  || "${{ inputs.environment }}" == 'deploy' ]]; then
+        if [[ "$EVENT_NAME" == "push" || "$ENV_INPUT" == "deploy" ]]; then
           export IMAGE_NAME=todolistapp-springboot
           export IMAGE_VERSION=${{ needs.setup.outputs.timestamp }}
           export IMAGE=${DOCKER_REGISTRY}/${IMAGE_NAME}:${IMAGE_VERSION}
