@@ -105,7 +105,7 @@ jobs:
           sed -i "s|%TODO_PDB_NAME%|${{ vars.TODO_PDB_NAME }}|g" ./ready-to-deploy.yaml
           sed -i "s|%UI_USERNAME%|${{ vars.UI_USERNAME }}|g" ./ready-to-deploy.yaml
           sed -i "s|%TELEGRAM_BOT_TOKEN%|${{ secrets.TELEGRAM_BOT_TOKEN }}|g" ./ready-to-deploy.yaml
-          sed -i "s|%TELEGRAM_BOT_NAME%|${{ vars.TELEGRAM_BOT_NAME }}|g" ./ready-to-deploy.yaml
+          sed -i "s|%TELEGRAM_BOT_NAME%|${{ vars.TELEGRAM_BOT_USERNAME }}|g" ./ready-to-deploy.yaml
           sed -i "s|%DB_URL%|${{ vars.DB_URL }}|g" ./ready-to-deploy.yaml
           sed -i "s|%DB_USERNAME%|${{ vars.DB_USERNAME }}|g" ./ready-to-deploy.yaml
           sed -i "s|%DB_PASSWORD%|${{ secrets.DB_PASSWORD }}|g" ./ready-to-deploy.yaml
