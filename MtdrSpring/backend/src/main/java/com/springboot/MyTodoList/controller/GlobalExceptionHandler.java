@@ -6,6 +6,7 @@ import com.springboot.MyTodoList.model.WorkItemPriority;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -104,6 +105,19 @@ public class GlobalExceptionHandler {
                         "status", 400,
                         "error", "BUSINESS_RULE_VIOLATION",
                         "message", ex.getMessage()
+                ));
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<Map<String, Object>> handleBadCredentials(
+            BadCredentialsException ex
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(Map.of(
+                        "status", 401,
+                        "error", "UNAUTHORIZED",
+                        "message", "Invalid email or password"
                 ));
     }
 }

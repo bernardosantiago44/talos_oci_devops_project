@@ -92,7 +92,7 @@ export function useWorkItemUpdate() {
 export function useWorkItemDelete() {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (id) => readData(deleteWorkItem({ client: apiClient, path: { id }, throwOnError: true })),
+        mutationFn: (id) => deleteWorkItem({ client: apiClient, path: { id }, throwOnError: true }),
         onSuccess: (_data, id) => {
             queryClient.invalidateQueries({ queryKey: apiQueryKeys.workItems.all });
             queryClient.invalidateQueries({ queryKey: apiQueryKeys.workItems.detail(id) });

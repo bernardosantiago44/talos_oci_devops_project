@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Layers, Sun, Moon, BarChart2, Sparkles } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Layers, Sun, Moon, BarChart2, Sparkles, LogOut, UserCircle } from 'lucide-react';
 import { DashboardSummaryCards } from '../components/dashboard/dashboard-summary-cards';
 import { DashboardToolbar } from '../components/dashboard/dashboard-toolbar';
 import { WorkItemListView } from '../components/dashboard/work-item-list-view';
@@ -11,6 +12,7 @@ import { TagManagerModal } from '../components/dashboard/tag-manager-modal';
 import { useWorkItemsViewModel } from "@/features/work-items/viewModels/useWorkItemsViewModel";
 import type { IWorkItemsViewModel } from "@/features/work-items/viewModels/useWorkItemsViewModel";
 import { useTheme } from '@/contexts/theme-context';
+import { useAuth } from '@/contexts/auth-context';
 import { AnalyticsPage } from './analytics-page';
 import { SemanticSearchPanel } from '../components/dashboard/semantic-search-panel';
 
@@ -19,8 +21,15 @@ type Tab = 'workitems' | 'ai-search' | 'analytics';
 export function WorkItemDashboardPage() {
   const viewModel: IWorkItemsViewModel = useWorkItemsViewModel();
   const { theme, toggle } = useTheme();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<Tab>('workitems');
   const [tagManagerOpen, setTagManagerOpen] = useState(false);
+
+  function handleLogout() {
+    logout();
+    navigate('/login', { replace: true });
+  }
 
   return (
     <div className="min-h-screen bg-zinc-50 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100">
@@ -38,25 +47,45 @@ export function WorkItemDashboardPage() {
             </div>
           </div>
 
-          {/* Theme toggle */}
-          <button
-            type="button"
-            onClick={toggle}
-            title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-            className="flex items-center gap-2 rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-100 hover:text-zinc-800 dark:border-zinc-700/60 dark:bg-zinc-800/60 dark:text-zinc-300 dark:hover:bg-zinc-700 dark:hover:text-zinc-100"
-          >
-            {theme === 'dark' ? (
-              <>
-                <Sun className="h-4 w-4" />
-                <span>Light</span>
-              </>
-            ) : (
-              <>
-                <Moon className="h-4 w-4" />
-                <span>Dark</span>
-              </>
-            )}
-          </button>
+          <div className="flex flex-wrap items-center gap-2">
+            <Link
+              to="/profile"
+              className="flex items-center gap-2 rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-100 hover:text-zinc-800 dark:border-zinc-700/60 dark:bg-zinc-800/60 dark:text-zinc-300 dark:hover:bg-zinc-700 dark:hover:text-zinc-100"
+              title="Profile"
+            >
+              <UserCircle className="h-4 w-4" />
+              <span className="max-w-[140px] truncate">{user?.name ?? 'Profile'}</span>
+            </Link>
+
+            <button
+              type="button"
+              onClick={handleLogout}
+              title="Sign out"
+              className="flex items-center gap-2 rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-100 hover:text-zinc-800 dark:border-zinc-700/60 dark:bg-zinc-800/60 dark:text-zinc-300 dark:hover:bg-zinc-700 dark:hover:text-zinc-100"
+            >
+              <LogOut className="h-4 w-4" />
+              <span>Sign out</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={toggle}
+              title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+              className="flex items-center gap-2 rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-100 hover:text-zinc-800 dark:border-zinc-700/60 dark:bg-zinc-800/60 dark:text-zinc-300 dark:hover:bg-zinc-700 dark:hover:text-zinc-100"
+            >
+              {theme === 'dark' ? (
+                <>
+                  <Sun className="h-4 w-4" />
+                  <span>Light</span>
+                </>
+              ) : (
+                <>
+                  <Moon className="h-4 w-4" />
+                  <span>Dark</span>
+                </>
+              )}
+            </button>
+          </div>
         </div>
 
         {/* Tabs */}

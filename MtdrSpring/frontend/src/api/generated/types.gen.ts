@@ -603,6 +603,100 @@ export type DeveloperSprintAnalytics = {
     TASKS_COMPLETED?: number;
 };
 
+/**
+ * Request payload for creating an app user account.
+ */
+export type SignupRequest = {
+    /**
+     * Display name.
+     */
+    name: string;
+    /**
+     * Unique account email address.
+     */
+    email: string;
+    /**
+     * Plain account password. Stored only as a BCrypt hash.
+     */
+    password: string;
+};
+
+/**
+ * Request payload for signing in with email and password.
+ */
+export type LoginRequest = {
+    /**
+     * Account email address.
+     */
+    email: string;
+    /**
+     * Account password.
+     */
+    password: string;
+};
+
+/**
+ * Request payload for updating the authenticated user's profile.
+ */
+export type UpdateProfileRequest = {
+    /**
+     * Updated display name.
+     */
+    name?: string;
+    /**
+     * Updated Telegram user identifier.
+     */
+    telegramUserId?: string;
+    /**
+     * Updated phone number.
+     */
+    phoneNumber?: string;
+    /**
+     * New plain password. Stored only as a BCrypt hash.
+     */
+    password?: string;
+};
+
+/**
+ * Safe app user profile fields.
+ */
+export type UserProfileResponse = {
+    /**
+     * User identifier.
+     */
+    userId?: string;
+    /**
+     * Display name.
+     */
+    name?: string;
+    /**
+     * Email address.
+     */
+    email?: string;
+    /**
+     * Telegram user identifier.
+     */
+    telegramUserId?: string;
+    /**
+     * Phone number.
+     */
+    phoneNumber?: string;
+};
+
+/**
+ * Authentication token and safe user profile.
+ */
+export type AuthResponse = {
+    /**
+     * JWT bearer token.
+     */
+    token?: string;
+    /**
+     * Authenticated user profile.
+     */
+    user?: UserProfileResponse;
+};
+
 export type GetAllWorkItemsData = {
     body?: never;
     path?: never;
@@ -1002,3 +1096,67 @@ export type GetDashboardDataResponses = {
 };
 
 export type GetDashboardDataResponse = GetDashboardDataResponses[keyof GetDashboardDataResponses];
+
+export type SignupData = {
+    body: SignupRequest;
+    path?: never;
+    query?: never;
+    url: '/auth/signup';
+};
+
+export type SignupResponses = {
+    /**
+     * Created
+     */
+    201: AuthResponse;
+};
+
+export type SignupResponse = SignupResponses[keyof SignupResponses];
+
+export type LoginData = {
+    body: LoginRequest;
+    path?: never;
+    query?: never;
+    url: '/auth/login';
+};
+
+export type LoginResponses = {
+    /**
+     * OK
+     */
+    200: AuthResponse;
+};
+
+export type LoginResponse = LoginResponses[keyof LoginResponses];
+
+export type MeData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/auth/me';
+};
+
+export type MeResponses = {
+    /**
+     * OK
+     */
+    200: UserProfileResponse;
+};
+
+export type MeResponse = MeResponses[keyof MeResponses];
+
+export type UpdateMeData = {
+    body: UpdateProfileRequest;
+    path?: never;
+    query?: never;
+    url: '/auth/me';
+};
+
+export type UpdateMeResponses = {
+    /**
+     * OK
+     */
+    200: UserProfileResponse;
+};
+
+export type UpdateMeResponse = UpdateMeResponses[keyof UpdateMeResponses];
