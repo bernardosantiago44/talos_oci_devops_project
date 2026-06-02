@@ -1,8 +1,8 @@
 package com.springboot.MyTodoList.util;
 
-import org.springframework.stereotype.Component;
 import org.springframework.beans.factory.annotation.Value;
-
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import org.springframework.stereotype.Component;
 
 import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
 import org.telegram.telegrambots.longpolling.BotSession;
@@ -16,15 +16,15 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
 @Component
+@ConditionalOnExpression("!'${telegram.bot.token:}'.trim().isEmpty()")
 public class MyTodoListBot implements SpringLongPollingBot, LongPollingSingleThreadUpdateConsumer {
 
     private final TelegramClient telegramClient;
+    private final String telegramBotToken;
 
-    @Value("${telegram.bot.token}")
-	private String telegramBotToken;
-
-    public MyTodoListBot() {
-        telegramClient = new OkHttpTelegramClient(getBotToken());
+    public MyTodoListBot(@Value("${telegram.bot.token:}") String telegramBotToken) {
+        this.telegramBotToken = telegramBotToken;
+        this.telegramClient = new OkHttpTelegramClient(telegramBotToken);
     }
 
     @Override
