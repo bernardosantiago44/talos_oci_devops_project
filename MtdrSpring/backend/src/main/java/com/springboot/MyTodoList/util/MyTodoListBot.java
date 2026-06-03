@@ -4,8 +4,10 @@ import com.springboot.MyTodoList.dto.WorkItem.CreateWorkItemRequest;
 import com.springboot.MyTodoList.dto.WorkItem.WorkItemResponse;
 import com.springboot.MyTodoList.dto.sprint.SprintResponse;
 import com.springboot.MyTodoList.model.AppUser;
+import com.springboot.MyTodoList.model.AppUserSummary;
 import com.springboot.MyTodoList.model.WorkItemPriority;
 import com.springboot.MyTodoList.repository.AppUserRepository;
+import com.springboot.MyTodoList.service.AppUserService;
 import com.springboot.MyTodoList.service.DeepSeekService;
 import com.springboot.MyTodoList.service.SprintService;
 import com.springboot.MyTodoList.service.WorkItemService;
@@ -25,6 +27,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMar
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -40,6 +43,7 @@ public class MyTodoListBot implements SpringLongPollingBot, LongPollingSingleThr
     private final String telegramBotToken;
     private final WorkItemService workItemService;
     private final AppUserRepository appUserRepository;
+    private final AppUserService appUserService;
     private final DeepSeekService deepSeekService;
     private final SprintService sprintService;
 
@@ -49,12 +53,14 @@ public class MyTodoListBot implements SpringLongPollingBot, LongPollingSingleThr
             @Value("${telegram.bot.token:}") String telegramBotToken,
             WorkItemService workItemService,
             AppUserRepository appUserRepository,
+            AppUserService appUserService,
             DeepSeekService deepSeekService,
             SprintService sprintService) {
         this.telegramBotToken = telegramBotToken;
         this.telegramClient = new OkHttpTelegramClient(telegramBotToken);
         this.workItemService = workItemService;
         this.appUserRepository = appUserRepository;
+        this.appUserService = appUserService;
         this.deepSeekService = deepSeekService;
         this.sprintService = sprintService;
     }
@@ -78,8 +84,24 @@ public class MyTodoListBot implements SpringLongPollingBot, LongPollingSingleThr
         String telegramId = String.valueOf(update.getMessage().getFrom().getId());
         String state = userState.get(chatId);
 
+        // If user is not linked yet, intercept everything except the linking flow
+        if ("WAITING_USER_LINK".equals(state)) {
+            handleUserLink(chatId, telegramId, text);
+            return;
+        }
+
+        Optional<AppUser> linkedUser = appUserRepository.findByTelegramUserId(telegramId);
+        if (linkedUser.isEmpty() && !text.equals(BotCommands.START_COMMAND.getCommand())) {
+            askUserToIdentify(chatId);
+            return;
+        }
+
         if (text.equals(BotCommands.START_COMMAND.getCommand())) {
-            handleStart(chatId);
+            if (linkedUser.isEmpty()) {
+                askUserToIdentify(chatId);
+            } else {
+                handleStart(chatId, linkedUser.get().getName());
+            }
         } else if (text.equals(BotCommands.HIDE_COMMAND.getCommand())) {
             handleHide(chatId);
         } else if (text.equals(BotCommands.TODO_LIST.getCommand())) {
@@ -98,9 +120,49 @@ public class MyTodoListBot implements SpringLongPollingBot, LongPollingSingleThr
         }
     }
 
-    private void handleStart(long chatId) {
-        ReplyKeyboardMarkup keyboard = buildMainKeyboard();
-        BotHelper.sendMessageToTelegram(chatId, BotMessages.HELLO_MYTODO_BOT.getMessage(), telegramClient, keyboard);
+    private void askUserToIdentify(long chatId) {
+        List<AppUserSummary> users = appUserService.findAll();
+        if (users.isEmpty()) {
+            BotHelper.sendMessageToTelegram(chatId, "No users found in the system. Contact your administrator.", telegramClient);
+            return;
+        }
+
+        ReplyKeyboardMarkup keyboard = buildUserSelectionKeyboard(users);
+        userState.put(chatId, "WAITING_USER_LINK");
+        BotHelper.sendMessageToTelegram(chatId,
+                "Who are you? Select your name to link your Telegram account:",
+                telegramClient, keyboard);
+    }
+
+    private void handleUserLink(long chatId, String telegramId, String selectedName) {
+        List<AppUserSummary> users = appUserService.findAll();
+        Optional<AppUserSummary> match = users.stream()
+                .filter(u -> u.name().equalsIgnoreCase(selectedName))
+                .findFirst();
+
+        if (match.isEmpty()) {
+            BotHelper.sendMessageToTelegram(chatId,
+                    "Name not recognized. Please select your name from the list.",
+                    telegramClient, buildUserSelectionKeyboard(users));
+            return;
+        }
+
+        AppUser user = appUserRepository.findById(match.get().userId()).orElse(null);
+        if (user == null) {
+            BotHelper.sendMessageToTelegram(chatId, "Error finding your account. Try again later.", telegramClient);
+            return;
+        }
+
+        user.setTelegramUserId(telegramId);
+        appUserRepository.save(user);
+        userState.remove(chatId);
+
+        handleStart(chatId, user.getName());
+    }
+
+    private void handleStart(long chatId, String userName) {
+        String greeting = "Welcome, " + userName + "! " + BotMessages.HELLO_MYTODO_BOT.getMessage();
+        BotHelper.sendMessageToTelegram(chatId, greeting, telegramClient, buildMainKeyboard());
         userState.remove(chatId);
     }
 
@@ -136,9 +198,7 @@ public class MyTodoListBot implements SpringLongPollingBot, LongPollingSingleThr
 
         Optional<AppUser> user = appUserRepository.findByTelegramUserId(telegramId);
         if (user.isEmpty()) {
-            BotHelper.sendMessageToTelegram(chatId,
-                    "Your Telegram account is not linked to any user in the system. Contact your administrator.",
-                    telegramClient);
+            askUserToIdentify(chatId);
             return;
         }
 
@@ -196,6 +256,24 @@ public class MyTodoListBot implements SpringLongPollingBot, LongPollingSingleThr
         return ReplyKeyboardMarkup.builder()
                 .keyboard(List.of(row1, row2))
                 .resizeKeyboard(true)
+                .build();
+    }
+
+    private ReplyKeyboardMarkup buildUserSelectionKeyboard(List<AppUserSummary> users) {
+        List<KeyboardRow> rows = new ArrayList<>();
+        KeyboardRow row = new KeyboardRow();
+        for (int i = 0; i < users.size(); i++) {
+            row.add(users.get(i).name());
+            // Max 2 names per row
+            if (row.size() == 2 || i == users.size() - 1) {
+                rows.add(row);
+                row = new KeyboardRow();
+            }
+        }
+        return ReplyKeyboardMarkup.builder()
+                .keyboard(rows)
+                .resizeKeyboard(true)
+                .oneTimeKeyboard(true)
                 .build();
     }
 
