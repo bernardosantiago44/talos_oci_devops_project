@@ -15,13 +15,13 @@ interface SprintManagerModalProps {
 
 const STATUS_LABELS: Record<string, string> = {
     ACTIVE: 'Active',
-    INACTIVE: 'Inactive',
+    CLOSED: 'Closed',
     COMPLETED: 'Completed',
 };
 
 const STATUS_COLORS: Record<string, string> = {
     ACTIVE: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300',
-    INACTIVE: 'bg-zinc-100 text-zinc-600 dark:bg-zinc-700/50 dark:text-zinc-400',
+    CLOSED: 'bg-zinc-100 text-zinc-600 dark:bg-zinc-700/50 dark:text-zinc-400',
     COMPLETED: 'bg-sky-50 text-sky-700 dark:bg-sky-500/15 dark:text-sky-300',
 };
 
@@ -97,7 +97,7 @@ export function SprintManagerModal({ isOpen, sprints, users, onClose }: SprintMa
     }
 
     async function handleToggleStatus(sprint: SprintDto) {
-        const next = sprint.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
+        const next = sprint.status === 'ACTIVE' ? 'CLOSED' : 'ACTIVE';
         setError('');
         try {
             await updateStatusMutation.mutateAsync({ id: sprint.sprintId, status: next });
@@ -199,7 +199,7 @@ export function SprintManagerModal({ isOpen, sprints, users, onClose }: SprintMa
                                             type="button"
                                             onClick={() => handleToggleStatus(sprint)}
                                             disabled={updateStatusMutation.isPending && updateStatusMutation.variables?.id === sprint.sprintId}
-                                            title={sprint.status === 'ACTIVE' ? 'Deactivate sprint' : 'Activate sprint'}
+                                            title={sprint.status === 'ACTIVE' ? 'Close sprint' : 'Reopen sprint'}
                                             className={`rounded-lg p-2 transition-colors disabled:opacity-50 ${
                                                 sprint.status === 'ACTIVE'
                                                     ? 'text-amber-500 hover:bg-amber-50 hover:text-amber-700 dark:text-amber-400 dark:hover:bg-amber-500/10'
