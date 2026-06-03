@@ -64,12 +64,16 @@ export function SprintManagerModal({ isOpen, sprints, onClose }: SprintManagerMo
         }
         setError('');
         const teamId = sprints.find(s => s.teamId)?.teamId ?? undefined;
+        const today = new Date().toISOString().slice(0, 10);
+        const endDate = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
         try {
             await createSprintMutation.mutateAsync({
                 sprintId: `sprint-${num}`,
                 teamId,
                 name: `Sprint ${num}`,
                 status: 'ACTIVE',
+                startDate: today,
+                endDate,
             });
             backToList();
         } catch (err: unknown) {
