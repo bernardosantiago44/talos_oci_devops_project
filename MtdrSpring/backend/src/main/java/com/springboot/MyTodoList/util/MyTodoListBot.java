@@ -39,7 +39,9 @@ public class MyTodoListBot implements SpringLongPollingBot, LongPollingSingleThr
 
     private static final Logger logger = LoggerFactory.getLogger(MyTodoListBot.class);
 
-    private static final String SKIP = "/skip";
+    private static final String SKIP        = "/skip";
+    private static final String VIEW_DETAIL = "View Task Detail";
+    private static final String BACK        = "Back to Menu";
 
     private final TelegramClient telegramClient;
     private final String telegramBotToken;
@@ -50,8 +52,9 @@ public class MyTodoListBot implements SpringLongPollingBot, LongPollingSingleThr
     private final SprintService sprintService;
 
     private final Map<Long, String> userState = new ConcurrentHashMap<>();
-    // Stores the in-progress work item form per chat
     private final Map<Long, CreateWorkItemRequest> pendingItems = new ConcurrentHashMap<>();
+    // Stores last shown task list so user can pick one by number for details
+    private final Map<Long, List<WorkItemResponse>> lastTaskList = new ConcurrentHashMap<>();
 
     public MyTodoListBot(
             @Value("${telegram.bot.token:}") String telegramBotToken,
@@ -117,6 +120,10 @@ public class MyTodoListBot implements SpringLongPollingBot, LongPollingSingleThr
             handleTodoListBySprint(chatId, telegramId, text);
             return;
         }
+        if ("TODOLIST_PICK_DETAIL".equals(state)) {
+            handleTaskDetail(chatId, text);
+            return;
+        }
 
         Optional<AppUser> linkedUser = appUserRepository.findByTelegramUserId(telegramId);
         if (linkedUser.isEmpty() && !text.equals(BotCommands.START_COMMAND.getCommand())) {
@@ -137,6 +144,10 @@ public class MyTodoListBot implements SpringLongPollingBot, LongPollingSingleThr
         } else if (text.equals(TODO_ACTIVE) || text.equals(TODO_COMPLETED)
                 || text.equals(TODO_BY_SPRINT) || text.equals(TODO_ALL)) {
             handleTodoListMenu(chatId, telegramId, text);
+        } else if (text.equals(VIEW_DETAIL)) {
+            promptPickTaskDetail(chatId);
+        } else if (text.equals(BACK)) {
+            handleStart(chatId, linkedUser.get().getName());
         } else if (text.equals(BotCommands.ADD_ITEM.getCommand())) {
             handleAddItemStart(chatId, telegramId);
         } else if (text.startsWith(BotCommands.LLM_REQ.getCommand())) {
@@ -294,15 +305,88 @@ public class MyTodoListBot implements SpringLongPollingBot, LongPollingSingleThr
             BotHelper.sendMessageToTelegram(chatId, "No tasks found for: " + label, telegramClient);
             return;
         }
+
+        lastTaskList.put(chatId, items);
+
         StringBuilder sb = new StringBuilder(label + ":\n\n");
-        for (WorkItemResponse item : items) {
-            sb.append("• [").append(item.status()).append("] ").append(item.title());
+        for (int i = 0; i < items.size(); i++) {
+            WorkItemResponse item = items.get(i);
+            sb.append(i + 1).append(". [").append(item.status()).append("] ").append(item.title());
             if (item.estimatedMinutes() != null) {
                 sb.append(" (~").append(item.estimatedMinutes()).append(" min)");
             }
             sb.append("\n");
         }
-        BotHelper.sendMessageToTelegram(chatId, sb.toString(), telegramClient);
+
+        KeyboardRow row1 = new KeyboardRow();
+        row1.add(VIEW_DETAIL);
+        row1.add(BACK);
+        ReplyKeyboardMarkup keyboard = ReplyKeyboardMarkup.builder()
+                .keyboard(List.of(row1))
+                .resizeKeyboard(true)
+                .build();
+        BotHelper.sendMessageToTelegram(chatId, sb.toString(), telegramClient, keyboard);
+    }
+
+    private void promptPickTaskDetail(long chatId) {
+        List<WorkItemResponse> tasks = lastTaskList.get(chatId);
+        if (tasks == null || tasks.isEmpty()) {
+            BotHelper.sendMessageToTelegram(chatId, "No task list available. Use /todolist first.", telegramClient);
+            return;
+        }
+        List<String> numbers = new ArrayList<>();
+        for (int i = 1; i <= tasks.size(); i++) numbers.add(String.valueOf(i));
+        userState.put(chatId, "TODOLIST_PICK_DETAIL");
+        BotHelper.sendMessageToTelegram(chatId,
+                "Which task? Select a number:",
+                telegramClient, buildOptionsKeyboard(numbers, true));
+    }
+
+    private void handleTaskDetail(long chatId, String text) {
+        userState.remove(chatId);
+        List<WorkItemResponse> tasks = lastTaskList.get(chatId);
+        int index;
+        try {
+            index = Integer.parseInt(text.trim()) - 1;
+        } catch (NumberFormatException e) {
+            BotHelper.sendMessageToTelegram(chatId, "Please enter a valid number.", telegramClient);
+            return;
+        }
+        if (tasks == null || index < 0 || index >= tasks.size()) {
+            BotHelper.sendMessageToTelegram(chatId, "Invalid number. Please try again.", telegramClient);
+            return;
+        }
+
+        WorkItemResponse item = tasks.get(index);
+        StringBuilder sb = new StringBuilder();
+        sb.append("Task Detail\n\n");
+        sb.append("Title: ").append(item.title()).append("\n");
+        sb.append("Status: ").append(item.status()).append("\n");
+        sb.append("Type: ").append(item.workType()).append("\n");
+        sb.append("Priority: ").append(item.priority()).append("\n");
+        sb.append("Sprint: ").append(item.sprintId()).append("\n");
+        if (item.description() != null && !item.description().isBlank()) {
+            sb.append("Description: ").append(item.description()).append("\n");
+        }
+        if (item.estimatedMinutes() != null) {
+            sb.append("Estimated: ").append(item.estimatedMinutes()).append(" min\n");
+        }
+        if (item.dueDate() != null) {
+            sb.append("Due: ").append(item.dueDate()).append("\n");
+        }
+        if (item.assignees() != null && !item.assignees().isEmpty()) {
+            sb.append("Assignees: ");
+            item.assignees().forEach(a -> sb.append(a.user() != null ? a.user().name() : "?").append(" "));
+            sb.append("\n");
+        }
+
+        KeyboardRow row = new KeyboardRow();
+        row.add(BACK);
+        ReplyKeyboardMarkup keyboard = ReplyKeyboardMarkup.builder()
+                .keyboard(List.of(row))
+                .resizeKeyboard(true)
+                .build();
+        BotHelper.sendMessageToTelegram(chatId, sb.toString(), telegramClient, keyboard);
     }
 
     // --- Add item multi-step form ---
