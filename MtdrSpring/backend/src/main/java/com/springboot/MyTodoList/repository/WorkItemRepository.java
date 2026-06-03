@@ -19,7 +19,9 @@ public interface WorkItemRepository extends JpaRepository<WorkItem, String>, Jpa
     @EntityGraph(attributePaths = {
             "assignments",
             "assignments.assignedUser",
-            "assignments.assignedByUser"
+            "assignments.assignedByUser",
+            "tags",
+            "tags.tag"
     })
     @Query("""
         SELECT wi FROM WorkItem wi
