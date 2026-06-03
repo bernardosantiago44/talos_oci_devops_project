@@ -226,24 +226,25 @@ public class MyTodoListBot implements SpringLongPollingBot, LongPollingSingleThr
         }
 
         List<SprintResponse> sprints = sprintService.findAll();
-        Optional<SprintResponse> activeSprint = sprints.stream()
-                .filter(s -> "ACTIVE".equalsIgnoreCase(s.status()))
-                .findFirst();
-
-        if (activeSprint.isEmpty()) {
-            BotHelper.sendMessageToTelegram(chatId, "No active sprint found. Cannot create work item.", telegramClient);
+        if (sprints.isEmpty()) {
+            BotHelper.sendMessageToTelegram(chatId, "No sprints found. Cannot create work item.", telegramClient);
             return;
         }
 
         CreateWorkItemRequest req = new CreateWorkItemRequest();
-        req.setSprintId(activeSprint.get().sprintId());
         req.setCreatedByUserId(user.get().getUserId());
         req.setStatus("NEW");
         req.setAssigneeIds(List.of(user.get().getUserId()));
 
         pendingItems.put(chatId, req);
-        userState.put(chatId, "ITEM_TITLE");
-        BotHelper.sendMessageToTelegram(chatId, "Step 1/4 — Title:\nWhat is the title of the task?", telegramClient);
+        userState.put(chatId, "ITEM_SPRINT");
+
+        List<String> sprintOptions = sprints.stream()
+                .map(s -> s.sprintId() + " — " + s.name())
+                .toList();
+        BotHelper.sendMessageToTelegram(chatId,
+                "Step 1/5 — Sprint:\nWhich sprint is this task for?",
+                telegramClient, buildOptionsKeyboard(sprintOptions, true));
     }
 
     private void handleAddItemStep(long chatId, String telegramId, String text, String state) {
@@ -255,11 +256,26 @@ public class MyTodoListBot implements SpringLongPollingBot, LongPollingSingleThr
         }
 
         switch (state) {
+            case "ITEM_SPRINT" -> {
+                // Text format: "sprint-id — Sprint Name", extract the id before " — "
+                String sprintId = text.contains(" — ") ? text.split(" — ")[0].trim() : text.trim();
+                List<SprintResponse> sprints = sprintService.findAll();
+                boolean valid = sprints.stream().anyMatch(s -> s.sprintId().equals(sprintId));
+                if (!valid) {
+                    List<String> opts = sprints.stream().map(s -> s.sprintId() + " — " + s.name()).toList();
+                    BotHelper.sendMessageToTelegram(chatId, "Please select a sprint from the list.",
+                            telegramClient, buildOptionsKeyboard(opts, true));
+                    return;
+                }
+                req.setSprintId(sprintId);
+                userState.put(chatId, "ITEM_TITLE");
+                BotHelper.sendMessageToTelegram(chatId, "Step 2/5 — Title:\nWhat is the title of the task?", telegramClient);
+            }
             case "ITEM_TITLE" -> {
                 req.setTitle(text);
                 userState.put(chatId, "ITEM_DESCRIPTION");
                 BotHelper.sendMessageToTelegram(chatId,
-                        "Step 2/4 — Description (optional):\nAdd a description or send " + SKIP + " to skip.",
+                        "Step 3/5 — Description (optional):\nAdd a description or send " + SKIP + " to skip.",
                         telegramClient);
             }
             case "ITEM_DESCRIPTION" -> {
@@ -268,7 +284,7 @@ public class MyTodoListBot implements SpringLongPollingBot, LongPollingSingleThr
                 }
                 userState.put(chatId, "ITEM_TYPE");
                 BotHelper.sendMessageToTelegram(chatId,
-                        "Step 3/4 — Type:\nWhat type of work is this?",
+                        "Step 4/5 — Type:\nWhat type of work is this?",
                         telegramClient, buildOptionsKeyboard(List.of("TASK", "FEATURE", "BUG", "ISSUE"), true));
             }
             case "ITEM_TYPE" -> {
@@ -281,7 +297,7 @@ public class MyTodoListBot implements SpringLongPollingBot, LongPollingSingleThr
                 req.setWorkType(type);
                 userState.put(chatId, "ITEM_PRIORITY");
                 BotHelper.sendMessageToTelegram(chatId,
-                        "Step 4/4 — Priority:",
+                        "Step 5/5 — Priority:",
                         telegramClient, buildOptionsKeyboard(List.of("LOW", "MEDIUM", "HIGH"), true));
             }
             case "ITEM_PRIORITY" -> {
