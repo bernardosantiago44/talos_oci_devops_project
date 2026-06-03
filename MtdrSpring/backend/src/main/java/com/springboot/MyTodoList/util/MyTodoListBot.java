@@ -108,6 +108,16 @@ public class MyTodoListBot implements SpringLongPollingBot, LongPollingSingleThr
             return;
         }
 
+        // Todolist sub-menu states
+        if ("TODOLIST_COMPLETED_SPRINT".equals(state)) {
+            handleTodoListCompletedSprint(chatId, telegramId, text);
+            return;
+        }
+        if ("TODOLIST_BY_SPRINT".equals(state)) {
+            handleTodoListBySprint(chatId, telegramId, text);
+            return;
+        }
+
         Optional<AppUser> linkedUser = appUserRepository.findByTelegramUserId(telegramId);
         if (linkedUser.isEmpty() && !text.equals(BotCommands.START_COMMAND.getCommand())) {
             askUserToIdentify(chatId);
@@ -124,6 +134,9 @@ public class MyTodoListBot implements SpringLongPollingBot, LongPollingSingleThr
             handleHide(chatId);
         } else if (text.equals(BotCommands.TODO_LIST.getCommand())) {
             handleTodoList(chatId, telegramId);
+        } else if (text.equals(TODO_ACTIVE) || text.equals(TODO_COMPLETED)
+                || text.equals(TODO_BY_SPRINT) || text.equals(TODO_ALL)) {
+            handleTodoListMenu(chatId, telegramId, text);
         } else if (text.equals(BotCommands.ADD_ITEM.getCommand())) {
             handleAddItemStart(chatId, telegramId);
         } else if (text.startsWith(BotCommands.LLM_REQ.getCommand())) {
@@ -192,6 +205,13 @@ public class MyTodoListBot implements SpringLongPollingBot, LongPollingSingleThr
 
     // --- Todo list ---
 
+    private static final String TODO_ACTIVE    = "Active Tasks";
+    private static final String TODO_COMPLETED = "Completed Tasks";
+    private static final String TODO_BY_SPRINT = "By Sprint";
+    private static final String TODO_ALL       = "All Tasks";
+
+    private static final List<String> ACTIVE_STATUSES = List.of("NEW", "TODO", "IN_PROGRESS", "BLOCKED");
+
     private void handleTodoList(long chatId, String telegramId) {
         Optional<AppUser> user = appUserRepository.findByTelegramUserId(telegramId);
         if (user.isEmpty()) {
@@ -199,13 +219,82 @@ public class MyTodoListBot implements SpringLongPollingBot, LongPollingSingleThr
             return;
         }
 
-        List<WorkItemResponse> items = workItemService.findByTelegramUserId(telegramId);
+        // Show sub-menu
+        KeyboardRow row1 = new KeyboardRow();
+        row1.add(TODO_ACTIVE);
+        row1.add(TODO_COMPLETED);
+        KeyboardRow row2 = new KeyboardRow();
+        row2.add(TODO_BY_SPRINT);
+        row2.add(TODO_ALL);
+        ReplyKeyboardMarkup menu = ReplyKeyboardMarkup.builder()
+                .keyboard(List.of(row1, row2))
+                .resizeKeyboard(true)
+                .oneTimeKeyboard(true)
+                .build();
+        BotHelper.sendMessageToTelegram(chatId, "What tasks do you want to see?", telegramClient, menu);
+    }
+
+    private void handleTodoListMenu(long chatId, String telegramId, String option) {
+        switch (option) {
+            case TODO_ACTIVE -> {
+                List<WorkItemResponse> items = workItemService.findByTelegramUserId(telegramId).stream()
+                        .filter(i -> ACTIVE_STATUSES.contains(i.status()))
+                        .toList();
+                sendTaskList(chatId, items, "Active tasks");
+            }
+            case TODO_ALL -> {
+                List<WorkItemResponse> items = workItemService.findByTelegramUserId(telegramId);
+                sendTaskList(chatId, items, "All tasks");
+            }
+            case TODO_COMPLETED -> {
+                userState.put(chatId, "TODOLIST_COMPLETED_SPRINT");
+                askSprintSelection(chatId, "completed tasks");
+            }
+            case TODO_BY_SPRINT -> {
+                userState.put(chatId, "TODOLIST_BY_SPRINT");
+                askSprintSelection(chatId, "tasks");
+            }
+            default -> handleTodoList(chatId, telegramId);
+        }
+    }
+
+    private void handleTodoListCompletedSprint(long chatId, String telegramId, String text) {
+        userState.remove(chatId);
+        String sprintId = text.contains(" — ") ? text.split(" — ")[0].trim() : null;
+        List<WorkItemResponse> items = workItemService.findByTelegramUserId(telegramId).stream()
+                .filter(i -> "DONE".equals(i.status()))
+                .filter(i -> sprintId == null || sprintId.equals(i.sprintId()))
+                .toList();
+        String label = sprintId != null ? "Completed in " + text : "All completed tasks";
+        sendTaskList(chatId, items, label);
+    }
+
+    private void handleTodoListBySprint(long chatId, String telegramId, String text) {
+        userState.remove(chatId);
+        String sprintId = text.contains(" — ") ? text.split(" — ")[0].trim() : null;
+        List<WorkItemResponse> items = workItemService.findByTelegramUserId(telegramId).stream()
+                .filter(i -> sprintId == null || sprintId.equals(i.sprintId()))
+                .toList();
+        String label = sprintId != null ? "Tasks in " + text : "All tasks";
+        sendTaskList(chatId, items, label);
+    }
+
+    private void askSprintSelection(long chatId, String context) {
+        List<SprintResponse> sprints = sprintService.findAll();
+        List<String> options = new ArrayList<>();
+        sprints.forEach(s -> options.add(s.sprintId() + " — " + s.name()));
+        options.add("All Sprints");
+        BotHelper.sendMessageToTelegram(chatId,
+                "Which sprint's " + context + " do you want to see?",
+                telegramClient, buildOptionsKeyboard(options, true));
+    }
+
+    private void sendTaskList(long chatId, List<WorkItemResponse> items, String label) {
         if (items.isEmpty()) {
-            BotHelper.sendMessageToTelegram(chatId, "You have no work items assigned.", telegramClient);
+            BotHelper.sendMessageToTelegram(chatId, "No tasks found for: " + label, telegramClient);
             return;
         }
-
-        StringBuilder sb = new StringBuilder("Your work items:\n\n");
+        StringBuilder sb = new StringBuilder(label + ":\n\n");
         for (WorkItemResponse item : items) {
             sb.append("• [").append(item.status()).append("] ").append(item.title());
             if (item.estimatedMinutes() != null) {
