@@ -84,6 +84,16 @@ public class MyTodoListBot implements SpringLongPollingBot, LongPollingSingleThr
         String telegramId = String.valueOf(update.getMessage().getFrom().getId());
         String state = userState.get(chatId);
 
+        try {
+            dispatch(chatId, telegramId, text, state);
+        } catch (Exception e) {
+            logger.error("Error handling message chatId={} text={}", chatId, text, e);
+            BotHelper.sendMessageToTelegram(chatId, "Something went wrong: " + e.getMessage(), telegramClient);
+        }
+    }
+
+    private void dispatch(long chatId, String telegramId, String text, String state) {
+
         // If user is not linked yet, intercept everything except the linking flow
         if ("WAITING_USER_LINK".equals(state)) {
             handleUserLink(chatId, telegramId, text);
@@ -172,6 +182,12 @@ public class MyTodoListBot implements SpringLongPollingBot, LongPollingSingleThr
     }
 
     private void handleTodoList(long chatId, String telegramId) {
+        Optional<AppUser> user = appUserRepository.findByTelegramUserId(telegramId);
+        if (user.isEmpty()) {
+            askUserToIdentify(chatId);
+            return;
+        }
+
         List<WorkItemResponse> items = workItemService.findByTelegramUserId(telegramId);
         if (items.isEmpty()) {
             BotHelper.sendMessageToTelegram(chatId, "You have no work items assigned.", telegramClient);
