@@ -1,5 +1,6 @@
 package com.springboot.MyTodoList.controller;
 
+import com.springboot.MyTodoList.dto.sprint.SprintCreateRequest;
 import com.springboot.MyTodoList.dto.sprint.SprintResponse;
 import com.springboot.MyTodoList.service.SprintService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -8,6 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -31,5 +33,12 @@ public class SprintController {
             @PathVariable String id
     ) {
         return ResponseEntity.ok(sprintService.findById(id));
+    }
+
+    @PostMapping
+    @Operation(summary = "Create sprint", description = "Creates a new sprint.")
+    public ResponseEntity<SprintResponse> createSprint(@RequestBody SprintCreateRequest request) {
+        SprintResponse created = sprintService.createSprint(request);
+        return ResponseEntity.created(URI.create("/api/sprints/" + created.sprintId())).body(created);
     }
 }

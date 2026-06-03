@@ -1,5 +1,6 @@
 package com.springboot.MyTodoList.service;
 
+import com.springboot.MyTodoList.dto.sprint.SprintCreateRequest;
 import com.springboot.MyTodoList.dto.sprint.SprintMapper;
 import com.springboot.MyTodoList.dto.sprint.SprintResponse;
 import com.springboot.MyTodoList.exception.SprintNotFoundException;
@@ -7,6 +8,7 @@ import com.springboot.MyTodoList.repository.SprintRepository;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -33,5 +35,13 @@ public class SprintService {
                 .findById(id)
                 .map(SprintMapper::toResponse)
                 .orElseThrow(() -> new SprintNotFoundException(id));
+    }
+
+    @Transactional
+    public SprintResponse createSprint(SprintCreateRequest request) {
+        if (sprintRepository.existsById(request.sprintId())) {
+            throw new IllegalArgumentException("Sprint with ID '" + request.sprintId() + "' already exists.");
+        }
+        return SprintMapper.toResponse(sprintRepository.save(SprintMapper.toEntity(request)));
     }
 }

@@ -2,6 +2,7 @@ package com.springboot.MyTodoList.util;
 
 import com.springboot.MyTodoList.dto.WorkItem.CreateWorkItemRequest;
 import com.springboot.MyTodoList.dto.WorkItem.WorkItemResponse;
+import com.springboot.MyTodoList.dto.sprint.SprintCreateRequest;
 import com.springboot.MyTodoList.dto.sprint.SprintResponse;
 import com.springboot.MyTodoList.model.AppUser;
 import com.springboot.MyTodoList.model.AppUserSummary;
@@ -124,6 +125,10 @@ public class MyTodoListBot implements SpringLongPollingBot, LongPollingSingleThr
             handleTaskDetail(chatId, text);
             return;
         }
+        if ("SPRINT_NUMBER".equals(state)) {
+            handleAddSprintNumber(chatId, telegramId, text);
+            return;
+        }
 
         Optional<AppUser> linkedUser = appUserRepository.findByTelegramUserId(telegramId);
         if (linkedUser.isEmpty() && !text.equals(BotCommands.START_COMMAND.getCommand())) {
@@ -150,6 +155,8 @@ public class MyTodoListBot implements SpringLongPollingBot, LongPollingSingleThr
             handleStart(chatId, linkedUser.get().getName());
         } else if (text.equals(BotCommands.ADD_ITEM.getCommand())) {
             handleAddItemStart(chatId, telegramId);
+        } else if (text.equals(BotCommands.ADD_SPRINT.getCommand())) {
+            handleAddSprintStart(chatId, telegramId);
         } else if (text.startsWith(BotCommands.LLM_REQ.getCommand())) {
             String prompt = text.substring(BotCommands.LLM_REQ.getCommand().length()).trim();
             handleLlm(chatId, prompt);
@@ -512,6 +519,53 @@ public class MyTodoListBot implements SpringLongPollingBot, LongPollingSingleThr
         }
     }
 
+    // --- Add sprint ---
+
+    private void handleAddSprintStart(long chatId, String telegramId) {
+        Optional<AppUser> user = appUserRepository.findByTelegramUserId(telegramId);
+        if (user.isEmpty()) {
+            askUserToIdentify(chatId);
+            return;
+        }
+        userState.put(chatId, "SPRINT_NUMBER");
+        BotHelper.sendMessageToTelegram(chatId,
+                "New Sprint\n\nEnter the sprint number (e.g. 3):", telegramClient);
+    }
+
+    private void handleAddSprintNumber(long chatId, String telegramId, String text) {
+        int number;
+        try {
+            number = Integer.parseInt(text.trim());
+            if (number <= 0) throw new NumberFormatException();
+        } catch (NumberFormatException e) {
+            BotHelper.sendMessageToTelegram(chatId, "Please enter a valid positive number.", telegramClient);
+            return;
+        }
+
+        Optional<AppUser> user = appUserRepository.findByTelegramUserId(telegramId);
+        if (user.isEmpty()) {
+            userState.remove(chatId);
+            askUserToIdentify(chatId);
+            return;
+        }
+
+        String sprintId = "sprint-" + number;
+        String sprintName = "Sprint " + number;
+
+        userState.remove(chatId);
+        try {
+            SprintCreateRequest req = new SprintCreateRequest(
+                    sprintId, "team-1", sprintName, null, null, null, "ACTIVE", user.get().getUserId());
+            sprintService.createSprint(req);
+            BotHelper.sendMessageToTelegram(chatId,
+                    "Sprint created!\n\nID: " + sprintId + "\nName: " + sprintName + "\nStatus: ACTIVE",
+                    telegramClient, buildMainKeyboard());
+        } catch (IllegalArgumentException e) {
+            BotHelper.sendMessageToTelegram(chatId,
+                    "Could not create sprint: " + e.getMessage(), telegramClient, buildMainKeyboard());
+        }
+    }
+
     // --- LLM ---
 
     private void handleLlm(long chatId, String prompt) {
@@ -542,10 +596,12 @@ public class MyTodoListBot implements SpringLongPollingBot, LongPollingSingleThr
         row1.add(BotCommands.TODO_LIST.getCommand());
         row1.add(BotCommands.ADD_ITEM.getCommand());
         KeyboardRow row2 = new KeyboardRow();
+        row2.add(BotCommands.ADD_SPRINT.getCommand());
         row2.add(BotCommands.LLM_REQ.getCommand());
-        row2.add(BotCommands.HIDE_COMMAND.getCommand());
+        KeyboardRow row3 = new KeyboardRow();
+        row3.add(BotCommands.HIDE_COMMAND.getCommand());
         return ReplyKeyboardMarkup.builder()
-                .keyboard(List.of(row1, row2))
+                .keyboard(List.of(row1, row2, row3))
                 .resizeKeyboard(true)
                 .build();
     }
