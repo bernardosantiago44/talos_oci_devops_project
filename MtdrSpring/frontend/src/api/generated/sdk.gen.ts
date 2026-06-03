@@ -2,7 +2,7 @@
 
 import type { Client, Options as Options2, TDataShape } from './client';
 import { client } from './client.gen';
-import type { AddAssigneeData, AddAssigneeResponses, CreateSprintData, CreateSprintResponses, CreateTagData, CreateTagResponses, CreateWorkItemData, CreateWorkItemResponses, DebugData, DebugResponses, DeleteSprintData, DeleteSprintResponses, DeleteTagData, DeleteTagResponses, DeleteWorkItemData, DeleteWorkItemResponses, GetAll1Data, GetAll1Responses, GetAllData, GetAllResponses, GetAllWorkItemsData, GetAllWorkItemsResponses, GetAssigneesData, GetAssigneesResponses, GetByIdData, GetByIdResponses, GetDashboardDataData, GetDashboardDataResponses, GetData, GetResponses, GetSprintData, GetSprintResponses, GetVelocityData, GetVelocityResponses, GetWorkItemsByTelegramUserData, GetWorkItemsByTelegramUserResponses, LogTimeData, LogTimeResponses, ReindexData, ReindexResponses, RemoveAssigneeData, RemoveAssigneeResponses, SearchData, SearchResponses, UpdateTagData, UpdateTagResponses, UpdateWorkItemData, UpdateWorkItemResponses } from './types.gen';
+import type { AddAssigneeData, AddAssigneeResponses, CreateSprintData, CreateSprintResponses, CreateTagData, CreateTagResponses, CreateWorkItemData, CreateWorkItemResponses, DebugData, DebugResponses, DeleteSprintData, DeleteSprintResponses, DeleteTagData, DeleteTagResponses, DeleteWorkItemData, DeleteWorkItemResponses, GetAll1Data, GetAll1Responses, GetAllData, GetAllResponses, GetAllWorkItemsData, GetAllWorkItemsResponses, GetAssigneesData, GetAssigneesResponses, GetByIdData, GetByIdResponses, GetDashboardDataData, GetDashboardDataResponses, GetData, GetResponses, GetSprintData, GetSprintResponses, GetVelocityData, GetVelocityResponses, GetWorkItemsByTelegramUserData, GetWorkItemsByTelegramUserResponses, LogTimeData, LogTimeResponses, ReindexData, ReindexResponses, RemoveAssigneeData, RemoveAssigneeResponses, SearchData, SearchResponses, UpdateSprintStatusData, UpdateSprintStatusResponses, UpdateTagData, UpdateTagResponses, UpdateWorkItemData, UpdateWorkItemResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -191,6 +191,8 @@ export const createSprint = <ThrowOnError extends boolean = false>(options: Opti
  *
  * Deletes a sprint by its identifier.
  */
+export const updateSprintStatus = <ThrowOnError extends boolean = false>(options: Options<UpdateSprintStatusData, ThrowOnError>) => (options.client ?? client).patch<UpdateSprintStatusResponses, unknown, ThrowOnError>({ url: '/api/sprints/{id}/status', ...options });
+
 export const deleteSprint = <ThrowOnError extends boolean = false>(options: Options<DeleteSprintData, ThrowOnError>) => (options.client ?? client).delete<DeleteSprintResponses, unknown, ThrowOnError>({ url: '/api/sprints/{id}', ...options });
 
 /**

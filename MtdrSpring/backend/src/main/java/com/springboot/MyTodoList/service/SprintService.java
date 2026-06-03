@@ -46,6 +46,14 @@ public class SprintService {
     }
 
     @Transactional
+    public SprintResponse updateStatus(String id, String status) {
+        var sprint = sprintRepository.findById(id)
+                .orElseThrow(() -> new SprintNotFoundException(id));
+        sprint.setStatus(status);
+        return SprintMapper.toResponse(sprintRepository.save(sprint));
+    }
+
+    @Transactional
     public void deleteSprint(String id) {
         if (!sprintRepository.existsById(id)) {
             throw new SprintNotFoundException(id);

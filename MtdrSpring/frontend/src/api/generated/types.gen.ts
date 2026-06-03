@@ -942,6 +942,19 @@ export type CreateSprintResponses = {
 
 export type CreateSprintResponse = CreateSprintResponses[keyof CreateSprintResponses];
 
+export type UpdateSprintStatusData = {
+    body: { status: string };
+    path: { id: string };
+    query?: never;
+    url: '/api/sprints/{id}/status';
+};
+
+export type UpdateSprintStatusResponses = {
+    200: SprintResponse;
+};
+
+export type UpdateSprintStatusResponse = UpdateSprintStatusResponses[keyof UpdateSprintStatusResponses];
+
 export type DeleteSprintData = {
     body?: never;
     path: {

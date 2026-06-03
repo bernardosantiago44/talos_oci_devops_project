@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Layers, Loader2, Plus, Trash2, X } from 'lucide-react';
-import { useSprintCreate, useSprintDelete } from '@/hooks/api';
+import { Layers, Loader2, Plus, PowerOff, Zap, Trash2, X } from 'lucide-react';
+import { useSprintCreate, useSprintDelete, useSprintUpdateStatus } from '@/hooks/api';
 import type { SprintDto } from '../../viewModels/useWorkItemsViewModel';
 import type { UserSummaryDto } from '@/shared/dtos/user-summary.dto';
 
@@ -27,6 +27,7 @@ const STATUS_COLORS: Record<string, string> = {
 
 export function SprintManagerModal({ isOpen, sprints, users, onClose }: SprintManagerModalProps) {
     const createSprintMutation = useSprintCreate();
+    const updateStatusMutation = useSprintUpdateStatus();
     const deleteSprintMutation = useSprintDelete();
 
     const [mode, setMode] = useState<Mode>('list');
@@ -92,6 +93,16 @@ export function SprintManagerModal({ isOpen, sprints, users, onClose }: SprintMa
                 }
             }
             setError(message);
+        }
+    }
+
+    async function handleToggleStatus(sprint: SprintDto) {
+        const next = sprint.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
+        setError('');
+        try {
+            await updateStatusMutation.mutateAsync({ id: sprint.sprintId, status: next });
+        } catch {
+            setError('Could not update sprint status. Please try again.');
         }
     }
 
@@ -174,6 +185,24 @@ export function SprintManagerModal({ isOpen, sprints, users, onClose }: SprintMa
                                         <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ${statusColor}`}>
                                             {statusLabel}
                                         </span>
+                                        <button
+                                            type="button"
+                                            onClick={() => handleToggleStatus(sprint)}
+                                            disabled={updateStatusMutation.isPending && updateStatusMutation.variables?.id === sprint.sprintId}
+                                            title={sprint.status === 'ACTIVE' ? 'Deactivate sprint' : 'Activate sprint'}
+                                            className={`rounded-lg p-2 transition-colors disabled:opacity-50 ${
+                                                sprint.status === 'ACTIVE'
+                                                    ? 'text-amber-500 hover:bg-amber-50 hover:text-amber-700 dark:text-amber-400 dark:hover:bg-amber-500/10'
+                                                    : 'text-emerald-500 hover:bg-emerald-50 hover:text-emerald-700 dark:text-emerald-400 dark:hover:bg-emerald-500/10'
+                                            }`}
+                                        >
+                                            {updateStatusMutation.isPending && updateStatusMutation.variables?.id === sprint.sprintId
+                                                ? <Loader2 className="h-4 w-4 animate-spin" />
+                                                : sprint.status === 'ACTIVE'
+                                                    ? <PowerOff className="h-4 w-4" />
+                                                    : <Zap className="h-4 w-4" />
+                                            }
+                                        </button>
                                         <button
                                             type="button"
                                             onClick={() => handleDelete(sprint)}

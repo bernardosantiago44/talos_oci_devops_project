@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/sprints")
@@ -40,6 +41,16 @@ public class SprintController {
     public ResponseEntity<SprintResponse> createSprint(@RequestBody SprintCreateRequest request) {
         SprintResponse created = sprintService.createSprint(request);
         return ResponseEntity.created(URI.create("/api/sprints/" + created.sprintId())).body(created);
+    }
+
+    @PatchMapping("/{id}/status")
+    @Operation(summary = "Update sprint status", description = "Sets the status of a sprint (ACTIVE, INACTIVE, COMPLETED).")
+    public ResponseEntity<SprintResponse> updateStatus(
+            @Parameter(description = "Sprint identifier.", example = "sprint-1")
+            @PathVariable String id,
+            @RequestBody Map<String, String> body
+    ) {
+        return ResponseEntity.ok(sprintService.updateStatus(id, body.get("status")));
     }
 
     @DeleteMapping("/{id}")
