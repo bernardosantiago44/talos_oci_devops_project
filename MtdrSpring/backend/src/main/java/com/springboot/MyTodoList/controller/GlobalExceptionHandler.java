@@ -3,6 +3,7 @@ package com.springboot.MyTodoList.controller;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.springboot.MyTodoList.exception.*;
 import com.springboot.MyTodoList.model.WorkItemPriority;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -104,6 +105,28 @@ public class GlobalExceptionHandler {
                         "status", 400,
                         "error", "BUSINESS_RULE_VIOLATION",
                         "message", ex.getMessage()
+                ));
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Map<String, Object>> handleIllegalArgument(IllegalArgumentException ex) {
+        return ResponseEntity
+                .badRequest()
+                .body(Map.of(
+                        "status", 400,
+                        "error", "BAD_REQUEST",
+                        "message", ex.getMessage()
+                ));
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<Map<String, Object>> handleDataIntegrity(DataIntegrityViolationException ex) {
+        return ResponseEntity
+                .badRequest()
+                .body(Map.of(
+                        "status", 400,
+                        "error", "DATA_INTEGRITY_VIOLATION",
+                        "message", "Could not save: a required field is invalid or already exists."
                 ));
     }
 }

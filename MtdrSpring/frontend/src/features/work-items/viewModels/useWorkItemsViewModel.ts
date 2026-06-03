@@ -30,6 +30,7 @@ type WorkItemWithTags = WorkItemResponse & {
 export interface SprintDto {
   sprintId: string;
   name: string;
+  teamId?: string;
   status?: string;
   startDate?: string;
   endDate?: string;
@@ -52,6 +53,7 @@ function mapSprint(sprint: SprintResponse): SprintDto | null {
   return {
     sprintId: sprint.sprintId,
     name: sprint.name,
+    teamId: sprint.teamId,
     status: sprint.status,
     startDate: sprint.startDate,
     endDate: sprint.endDate,

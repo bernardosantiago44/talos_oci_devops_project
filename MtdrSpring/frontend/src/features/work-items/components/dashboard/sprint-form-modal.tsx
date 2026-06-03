@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { Loader2, X } from 'lucide-react';
 import { useSprintCreate } from '@/hooks/api';
+import type { SprintDto } from '../../viewModels/useWorkItemsViewModel';
 
 interface SprintFormModalProps {
     isOpen: boolean;
+    sprints: SprintDto[];
     onClose: () => void;
     onCreated?: () => void;
 }
 
-export function SprintFormModal({ isOpen, onClose, onCreated }: SprintFormModalProps) {
+export function SprintFormModal({ isOpen, sprints, onClose, onCreated }: SprintFormModalProps) {
     const createSprintMutation = useSprintCreate();
     const [sprintNumber, setSprintNumber] = useState('');
     const [error, setError] = useState('');
@@ -27,17 +29,31 @@ export function SprintFormModal({ isOpen, onClose, onCreated }: SprintFormModalP
             return;
         }
         setError('');
+
+        // Reuse teamId from existing sprints so we don't guess a wrong FK value
+        const teamId = sprints.find(s => s.teamId)?.teamId ?? undefined;
+
         try {
             await createSprintMutation.mutateAsync({
                 sprintId: `sprint-${num}`,
-                teamId: 'team-1',
+                teamId,
                 name: `Sprint ${num}`,
                 status: 'ACTIVE',
             });
             onCreated?.();
             onClose();
-        } catch {
-            setError('Could not create sprint. That number may already be in use.');
+        } catch (err: unknown) {
+            let message = 'Could not create sprint. Please try again.';
+            if (err && typeof err === 'object') {
+                const body = (err as Record<string, unknown>).body ?? err;
+                if (body && typeof body === 'object') {
+                    const m = (body as Record<string, unknown>).message;
+                    if (typeof m === 'string' && m) message = m;
+                } else if (err instanceof Error && err.message) {
+                    message = err.message;
+                }
+            }
+            setError(message);
         }
     }
 
@@ -84,7 +100,7 @@ export function SprintFormModal({ isOpen, onClose, onCreated }: SprintFormModalP
                             min={1}
                             value={sprintNumber}
                             onChange={(e) => setSprintNumber(e.target.value)}
-                            placeholder="e.g. 3"
+                            placeholder="e.g. 4"
                             className="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-800 placeholder-zinc-400 outline-none focus:border-sky-400/60 focus:ring-1 focus:ring-sky-400/30 dark:border-zinc-700/60 dark:bg-zinc-800/60 dark:text-zinc-200 dark:placeholder-zinc-600 dark:focus:border-sky-500/60 dark:focus:ring-sky-500/30"
                             autoFocus
                         />
