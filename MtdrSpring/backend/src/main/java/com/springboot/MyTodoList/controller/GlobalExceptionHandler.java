@@ -121,12 +121,13 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<Map<String, Object>> handleDataIntegrity(DataIntegrityViolationException ex) {
+        String detail = ex.getMostSpecificCause().getMessage();
         return ResponseEntity
                 .badRequest()
                 .body(Map.of(
                         "status", 400,
                         "error", "DATA_INTEGRITY_VIOLATION",
-                        "message", "Could not save: a required field is invalid or already exists."
+                        "message", detail != null ? detail : "Could not save: a required field is invalid or already exists."
                 ));
     }
 }
