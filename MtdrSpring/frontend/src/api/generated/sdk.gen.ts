@@ -191,7 +191,7 @@ export const createSprint = <ThrowOnError extends boolean = false>(options: Opti
  *
  * Deletes a sprint by its identifier.
  */
-export const updateSprintStatus = <ThrowOnError extends boolean = false>(options: Options<UpdateSprintStatusData, ThrowOnError>) => (options.client ?? client).patch<UpdateSprintStatusResponses, unknown, ThrowOnError>({ url: '/api/sprints/{id}/status', ...options });
+export const updateSprintStatus = <ThrowOnError extends boolean = false>(options: Options<UpdateSprintStatusData, ThrowOnError>) => (options.client ?? client).put<UpdateSprintStatusResponses, unknown, ThrowOnError>({ url: '/api/sprints/{id}/status', ...options });
 
 export const deleteSprint = <ThrowOnError extends boolean = false>(options: Options<DeleteSprintData, ThrowOnError>) => (options.client ?? client).delete<DeleteSprintResponses, unknown, ThrowOnError>({ url: '/api/sprints/{id}', ...options });
 

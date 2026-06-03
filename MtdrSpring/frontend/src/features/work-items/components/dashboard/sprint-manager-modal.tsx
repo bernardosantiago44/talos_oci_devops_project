@@ -101,8 +101,18 @@ export function SprintManagerModal({ isOpen, sprints, users, onClose }: SprintMa
         setError('');
         try {
             await updateStatusMutation.mutateAsync({ id: sprint.sprintId, status: next });
-        } catch {
-            setError('Could not update sprint status. Please try again.');
+        } catch (err: unknown) {
+            let message = 'Could not update sprint status. Please try again.';
+            if (err && typeof err === 'object') {
+                const body = (err as Record<string, unknown>).body ?? err;
+                if (body && typeof body === 'object') {
+                    const m = (body as Record<string, unknown>).message;
+                    if (typeof m === 'string' && m) message = m;
+                } else if (err instanceof Error && err.message) {
+                    message = err.message;
+                }
+            }
+            setError(message);
         }
     }
 

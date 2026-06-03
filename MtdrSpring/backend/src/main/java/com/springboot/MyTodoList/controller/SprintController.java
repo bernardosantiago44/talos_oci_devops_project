@@ -43,7 +43,7 @@ public class SprintController {
         return ResponseEntity.created(URI.create("/api/sprints/" + created.sprintId())).body(created);
     }
 
-    @PatchMapping("/{id}/status")
+    @PutMapping("/{id}/status")
     @Operation(summary = "Update sprint status", description = "Sets the status of a sprint (ACTIVE, INACTIVE, COMPLETED).")
     public ResponseEntity<SprintResponse> updateStatus(
             @Parameter(description = "Sprint identifier.", example = "sprint-1")
