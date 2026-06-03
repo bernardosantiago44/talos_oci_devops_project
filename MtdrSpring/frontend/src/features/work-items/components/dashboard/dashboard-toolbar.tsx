@@ -214,14 +214,14 @@ export function DashboardToolbar({
                     Tags
                 </button>
 
-                {/* New Sprint button */}
+                {/* Sprints button */}
                 <button
                     type="button"
                     onClick={onAddSprintClick}
                     className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700 transition-colors hover:bg-emerald-100 hover:text-emerald-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 dark:border-emerald-700/50 dark:bg-emerald-500/10 dark:text-emerald-300 dark:hover:bg-emerald-500/20 dark:hover:text-emerald-100"
                 >
                     <Layers className="h-4 w-4" />
-                    New Sprint
+                    Sprints
                 </button>
 
                 {/* Create button */}

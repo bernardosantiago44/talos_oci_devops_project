@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/api/client';
-import { createSprint, getAll, getAll1, getSprint } from '@/api/generated';
+import { createSprint, deleteSprint, getAll, getAll1, getSprint } from '@/api/generated';
 import type { SprintCreateRequest } from '@/api/generated';
 import { apiQueryKeys } from './query-keys';
 import { readData } from './request';
@@ -31,6 +31,18 @@ export function useSprintCreate() {
   return useMutation({
     mutationFn: (body: SprintCreateRequest) =>
       readData(createSprint({ client: apiClient, body, throwOnError: true })),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: apiQueryKeys.sprints.all });
+    },
+  });
+}
+
+export function useSprintDelete() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) =>
+      deleteSprint({ client: apiClient, path: { id }, throwOnError: true }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: apiQueryKeys.sprints.all });
     },

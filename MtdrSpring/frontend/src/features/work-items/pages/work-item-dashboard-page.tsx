@@ -8,7 +8,7 @@ import { WorkItemFormModal } from '../components/dashboard/work-item-form-modal'
 import { WorkItemDetailModal } from '../components/dashboard/work-item-detail-modal';
 import { WorkLogModal } from '../components/dashboard/work-log-modal';
 import { TagManagerModal } from '../components/dashboard/tag-manager-modal';
-import { SprintFormModal } from '../components/dashboard/sprint-form-modal';
+import { SprintManagerModal } from '../components/dashboard/sprint-manager-modal';
 import { useWorkItemsViewModel } from "@/features/work-items/viewModels/useWorkItemsViewModel";
 import type { IWorkItemsViewModel } from "@/features/work-items/viewModels/useWorkItemsViewModel";
 import { useTheme } from '@/contexts/theme-context';
@@ -197,7 +197,7 @@ export function WorkItemDashboardPage() {
         onClose={() => setTagManagerOpen(false)}
       />
 
-      <SprintFormModal
+      <SprintManagerModal
         isOpen={sprintFormOpen}
         sprints={viewModel.sprints}
         onClose={() => setSprintFormOpen(false)}

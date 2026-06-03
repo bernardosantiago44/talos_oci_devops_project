@@ -41,4 +41,14 @@ public class SprintController {
         SprintResponse created = sprintService.createSprint(request);
         return ResponseEntity.created(URI.create("/api/sprints/" + created.sprintId())).body(created);
     }
+
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Delete sprint", description = "Deletes a sprint by its identifier.")
+    public ResponseEntity<Void> deleteSprint(
+            @Parameter(description = "Sprint identifier.", example = "sprint-1")
+            @PathVariable String id
+    ) {
+        sprintService.deleteSprint(id);
+        return ResponseEntity.noContent().build();
+    }
 }

@@ -44,4 +44,12 @@ public class SprintService {
         }
         return SprintMapper.toResponse(sprintRepository.save(SprintMapper.toEntity(request)));
     }
+
+    @Transactional
+    public void deleteSprint(String id) {
+        if (!sprintRepository.existsById(id)) {
+            throw new SprintNotFoundException(id);
+        }
+        sprintRepository.deleteById(id);
+    }
 }
