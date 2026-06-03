@@ -2,7 +2,7 @@
 
 import type { Client, Options as Options2, TDataShape } from './client';
 import { client } from './client.gen';
-import type { AddAssigneeData, AddAssigneeResponses, CreateTagData, CreateTagResponses, CreateWorkItemData, CreateWorkItemResponses, DebugData, DebugResponses, DeleteTagData, DeleteTagResponses, DeleteWorkItemData, DeleteWorkItemResponses, GetAll1Data, GetAll1Responses, GetAllData, GetAllResponses, GetAllWorkItemsData, GetAllWorkItemsResponses, GetAssigneesData, GetAssigneesResponses, GetByIdData, GetByIdResponses, GetDashboardDataData, GetDashboardDataResponses, GetData, GetResponses, GetSprintData, GetSprintResponses, GetVelocityData, GetVelocityResponses, GetWorkItemsByTelegramUserData, GetWorkItemsByTelegramUserResponses, LogTimeData, LogTimeResponses, ReindexData, ReindexResponses, RemoveAssigneeData, RemoveAssigneeResponses, SearchData, SearchResponses, UpdateTagData, UpdateTagResponses, UpdateWorkItemData, UpdateWorkItemResponses } from './types.gen';
+import type { AddAssigneeData, AddAssigneeResponses, CreateSprintData, CreateSprintResponses, CreateTagData, CreateTagResponses, CreateWorkItemData, CreateWorkItemResponses, DebugData, DebugResponses, DeleteTagData, DeleteTagResponses, DeleteWorkItemData, DeleteWorkItemResponses, GetAll1Data, GetAll1Responses, GetAllData, GetAllResponses, GetAllWorkItemsData, GetAllWorkItemsResponses, GetAssigneesData, GetAssigneesResponses, GetByIdData, GetByIdResponses, GetDashboardDataData, GetDashboardDataResponses, GetData, GetResponses, GetSprintData, GetSprintResponses, GetVelocityData, GetVelocityResponses, GetWorkItemsByTelegramUserData, GetWorkItemsByTelegramUserResponses, LogTimeData, LogTimeResponses, ReindexData, ReindexResponses, RemoveAssigneeData, RemoveAssigneeResponses, SearchData, SearchResponses, UpdateTagData, UpdateTagResponses, UpdateWorkItemData, UpdateWorkItemResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -178,6 +178,13 @@ export const getWorkItemsByTelegramUser = <ThrowOnError extends boolean = false>
  * Returns all configured sprints.
  */
 export const getAll = <ThrowOnError extends boolean = false>(options?: Options<GetAllData, ThrowOnError>) => (options?.client ?? client).get<GetAllResponses, unknown, ThrowOnError>({ url: '/api/sprints', ...options });
+
+/**
+ * Create sprint
+ *
+ * Creates a new sprint.
+ */
+export const createSprint = <ThrowOnError extends boolean = false>(options: Options<CreateSprintData, ThrowOnError>) => (options.client ?? client).post<CreateSprintResponses, unknown, ThrowOnError>({ url: '/api/sprints', ...options });
 
 /**
  * Get sprint by ID

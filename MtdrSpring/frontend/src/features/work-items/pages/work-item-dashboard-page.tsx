@@ -8,6 +8,7 @@ import { WorkItemFormModal } from '../components/dashboard/work-item-form-modal'
 import { WorkItemDetailModal } from '../components/dashboard/work-item-detail-modal';
 import { WorkLogModal } from '../components/dashboard/work-log-modal';
 import { TagManagerModal } from '../components/dashboard/tag-manager-modal';
+import { SprintFormModal } from '../components/dashboard/sprint-form-modal';
 import { useWorkItemsViewModel } from "@/features/work-items/viewModels/useWorkItemsViewModel";
 import type { IWorkItemsViewModel } from "@/features/work-items/viewModels/useWorkItemsViewModel";
 import { useTheme } from '@/contexts/theme-context';
@@ -21,6 +22,7 @@ export function WorkItemDashboardPage() {
   const { theme, toggle } = useTheme();
   const [activeTab, setActiveTab] = useState<Tab>('workitems');
   const [tagManagerOpen, setTagManagerOpen] = useState(false);
+  const [sprintFormOpen, setSprintFormOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-zinc-50 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100">
@@ -138,6 +140,7 @@ export function WorkItemDashboardPage() {
                 viewMode={viewModel.viewMode}
                 onViewModeChange={viewModel.setViewMode}
                 onManageTagsClick={() => setTagManagerOpen(true)}
+                onAddSprintClick={() => setSprintFormOpen(true)}
                 onCreateClick={viewModel.actions.openNew}
                 users={viewModel.users}
                 sprints={viewModel.sprints}
@@ -192,6 +195,11 @@ export function WorkItemDashboardPage() {
         isOpen={tagManagerOpen}
         tags={viewModel.tags}
         onClose={() => setTagManagerOpen(false)}
+      />
+
+      <SprintFormModal
+        isOpen={sprintFormOpen}
+        onClose={() => setSprintFormOpen(false)}
       />
 
       {/* Detail preview modal */}

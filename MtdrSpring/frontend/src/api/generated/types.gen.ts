@@ -918,6 +918,30 @@ export type GetAllResponses = {
 
 export type GetAllResponse = GetAllResponses[keyof GetAllResponses];
 
+export type SprintCreateRequest = {
+    sprintId: string;
+    teamId?: string;
+    name: string;
+    goal?: string;
+    startDate?: string;
+    endDate?: string;
+    status?: string;
+    createdByUserId?: string;
+};
+
+export type CreateSprintData = {
+    body: SprintCreateRequest;
+    path?: never;
+    query?: never;
+    url: '/api/sprints';
+};
+
+export type CreateSprintResponses = {
+    201: SprintResponse;
+};
+
+export type CreateSprintResponse = CreateSprintResponses[keyof CreateSprintResponses];
+
 export type GetSprintData = {
     body?: never;
     path: {
