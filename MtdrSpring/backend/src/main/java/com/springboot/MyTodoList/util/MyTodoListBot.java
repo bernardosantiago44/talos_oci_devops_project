@@ -554,9 +554,19 @@ public class MyTodoListBot implements SpringLongPollingBot, LongPollingSingleThr
 
         userState.remove(chatId);
         try {
+            String teamId = sprintService.findAll().stream()
+                    .map(s -> s.teamId())
+                    .filter(t -> t != null && !t.isBlank())
+                    .findFirst()
+                    .orElse(null);
+            if (teamId == null) {
+                BotHelper.sendMessageToTelegram(chatId,
+                        "Could not create sprint: no existing team found. Contact your administrator.", telegramClient, buildMainKeyboard());
+                return;
+            }
             java.time.LocalDate today = java.time.LocalDate.now();
             SprintCreateRequest req = new SprintCreateRequest(
-                    sprintId, "team-1", sprintName, null, today, today.plusWeeks(2), "ACTIVE", user.get().getUserId());
+                    sprintId, teamId, sprintName, null, today, today.plusWeeks(2), "ACTIVE", user.get().getUserId());
             sprintService.createSprint(req);
             BotHelper.sendMessageToTelegram(chatId,
                     "Sprint created!\n\nID: " + sprintId + "\nName: " + sprintName + "\nStatus: ACTIVE",

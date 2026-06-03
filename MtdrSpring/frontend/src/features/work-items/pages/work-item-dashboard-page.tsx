@@ -200,6 +200,7 @@ export function WorkItemDashboardPage() {
       <SprintManagerModal
         isOpen={sprintFormOpen}
         sprints={viewModel.sprints}
+        users={viewModel.users}
         onClose={() => setSprintFormOpen(false)}
       />
 

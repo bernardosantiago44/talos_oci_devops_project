@@ -2,12 +2,14 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Layers, Loader2, Plus, Trash2, X } from 'lucide-react';
 import { useSprintCreate, useSprintDelete } from '@/hooks/api';
 import type { SprintDto } from '../../viewModels/useWorkItemsViewModel';
+import type { UserSummaryDto } from '@/shared/dtos/user-summary.dto';
 
 type Mode = 'list' | 'create';
 
 interface SprintManagerModalProps {
     isOpen: boolean;
     sprints: SprintDto[];
+    users: UserSummaryDto[];
     onClose: () => void;
 }
 
@@ -23,7 +25,7 @@ const STATUS_COLORS: Record<string, string> = {
     COMPLETED: 'bg-sky-50 text-sky-700 dark:bg-sky-500/15 dark:text-sky-300',
 };
 
-export function SprintManagerModal({ isOpen, sprints, onClose }: SprintManagerModalProps) {
+export function SprintManagerModal({ isOpen, sprints, users, onClose }: SprintManagerModalProps) {
     const createSprintMutation = useSprintCreate();
     const deleteSprintMutation = useSprintDelete();
 
@@ -64,6 +66,7 @@ export function SprintManagerModal({ isOpen, sprints, onClose }: SprintManagerMo
         }
         setError('');
         const teamId = sprints.find(s => s.teamId)?.teamId ?? undefined;
+        const createdByUserId = users[0]?.userId;
         const today = new Date().toISOString().slice(0, 10);
         const endDate = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
         try {
@@ -74,6 +77,7 @@ export function SprintManagerModal({ isOpen, sprints, onClose }: SprintManagerMo
                 status: 'ACTIVE',
                 startDate: today,
                 endDate,
+                createdByUserId,
             });
             backToList();
         } catch (err: unknown) {
