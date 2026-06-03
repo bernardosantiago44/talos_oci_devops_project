@@ -33,9 +33,16 @@ public class TimeEntryService {
 
     public TimeEntryResponse logTime(TimeEntryRequest request) {
         validateRequest(request);
-        
-        TimeEntry timeEntry = timeEntryRepository.save(toTimeEntry(request));
-        return toResponse(timeEntry);
+
+        TimeEntry timeEntry = timeEntryRepository
+                .findByWorkItem_WorkItemIdAndUser_UserId(request.getWorkItemId(), request.getUserId())
+                .orElseGet(() -> toTimeEntry(request));
+
+        timeEntry.setMinutes(request.getMinutes());
+        timeEntry.setNote(request.getNote());
+        timeEntry.setCreatedAt(OffsetDateTime.now());
+
+        return toResponse(timeEntryRepository.save(timeEntry));
     }
     
     private void validateRequest(TimeEntryRequest request) {
@@ -57,16 +64,9 @@ public class TimeEntryService {
     
     private TimeEntry toTimeEntry(TimeEntryRequest request) {
         TimeEntry timeEntry = new TimeEntry();
-        WorkItem workItem = findWorkItem(request.getWorkItemId());
-        AppUser user = findAppUser(request.getUserId());
-        
         timeEntry.setId(UUID.randomUUID().toString());
-        timeEntry.setWorkItem(workItem);
-        timeEntry.setUser(user);
-        timeEntry.setNote(request.getNote());
-        timeEntry.setMinutes(request.getMinutes());
-        timeEntry.setCreatedAt(OffsetDateTime.now());
-        
+        timeEntry.setWorkItem(findWorkItem(request.getWorkItemId()));
+        timeEntry.setUser(findAppUser(request.getUserId()));
         return timeEntry;
     }
     

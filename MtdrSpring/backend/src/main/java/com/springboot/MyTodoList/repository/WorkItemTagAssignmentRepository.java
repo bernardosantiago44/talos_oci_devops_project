@@ -9,4 +9,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface WorkItemTagAssignmentRepository extends JpaRepository<WorkItemTag, WorkItemTagId> {
     void deleteByWorkItem_WorkItemId(String workItemId);
+    void deleteByTag_TagId(String tagId);
 }

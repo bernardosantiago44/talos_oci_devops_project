@@ -9,6 +9,7 @@ import com.springboot.MyTodoList.exception.TagNotFoundException;
 import com.springboot.MyTodoList.model.Tag;
 import com.springboot.MyTodoList.model.WorkItem;
 import com.springboot.MyTodoList.repository.TagsRepository;
+import com.springboot.MyTodoList.repository.WorkItemTagAssignmentRepository;
 import com.springboot.MyTodoList.util.Validator;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
@@ -21,9 +22,11 @@ import java.util.List;
 public class TagsService {
     private static final Logger LOGGER = LoggerFactory.getLogger(TagsService.class);
     private final TagsRepository tagsRepository;
+    private final WorkItemTagAssignmentRepository workItemTagAssignmentRepository;
 
-    public TagsService(TagsRepository tagsRepository) {
+    public TagsService(TagsRepository tagsRepository, WorkItemTagAssignmentRepository workItemTagAssignmentRepository) {
         this.tagsRepository = tagsRepository;
+        this.workItemTagAssignmentRepository = workItemTagAssignmentRepository;
     }
     
     public List<TagResponse> findAll() {
@@ -66,6 +69,7 @@ public class TagsService {
     
     @Transactional
     public void deleteTagById(String id) {
+        workItemTagAssignmentRepository.deleteByTag_TagId(id);
         tagsRepository.deleteById(id);
     }
     
