@@ -74,6 +74,7 @@ jobs:
           echo "PR detected: Skipping docker build and push."
         fi
     - name: Commit the generated architecture diagrams
+      if: github.event_name == 'push'
       working-directory: MtdrSpring/doc/arch/generated
       run: |
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
