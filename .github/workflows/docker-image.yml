@@ -76,9 +76,11 @@ jobs:
 
     - name: Render PlantUML to SVG
       if: github.event_name == 'push'
-      uses: holowinski/plantuml-github-action@main
-      with:
-        args: -v -tsvg "MtdrSpring/doc/arch/generated/level-3/*.puml"
+      run: |
+        apt-get install -y graphviz
+        wget -O plantuml.jar https://github.com/plantuml/plantuml/releases/latest/download/plantuml.jar
+        java -jar plantuml.jar -tsvg -o "." "MtdrSpring/doc/arch/generated/level-3/**/*.puml"
+        rm plantuml.jar
 
     - name: Commit the generated architecture diagrams
       if: github.event_name == 'push'
