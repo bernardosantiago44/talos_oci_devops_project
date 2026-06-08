@@ -76,9 +76,10 @@ jobs:
 
     - name: Render PlantUML to SVG
       if: github.event_name == 'push'
-      uses: cloudbees/plantuml-github-action@master
+      uses: jitewright/action-plantuml@v1
       with:
-        args: -tsvg -o "." "MtdrSpring/doc/arch/generated/level-3/*.puml"
+        pattern: "MtdrSpring/doc/arch/generated/level-3/*.puml"
+        output_format: svg
 
     - name: Commit the generated architecture diagrams
       if: github.event_name == 'push'
