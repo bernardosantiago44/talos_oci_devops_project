@@ -73,6 +73,13 @@ jobs:
         else
           echo "PR detected: Skipping docker build and push."
         fi
+
+    - name: Render PlantUML to SVG
+      if: github.event_name == 'push'
+      uses: cloudbees/plantuml-github-action@master
+      with:
+        args: -tsvg -o "." "MtdrSpring/doc/arch/generated/level-3/*.puml"
+
     - name: Commit the generated architecture diagrams
       if: github.event_name == 'push'
       working-directory: MtdrSpring/doc/arch/generated
