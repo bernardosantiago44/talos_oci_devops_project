@@ -80,9 +80,13 @@ jobs:
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
         git config --local user.name "Architecture Generator[bot]"
         
-        git add level-3/*
-        git commit -m "Auto-generated level3 architecture docs [skip ci]"
-        git push
+        if [ -n "$(git status --porcelain level-3/*)" ]; then
+          git add level-3/*
+          git commit -m "Auto-generated level3 architecture docs [skip ci]"
+          git push
+        else
+          echo "Nothing changed!"
+        fi
 
   deploy:
     if: github.event_name == 'push' || inputs.environment == 'deploy'
