@@ -1,7 +1,8 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useAppUserList, useSprintList, useTagList, useTimeEntryCreate, useWorkItemCreate, useWorkItemDelete, useWorkItemList, useWorkItemUpdate } from '@/hooks/api';
-import type { AppUserSummary, CreateWorkItemRequest, SprintResponse, TagResponse, UpdateWorkItemRequest, WorkItemQuery, WorkItemResponse } from '@/api/generated';
+import type { AppUserSummary, CreateWorkItemRequest, SprintResponse, TagResponse, UpdateWorkItemRequest, UserProfileResponse, WorkItemQuery, WorkItemResponse } from '@/api/generated';
 import type { ViewMode } from '@/features/work-items/components/dashboard/dashboard-toolbar';
+import { useAuth } from '@/contexts/auth-context';
 import type { WorkItemDetailDto, Assignee } from '../dtos/work-item-detail.dto';
 import type { WorkLogDto, WorkLogMode } from '../dtos/work-log.dto';
 import type { WorkItemStatus } from '../enums/work-item-status.enum';
@@ -37,6 +38,17 @@ export interface SprintDto {
 
 function mapAppUser(user: AppUserSummary): UserSummaryDto | null {
   if (!user.userId || !user.name) return null;
+
+  return {
+    userId: user.userId,
+    name: user.name,
+    email: user.email,
+    telegramUserId: user.telegramUserId,
+  };
+}
+
+function mapProfileUser(user: UserProfileResponse | null): UserSummaryDto | null {
+  if (!user?.userId || !user.name) return null;
 
   return {
     userId: user.userId,
@@ -178,6 +190,8 @@ function mapWorkItem(
 }
 
 export const useWorkItemsViewModel = () => {
+  const { user: authenticatedUser } = useAuth();
+  const hasAppliedAuthenticatedAssignee = useRef(false);
   const [filters, setFilters] = useState({
     search: '',
     status: [] as WorkItemStatus[],
@@ -207,10 +221,18 @@ export const useWorkItemsViewModel = () => {
     workLogMode: 'log' as WorkLogMode,
   });
 
-  const users = useMemo(
-    () => (usersQuery.data ?? []).map(mapAppUser).filter((user): user is UserSummaryDto => Boolean(user)),
-    [usersQuery.data]
-  );
+  const users = useMemo(() => {
+    const mappedUsers = (usersQuery.data ?? [])
+      .map(mapAppUser)
+      .filter((user): user is UserSummaryDto => Boolean(user));
+    const currentUser = mapProfileUser(authenticatedUser);
+
+    if (currentUser && !mappedUsers.some((user) => user.userId === currentUser.userId)) {
+      return [...mappedUsers, currentUser];
+    }
+
+    return mappedUsers;
+  }, [authenticatedUser, usersQuery.data]);
 
   const sprints = useMemo(
     () => (sprintsQuery.data ?? []).map(mapSprint).filter((sprint): sprint is SprintDto => Boolean(sprint)),
@@ -233,10 +255,29 @@ export const useWorkItemsViewModel = () => {
     await workItemsQuery.refetch();
   }, [workItemsQuery]);
 
+  useEffect(() => {
+    const authenticatedUserId = authenticatedUser?.userId;
+    if (!authenticatedUserId || hasAppliedAuthenticatedAssignee.current) {
+      return;
+    }
+
+    setFilters((currentFilters) => {
+      hasAppliedAuthenticatedAssignee.current = true;
+      if (currentFilters.assignee.length > 0) {
+        return currentFilters;
+      }
+
+      return {
+        ...currentFilters,
+        assignee: [authenticatedUserId],
+      };
+    });
+  }, [authenticatedUser?.userId]);
+
   const handleCreate = useCallback(
     async (dto: CreateWorkItemFormInput) => {
       const sprintId = dto.sprintId || sprints[0]?.sprintId;
-      const createdByUserId = users[0]?.userId;
+      const createdByUserId = authenticatedUser?.userId ?? users[0]?.userId;
 
       if (!sprintId || !createdByUserId) {
         throw new Error('A sprint and creator user are required before creating work items.');
@@ -259,7 +300,7 @@ export const useWorkItemsViewModel = () => {
 
       await createWorkItemMutation.mutateAsync(body);
     },
-    [createWorkItemMutation, sprints, users]
+    [authenticatedUser?.userId, createWorkItemMutation, sprints, users]
   );
 
   const handleUpdate = useCallback(

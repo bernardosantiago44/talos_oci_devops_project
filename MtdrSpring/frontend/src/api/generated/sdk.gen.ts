@@ -2,7 +2,7 @@
 
 import type { Client, Options as Options2, TDataShape } from './client';
 import { client } from './client.gen';
-import type { AddAssigneeData, AddAssigneeResponses, CreateTagData, CreateTagResponses, CreateWorkItemData, CreateWorkItemResponses, DebugData, DebugResponses, DeleteTagData, DeleteTagResponses, DeleteWorkItemData, DeleteWorkItemResponses, GetAll1Data, GetAll1Responses, GetAllData, GetAllResponses, GetAllWorkItemsData, GetAllWorkItemsResponses, GetAssigneesData, GetAssigneesResponses, GetByIdData, GetByIdResponses, GetDashboardDataData, GetDashboardDataResponses, GetData, GetResponses, GetSprintData, GetSprintResponses, GetVelocityData, GetVelocityResponses, GetWorkItemsByTelegramUserData, GetWorkItemsByTelegramUserResponses, LogTimeData, LogTimeResponses, ReindexData, ReindexResponses, RemoveAssigneeData, RemoveAssigneeResponses, SearchData, SearchResponses, UpdateTagData, UpdateTagResponses, UpdateWorkItemData, UpdateWorkItemResponses } from './types.gen';
+import type { AddAssigneeData, AddAssigneeResponses, CreateTagData, CreateTagResponses, CreateWorkItemData, CreateWorkItemResponses, DebugData, DebugResponses, DeleteTagData, DeleteTagResponses, DeleteWorkItemData, DeleteWorkItemResponses, GetAll1Data, GetAll1Responses, GetAllData, GetAllResponses, GetAllWorkItemsData, GetAllWorkItemsResponses, GetAssigneesData, GetAssigneesResponses, GetByIdData, GetByIdResponses, GetDashboardDataData, GetDashboardDataResponses, GetData, GetResponses, GetSprintData, GetSprintResponses, GetVelocityData, GetVelocityResponses, GetWorkItemsByTelegramUserData, GetWorkItemsByTelegramUserResponses, LoginData, LoginResponses, LogTimeData, LogTimeResponses, MeData, MeResponses, ReindexData, ReindexResponses, RemoveAssigneeData, RemoveAssigneeResponses, SearchData, SearchResponses, SignupData, SignupResponses, UpdateMeData, UpdateMeResponses, UpdateTagData, UpdateTagResponses, UpdateWorkItemData, UpdateWorkItemResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -23,7 +23,11 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
  *
  * Returns all work items with assignment details.
  */
-export const getAllWorkItems = <ThrowOnError extends boolean = false>(options?: Options<GetAllWorkItemsData, ThrowOnError>) => (options?.client ?? client).get<GetAllWorkItemsResponses, unknown, ThrowOnError>({ url: '/api/workitems', ...options });
+export const getAllWorkItems = <ThrowOnError extends boolean = false>(options?: Options<GetAllWorkItemsData, ThrowOnError>) => (options?.client ?? client).get<GetAllWorkItemsResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/workitems',
+    ...options
+});
 
 /**
  * Create work item
@@ -31,6 +35,7 @@ export const getAllWorkItems = <ThrowOnError extends boolean = false>(options?: 
  * Creates a work item and optionally assigns users.
  */
 export const createWorkItem = <ThrowOnError extends boolean = false>(options: Options<CreateWorkItemData, ThrowOnError>) => (options.client ?? client).post<CreateWorkItemResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/workitems',
     ...options,
     headers: {
@@ -45,6 +50,7 @@ export const createWorkItem = <ThrowOnError extends boolean = false>(options: Op
  * Creates a time entry for a user and work item.
  */
 export const logTime = <ThrowOnError extends boolean = false>(options: Options<LogTimeData, ThrowOnError>) => (options.client ?? client).post<LogTimeResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/time-entries',
     ...options,
     headers: {
@@ -58,7 +64,11 @@ export const logTime = <ThrowOnError extends boolean = false>(options: Options<L
  *
  * Returns all saved tags.
  */
-export const get = <ThrowOnError extends boolean = false>(options?: Options<GetData, ThrowOnError>) => (options?.client ?? client).get<GetResponses, unknown, ThrowOnError>({ url: '/api/tags', ...options });
+export const get = <ThrowOnError extends boolean = false>(options?: Options<GetData, ThrowOnError>) => (options?.client ?? client).get<GetResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/tags',
+    ...options
+});
 
 /**
  * Create a tag
@@ -66,6 +76,7 @@ export const get = <ThrowOnError extends boolean = false>(options?: Options<GetD
  * Creates a new tag.
  */
 export const createTag = <ThrowOnError extends boolean = false>(options: Options<CreateTagData, ThrowOnError>) => (options.client ?? client).post<CreateTagResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/tags',
     ...options,
     headers: {
@@ -80,6 +91,7 @@ export const createTag = <ThrowOnError extends boolean = false>(options: Options
  * Searches work items by natural-language meaning and falls back to keyword search when AI is unavailable.
  */
 export const search = <ThrowOnError extends boolean = false>(options: Options<SearchData, ThrowOnError>) => (options.client ?? client).post<SearchResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/semantic-search',
     ...options,
     headers: {
@@ -93,21 +105,33 @@ export const search = <ThrowOnError extends boolean = false>(options: Options<Se
  *
  * Re-indexes all work items for semantic search.
  */
-export const reindex = <ThrowOnError extends boolean = false>(options?: Options<ReindexData, ThrowOnError>) => (options?.client ?? client).post<ReindexResponses, unknown, ThrowOnError>({ url: '/api/semantic-search/reindex', ...options });
+export const reindex = <ThrowOnError extends boolean = false>(options?: Options<ReindexData, ThrowOnError>) => (options?.client ?? client).post<ReindexResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/semantic-search/reindex',
+    ...options
+});
 
 /**
  * Delete work item
  *
  * Deletes a work item by its identifier.
  */
-export const deleteWorkItem = <ThrowOnError extends boolean = false>(options: Options<DeleteWorkItemData, ThrowOnError>) => (options.client ?? client).delete<DeleteWorkItemResponses, unknown, ThrowOnError>({ url: '/api/workitems/{id}', ...options });
+export const deleteWorkItem = <ThrowOnError extends boolean = false>(options: Options<DeleteWorkItemData, ThrowOnError>) => (options.client ?? client).delete<DeleteWorkItemResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/workitems/{id}',
+    ...options
+});
 
 /**
  * Get work item by ID
  *
  * Returns a work item by its identifier.
  */
-export const getById = <ThrowOnError extends boolean = false>(options: Options<GetByIdData, ThrowOnError>) => (options.client ?? client).get<GetByIdResponses, unknown, ThrowOnError>({ url: '/api/workitems/{id}', ...options });
+export const getById = <ThrowOnError extends boolean = false>(options: Options<GetByIdData, ThrowOnError>) => (options.client ?? client).get<GetByIdResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/workitems/{id}',
+    ...options
+});
 
 /**
  * Update work item
@@ -115,6 +139,7 @@ export const getById = <ThrowOnError extends boolean = false>(options: Options<G
  * Applies non-null updates to a work item.
  */
 export const updateWorkItem = <ThrowOnError extends boolean = false>(options: Options<UpdateWorkItemData, ThrowOnError>) => (options.client ?? client).patch<UpdateWorkItemResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/workitems/{id}',
     ...options,
     headers: {
@@ -128,21 +153,33 @@ export const updateWorkItem = <ThrowOnError extends boolean = false>(options: Op
  *
  * Removes a user's assignment from a work item.
  */
-export const removeAssignee = <ThrowOnError extends boolean = false>(options: Options<RemoveAssigneeData, ThrowOnError>) => (options.client ?? client).delete<RemoveAssigneeResponses, unknown, ThrowOnError>({ url: '/api/workitems/{id}/assignees/{userId}', ...options });
+export const removeAssignee = <ThrowOnError extends boolean = false>(options: Options<RemoveAssigneeData, ThrowOnError>) => (options.client ?? client).delete<RemoveAssigneeResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/workitems/{id}/assignees/{userId}',
+    ...options
+});
 
 /**
  * Add work item assignee
  *
  * Assigns a user to a work item.
  */
-export const addAssignee = <ThrowOnError extends boolean = false>(options: Options<AddAssigneeData, ThrowOnError>) => (options.client ?? client).patch<AddAssigneeResponses, unknown, ThrowOnError>({ url: '/api/workitems/{id}/assignees/{userId}', ...options });
+export const addAssignee = <ThrowOnError extends boolean = false>(options: Options<AddAssigneeData, ThrowOnError>) => (options.client ?? client).patch<AddAssigneeResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/workitems/{id}/assignees/{userId}',
+    ...options
+});
 
 /**
  * Delete a tag by id
  *
  * Delete an existing tag.
  */
-export const deleteTag = <ThrowOnError extends boolean = false>(options: Options<DeleteTagData, ThrowOnError>) => (options.client ?? client).delete<DeleteTagResponses, unknown, ThrowOnError>({ url: '/api/tags/{id}', ...options });
+export const deleteTag = <ThrowOnError extends boolean = false>(options: Options<DeleteTagData, ThrowOnError>) => (options.client ?? client).delete<DeleteTagResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/tags/{id}',
+    ...options
+});
 
 /**
  * Update an existing tag
@@ -150,6 +187,7 @@ export const deleteTag = <ThrowOnError extends boolean = false>(options: Options
  * Only provided fields will be updated.
  */
 export const updateTag = <ThrowOnError extends boolean = false>(options: Options<UpdateTagData, ThrowOnError>) => (options.client ?? client).patch<UpdateTagResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/tags/{id}',
     ...options,
     headers: {
@@ -163,53 +201,139 @@ export const updateTag = <ThrowOnError extends boolean = false>(options: Options
  *
  * Returns active assignees for a work item.
  */
-export const getAssignees = <ThrowOnError extends boolean = false>(options: Options<GetAssigneesData, ThrowOnError>) => (options.client ?? client).get<GetAssigneesResponses, unknown, ThrowOnError>({ url: '/api/workitems/{id}/assignees', ...options });
+export const getAssignees = <ThrowOnError extends boolean = false>(options: Options<GetAssigneesData, ThrowOnError>) => (options.client ?? client).get<GetAssigneesResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/workitems/{id}/assignees',
+    ...options
+});
 
 /**
  * List work items for Telegram user
  *
  * Returns work items assigned to the app user with the provided Telegram user ID.
  */
-export const getWorkItemsByTelegramUser = <ThrowOnError extends boolean = false>(options: Options<GetWorkItemsByTelegramUserData, ThrowOnError>) => (options.client ?? client).get<GetWorkItemsByTelegramUserResponses, unknown, ThrowOnError>({ url: '/api/workitems/telegramUser/{telegramUserId}', ...options });
+export const getWorkItemsByTelegramUser = <ThrowOnError extends boolean = false>(options: Options<GetWorkItemsByTelegramUserData, ThrowOnError>) => (options.client ?? client).get<GetWorkItemsByTelegramUserResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/workitems/telegramUser/{telegramUserId}',
+    ...options
+});
 
 /**
  * List sprints
  *
  * Returns all configured sprints.
  */
-export const getAll = <ThrowOnError extends boolean = false>(options?: Options<GetAllData, ThrowOnError>) => (options?.client ?? client).get<GetAllResponses, unknown, ThrowOnError>({ url: '/api/sprints', ...options });
+export const getAll = <ThrowOnError extends boolean = false>(options?: Options<GetAllData, ThrowOnError>) => (options?.client ?? client).get<GetAllResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/sprints',
+    ...options
+});
 
 /**
  * Get sprint by ID
  *
  * Returns one sprint by its identifier.
  */
-export const getSprint = <ThrowOnError extends boolean = false>(options: Options<GetSprintData, ThrowOnError>) => (options.client ?? client).get<GetSprintResponses, unknown, ThrowOnError>({ url: '/api/sprints/{id}', ...options });
+export const getSprint = <ThrowOnError extends boolean = false>(options: Options<GetSprintData, ThrowOnError>) => (options.client ?? client).get<GetSprintResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/sprints/{id}',
+    ...options
+});
 
 /**
  * List app users
  *
  * Returns all application users ordered by name.
  */
-export const getAll1 = <ThrowOnError extends boolean = false>(options?: Options<GetAll1Data, ThrowOnError>) => (options?.client ?? client).get<GetAll1Responses, unknown, ThrowOnError>({ url: '/api/appusers', ...options });
+export const getAll1 = <ThrowOnError extends boolean = false>(options?: Options<GetAll1Data, ThrowOnError>) => (options?.client ?? client).get<GetAll1Responses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/appusers',
+    ...options
+});
 
 /**
  * Get sprint velocity analytics
  *
  * Returns completion percentages per sprint and the overall velocity target.
  */
-export const getVelocity = <ThrowOnError extends boolean = false>(options?: Options<GetVelocityData, ThrowOnError>) => (options?.client ?? client).get<GetVelocityResponses, unknown, ThrowOnError>({ url: '/api/analytics/velocity', ...options });
+export const getVelocity = <ThrowOnError extends boolean = false>(options?: Options<GetVelocityData, ThrowOnError>) => (options?.client ?? client).get<GetVelocityResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/analytics/velocity',
+    ...options
+});
 
 /**
  * Get analytics debug rows
  *
  * Returns raw work item, assignment, and time-entry rows used for diagnostics.
  */
-export const debug = <ThrowOnError extends boolean = false>(options?: Options<DebugData, ThrowOnError>) => (options?.client ?? client).get<DebugResponses, unknown, ThrowOnError>({ url: '/api/analytics/debug', ...options });
+export const debug = <ThrowOnError extends boolean = false>(options?: Options<DebugData, ThrowOnError>) => (options?.client ?? client).get<DebugResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/analytics/debug',
+    ...options
+});
 
 /**
  * Get developer dashboard analytics
  *
  * Returns KPI totals and developer-by-sprint chart data.
  */
-export const getDashboardData = <ThrowOnError extends boolean = false>(options?: Options<GetDashboardDataData, ThrowOnError>) => (options?.client ?? client).get<GetDashboardDataResponses, unknown, ThrowOnError>({ url: '/api/analytics/dashboard', ...options });
+export const getDashboardData = <ThrowOnError extends boolean = false>(options?: Options<GetDashboardDataData, ThrowOnError>) => (options?.client ?? client).get<GetDashboardDataResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/analytics/dashboard',
+    ...options
+});
+
+/**
+ * Create account
+ *
+ * Creates an app user and returns a JWT.
+ */
+export const signup = <ThrowOnError extends boolean = false>(options: Options<SignupData, ThrowOnError>) => (options.client ?? client).post<SignupResponses, unknown, ThrowOnError>({
+    url: '/auth/signup',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Log in
+ *
+ * Returns a JWT for valid email/password credentials.
+ */
+export const login = <ThrowOnError extends boolean = false>(options: Options<LoginData, ThrowOnError>) => (options.client ?? client).post<LoginResponses, unknown, ThrowOnError>({
+    url: '/auth/login',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Get current user
+ *
+ * Returns the authenticated user's safe profile.
+ */
+export const me = <ThrowOnError extends boolean = false>(options?: Options<MeData, ThrowOnError>) => (options?.client ?? client).get<MeResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/auth/me',
+    ...options
+});
+
+/**
+ * Update current user
+ *
+ * Updates the authenticated user's profile.
+ */
+export const updateMe = <ThrowOnError extends boolean = false>(options: Options<UpdateMeData, ThrowOnError>) => (options.client ?? client).patch<UpdateMeResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/auth/me',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});

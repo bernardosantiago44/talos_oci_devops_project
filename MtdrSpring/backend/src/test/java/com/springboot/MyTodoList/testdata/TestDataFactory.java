@@ -79,6 +79,8 @@ public final class TestDataFactory {
         user.setName("Ada Lovelace");
         user.setEmail(id + "@example.com");
         user.setTelegramUserId("telegram-" + id);
+        user.setPhoneNumber("3312345678");
+        user.setPasswordHash("$2a$10$abcdefghijklmnopqrstuuQ0xJgtiFLiZpZRxz5hNQgoqYqV6tf6.");
         user.setCreatedAt(OffsetDateTime.parse("2026-04-29T09:00:00-06:00"));
         return user;
     }

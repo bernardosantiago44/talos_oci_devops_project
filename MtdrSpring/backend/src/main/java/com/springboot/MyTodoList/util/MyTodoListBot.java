@@ -1,10 +1,10 @@
 package com.springboot.MyTodoList.util;
 
+import com.springboot.MyTodoList.config.BotProps;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
-import org.springframework.beans.factory.annotation.Value;
-
-
-import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
 import org.telegram.telegrambots.longpolling.BotSession;
 import org.telegram.telegrambots.longpolling.interfaces.LongPollingUpdateConsumer;
 import org.telegram.telegrambots.longpolling.starter.AfterBotRegistration;
@@ -16,20 +16,22 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
 @Component
+@ConditionalOnExpression("!'${telegram.bot.token:}'.trim().isEmpty()")
 public class MyTodoListBot implements SpringLongPollingBot, LongPollingSingleThreadUpdateConsumer {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(MyTodoListBot.class);
+
     private final TelegramClient telegramClient;
+    private final BotProps botProps;
 
-    @Value("${telegram.bot.token}")
-	private String telegramBotToken;
-
-    public MyTodoListBot() {
-        telegramClient = new OkHttpTelegramClient(getBotToken());
+    public MyTodoListBot(TelegramClient telegramClient, BotProps botProps) {
+        this.telegramClient = telegramClient;
+        this.botProps = botProps;
     }
 
     @Override
     public String getBotToken() {
-        return telegramBotToken;
+        return botProps.getToken();
     }
 
     @Override
@@ -39,21 +41,15 @@ public class MyTodoListBot implements SpringLongPollingBot, LongPollingSingleThr
 
     @Override
     public void consume(Update update) {
-        // We check if the update has a message and the message has text
         if (update.hasMessage() && update.getMessage().hasText()) {
-            // Set variables
-            String message_text = update.getMessage().getText();
-            long chat_id = update.getMessage().getChatId();
-
-            SendMessage message = SendMessage // Create a message object
-                    .builder()
-                    .chatId(chat_id)
-                    .text(message_text)
+            SendMessage message = SendMessage.builder()
+                    .chatId(update.getMessage().getChatId())
+                    .text(update.getMessage().getText())
                     .build();
             try {
-                telegramClient.execute(message); // Sending our message object to user
-            } catch (TelegramApiException e) {
-                e.printStackTrace();
+                telegramClient.execute(message);
+            } catch (TelegramApiException exception) {
+                LOGGER.error("Failed to send Telegram message", exception);
             }
         }
     }

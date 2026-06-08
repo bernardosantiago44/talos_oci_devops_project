@@ -1,0 +1,104 @@
+@startuml
+
+class SprintService {
+	{field} {static} -log : Logger
+	{field} -sprintRepository : SprintRepository
+	{method} +findAll () : List
+	{method} +findById ( id : String ) : SprintResponse
+}
+
+
+class TagsService {
+	{field} {static} -LOGGER : Logger
+	{field} -tagsRepository : TagsRepository
+	{method} +createTag ( request : CreateTagRequest ) : TagResponse
+	{method} +deleteTagById ( id : String ) : void
+	{method} -ensureTagExistsById ( id : String ) : void
+	{method} +findAll () : List
+	{method} +replaceTags ( workItem : WorkItem , tagIds : List ) : void
+	{method} +updateTag ( id : String , request : UpdateTagRequest ) : TagResponse
+	{method} -validateTagColor ( color : String ) : void
+	{method} -validateTagNameDoesNotExist ( name : String ) : void
+	{method} -validateTagNameDoesNotExistExcludingId ( name : String , id : String ) : void
+	{method} -validateUpdateTagRequest ( request : UpdateTagRequest ) : void
+}
+
+
+class TimeEntryService {
+	{field} -appUserRepository : AppUserRepository
+	{field} {static} -log : Logger
+	{field} -timeEntryRepository : TimeEntryRepository
+	{field} -workItemRepository : WorkItemRepository
+	{method} -findAppUser ( userId : String ) : AppUser
+	{method} -findWorkItem ( workItemId : String ) : WorkItem
+	{method} +logTime ( request : TimeEntryRequest ) : TimeEntryResponse
+	{method} -toResponse ( timeEntry : TimeEntry ) : TimeEntryResponse
+	{method} -toTimeEntry ( request : TimeEntryRequest ) : TimeEntry
+	{method} -validateRequest ( request : TimeEntryRequest ) : void
+}
+
+
+class WorkItemAssignmentService {
+	{field} {static} -ASSIGNEE_ROLE : String
+	{field} -appUserRepository : AppUserRepository
+	{field} -assignmentRepository : WorkItemAssignmentRepository
+	{field} {static} -log : Logger
+	{field} -workItemRepository : WorkItemRepository
+	{method} +addAssignee ( workItemId : String , userId : String ) : WorkItemAssignmentDto
+	{method} -findUser ( userId : String ) : AppUser
+	{method} -findWorkItem ( workItemId : String ) : WorkItem
+	{method} +getAssignees ( workItemId : String ) : List
+	{method} +removeAssignee ( workItemId : String , userId : String ) : void
+	{method} +replaceAssignees ( workItem : WorkItem , assigneeIds : List ) : void
+	{method} -saveAssignmentToRepository ( workItem : WorkItem , user : AppUser ) : WorkItemAssignment
+	{method} -validateNoDuplicates ( assigneeIds : List ) : void
+}
+
+
+class WorkItemService {
+	{field} {static} -VALID_STATUSES : Set
+	{field} {static} -VALID_WORK_TYPES : Set
+	{field} -appUserRepository : AppUserRepository
+	{field} {static} -log : Logger
+	{field} -sprintRepository : SprintRepository
+	{field} -userRepository : AppUserRepository
+	{field} -workItemRepository : WorkItemRepository
+	{method} +createWorkItem ( request : CreateWorkItemRequest ) : WorkItemResponse
+	{method} +deleteWorkItemById ( id : String ) : void
+	{method} -ensureUserExistsByTelegramId ( id : String ) : void
+	{method} -ensureWorkItemExistsById ( id : String ) : void
+	{method} -escapeLike ( value : String ) : String
+	{method} +findAll () : List
+	{method} +findById ( id : String ) : WorkItemResponse
+	{method} +findByQuery ( query : WorkItemQuery ) : List
+	{method} +findByTelegramUserId ( userId : String ) : List
+	{method} -hasText ( value : String ) : boolean
+	{method} -normalizeIdValues ( values : List ) : List
+	{method} -normalizeStatuses ( values : List ) : List
+	{method} -normalizeUpperSnake ( value : String ) : String
+	{method} -parsePriority ( priority : String ) : WorkItemPriority
+	{method} -toSpecification ( query : WorkItemQuery , priority : WorkItemPriority , statuses : List , workType : String ) : Specification
+	{method} +updateWorkItem ( id : String , request : UpdateWorkItemRequest ) : WorkItemResponse
+	{method} -validateCreateWorkItem ( request : CreateWorkItemRequest ) : void
+	{method} -validateUpdateWorkItem ( request : UpdateWorkItemRequest , existingWorkItem : WorkItem ) : void
+}
+
+
+class WorkItemTagAssignmentService {
+	{field} {static} -LOGGER : Logger
+	{field} -entityManager : EntityManager
+	{field} -tagsRepository : TagsRepository
+	{method} +replaceTags ( workItem : WorkItem , tagIds : List ) : void
+	{method} -saveAssignmentToRepository ( workItem : WorkItem , tag : Tag ) : WorkItemTag
+}
+
+
+
+
+WorkItemService *--  WorkItemAssignmentService : assignmentService
+WorkItemService *--  WorkItemTagAssignmentService : tagAssignmentService
+
+hide fields
+hide methods
+
+@enduml
