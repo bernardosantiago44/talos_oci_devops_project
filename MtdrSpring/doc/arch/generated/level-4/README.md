@@ -1,4 +1,4 @@
-# Generated Level 3 diagrams
+# Generated Level 4 diagrams
 
 These PlantUML class diagrams map the compiled Spring Boot implementation to the
 Level 3 backend components defined in `model.dsl`. Structurizr DSL remains the

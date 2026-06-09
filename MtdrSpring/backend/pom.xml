@@ -123,12 +123,13 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
+			<!-- Start of delivery for module 5 -->
 			<plugin>
 				<groupId>de.elnarion.maven</groupId>
 				<artifactId>plantuml-generator-maven-plugin</artifactId>
 				<version>3.0.1</version>
 				<configuration>
-					<outputDirectory>${project.basedir}/../doc/arch/generated/level-3</outputDirectory>
+					<outputDirectory>${project.basedir}/../doc/arch/generated/level-4</outputDirectory>
 					<scanPackages>
 						<scanPackage>com.springboot.MyTodoList</scanPackage>
 					</scanPackages>
@@ -239,6 +240,7 @@
 					</execution>
 				</executions>
 			</plugin>
+			<!-- End of delivery for module 5 -->
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>

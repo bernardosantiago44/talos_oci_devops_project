@@ -59,6 +59,7 @@ jobs:
         EVENT_NAME: ${{ github.event_name }}
         ENV_INPUT: ${{ inputs.environment }}
       run: |
+        # Plantuml documents are generated here
         mvn clean package spring-boot:repackage
 
         if [[ "$EVENT_NAME" == "push" || "$ENV_INPUT" == "deploy" ]]; then
@@ -74,14 +75,16 @@ jobs:
           echo "PR detected: Skipping docker build and push."
         fi
 
+    # Generations of svg documents from plantuml with graphviz
     - name: Render PlantUML to SVG
       if: github.event_name == 'push'
       run: |
         sudo apt-get install -y graphviz
         wget -O plantuml.jar https://github.com/plantuml/plantuml/releases/latest/download/plantuml.jar
-        java -jar plantuml.jar -tsvg -o "." "MtdrSpring/doc/arch/generated/level-3/**/*.puml"
+        java -jar plantuml.jar -tsvg -o "." "MtdrSpring/doc/arch/generated/level-4/**/*.puml"
         rm plantuml.jar
 
+    # Commit of new or changed .puml and .svg diagrams
     - name: Commit the generated architecture diagrams
       if: github.event_name == 'push'
       working-directory: MtdrSpring/doc/arch/generated
@@ -89,9 +92,10 @@ jobs:
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
         git config --local user.name "Architecture Generator[bot]"
         
-        if [ -n "$(git status --porcelain level-3/*)" ]; then
-          git add level-3/*
-          git commit -m "Auto-generated level3 architecture docs [skip ci]"
+        # protection in case nothing changed
+        if [ -n "$(git status --porcelain level-4/*)" ]; then
+          git add level-4/*
+          git commit -m "Auto-generated level4 architecture docs [skip ci]"
           git push
         else
           echo "Nothing changed!"
