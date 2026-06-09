@@ -20,37 +20,37 @@ model {
         frontend = container "Frontend Web Application" "Browser-based UI for work items, sprints, tags, assignments, time entries, and analytics dashboards." "React, TypeScript, Nginx"
         backend = container "Backend API Layered Monolith" "Single Spring Boot deployable containing REST APIs, business services, Telegram bot integration, analytics, semantic search, and persistence access." "Java 25, Spring Boot" {
             restControllers = component "REST Controllers" "HTTP entrypoints for work items, users, sprints, tags, time entries, analytics, and semantic search." "Spring MVC Controllers" {
-                url "https://github.com/bernardosantiago44/talos_oci_devops_project/blob/arch/plantuml/MtdrSpring/doc/arch/generated/level-4/rest-controllers.puml"
+                url "https://github.com/bernardosantiago44/talos_oci_devops_project/blob/main/MtdrSpring/doc/arch/generated/level-4/rest-controllers.svg"
             }
             workManagement = component "Work Management" "Creates, updates, searches, organizes, and deletes work items such as tasks, issues, bugs, and features." "Spring Service" {
-                url "https://github.com/bernardosantiago44/talos_oci_devops_project/blob/arch/plantuml/MtdrSpring/doc/arch/generated/level-4/work-management.puml"
+                url "https://github.com/bernardosantiago44/talos_oci_devops_project/blob/main/MtdrSpring/doc/arch/generated/level-4/work-management.svg"
             }
             timeTracking = component "Time Tracking" "Registers estimates, actual time, work sessions, and time notes for assigned work." "Spring Service" {
-                url "https://github.com/bernardosantiago44/talos_oci_devops_project/blob/arch/plantuml/MtdrSpring/doc/arch/generated/level-4/time-tracking.puml"
+                url "https://github.com/bernardosantiago44/talos_oci_devops_project/blob/main/MtdrSpring/doc/arch/generated/level-4/time-tracking.svg"
             }
             activityTracking = component "Activity Tracking" "Records relevant user actions, status changes, comments, blockers, and system activity for visibility." "Spring Service / Logging" {
-                url "https://github.com/bernardosantiago44/talos_oci_devops_project/blob/arch/plantuml/MtdrSpring/doc/arch/generated/level-4/activity-tracking.puml"
+                url "https://github.com/bernardosantiago44/talos_oci_devops_project/blob/main/MtdrSpring/doc/arch/generated/level-4/activity-tracking.svg"
             }
             botInterface = component "Bot Interface" "Receives Telegram commands and translates them into backend use cases." "Telegram Bots Spring Boot" {
-                url "https://github.com/bernardosantiago44/talos_oci_devops_project/blob/arch/plantuml/MtdrSpring/doc/arch/generated/level-4/bot-interface.puml"
+                url "https://github.com/bernardosantiago44/talos_oci_devops_project/blob/main/MtdrSpring/doc/arch/generated/level-4/bot-interface.svg"
             }
             sprintManagement = component "Sprint Management" "Reads sprint definitions, goals, scope, and sprint status used by planning and work workflows." "Spring Service" {
-                url "https://github.com/bernardosantiago44/talos_oci_devops_project/blob/arch/plantuml/MtdrSpring/doc/arch/generated/level-4/sprint-management.puml"
+                url "https://github.com/bernardosantiago44/talos_oci_devops_project/blob/main/MtdrSpring/doc/arch/generated/level-4/sprint-management.svg"
             }
             assignmentManagement = component "Assignment Management" "Assigns and unassigns work items to team members with ownership tracking." "Spring Service" {
-                url "https://github.com/bernardosantiago44/talos_oci_devops_project/blob/arch/plantuml/MtdrSpring/doc/arch/generated/level-4/assignment-management.puml"
+                url "https://github.com/bernardosantiago44/talos_oci_devops_project/blob/main/MtdrSpring/doc/arch/generated/level-4/assignment-management.svg"
             }
             reportingAnalytics = component "Reporting and KPI Analytics" "Calculates and exposes productivity indicators, sprint velocity, team progress, and estimate-vs-actual data." "Spring Service" {
-                url "https://github.com/bernardosantiago44/talos_oci_devops_project/blob/arch/plantuml/MtdrSpring/doc/arch/generated/level-4/reporting-kpi-analytics.puml"
+                url "https://github.com/bernardosantiago44/talos_oci_devops_project/blob/main/MtdrSpring/doc/arch/generated/level-4/reporting-kpi-analytics.svg"
             }
             semanticSearch = component "Semantic Search and AI Integration" "Builds an in-memory vector index, requests embeddings, and returns semantically relevant work items." "Spring Service" {
-                url "https://github.com/bernardosantiago44/talos_oci_devops_project/blob/arch/plantuml/MtdrSpring/doc/arch/generated/level-4/semantic-search-ai-integration.puml"
+                url "https://github.com/bernardosantiago44/talos_oci_devops_project/blob/main/MtdrSpring/doc/arch/generated/level-4/semantic-search-ai-integration.svg"
             }
             persistenceRepositories = component "Persistence Repositories" "Encapsulates database access for users, work items, assignments, tags, sprints, time entries, and analytics queries." "Spring Data JPA" {
-                url "https://github.com/bernardosantiago44/talos_oci_devops_project/blob/arch/plantuml/MtdrSpring/doc/arch/generated/level-4/persistence-repositories.puml"
+                url "https://github.com/bernardosantiago44/talos_oci_devops_project/blob/main/MtdrSpring/doc/arch/generated/level-4/persistence-repositories.svg"
             }
             domainModel = component "Domain Model" "JPA entities and DTO mappers representing work items, users, assignments, tags, sprints, time entries, and analytics projections." "Java, JPA" {
-                url "https://github.com/bernardosantiago44/talos_oci_devops_project/blob/arch/plantuml/MtdrSpring/doc/arch/generated/level-4/domain-model.puml"
+                url "https://github.com/bernardosantiago44/talos_oci_devops_project/blob/main/MtdrSpring/doc/arch/generated/level-4/domain-model.svg"
             }
         }
         database = container "Oracle Autonomous Database" "Persists users, work items, assignments, tags, sprints, time entries, activity history, and analytics data." "Oracle Autonomous Database"
