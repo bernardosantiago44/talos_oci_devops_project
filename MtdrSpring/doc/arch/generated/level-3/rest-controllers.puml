@@ -1,0 +1,277 @@
+@startuml
+
+class AnalyticsController {
+	{method} +debug () : AnalyticsDebug
+	{method} +getDashboardData () : AnalyticsDashboard
+	{method} +getVelocity () : VelocityAnalytics
+}
+
+
+class AnalyticsService {
+	{field} {static} -VELOCITY_TARGET : double
+	{field} -analyticsRepository : AnalyticsRepository
+	{method} +getDashboardData () : AnalyticsDashboard
+	{method} +getDebugData () : AnalyticsDebug
+	{method} +getVelocity () : VelocityAnalytics
+	{method} -round1 ( value : double ) : double
+	{method} -toSprintVelocity ( row : SprintVelocityRow ) : SprintVelocity
+}
+
+
+class AppUserController {
+	{method} +getAll () : List
+}
+
+
+class AppUserService {
+	{field} -appUserRepository : AppUserRepository
+	{method} +findAll () : List
+	{method} -toSummary ( user : AppUser ) : AppUserSummary
+}
+
+
+class AuthController {
+	{method} +login ( request : LoginRequest ) : ResponseEntity
+	{method} +me ( authentication : Authentication ) : ResponseEntity
+	{method} +signup ( request : SignupRequest ) : ResponseEntity
+	{method} +updateMe ( authentication : Authentication , request : UpdateProfileRequest ) : ResponseEntity
+}
+
+
+class AuthService {
+	{field} {static} -INVALID_CREDENTIALS_MESSAGE : String
+	{field} -appUserRepository : AppUserRepository
+	{field} -passwordEncoder : PasswordEncoder
+	{method} +getCurrentUser ( userId : String ) : UserProfileResponse
+	{method} +login ( request : LoginRequest ) : AuthResponse
+	{method} -normalizeEmail ( email : String ) : String
+	{method} +signup ( request : SignupRequest ) : AuthResponse
+	{method} -toAuthResponse ( user : AppUser ) : AuthResponse
+	{method} -toProfile ( user : AppUser ) : UserProfileResponse
+	{method} +updateCurrentUser ( userId : String , request : UpdateProfileRequest ) : UserProfileResponse
+	{method} -updateName ( user : AppUser , name : String ) : void
+	{method} -updatePassword ( user : AppUser , password : String ) : void
+	{method} -updatePhoneNumber ( user : AppUser , phoneNumber : String ) : void
+	{method} -updateTelegramUserId ( user : AppUser , telegramUserId : String ) : void
+}
+
+
+class DeepSeekService {
+	{field} -httpClient : CloseableHttpClient
+	{field} -httpPost : HttpPost
+	{method} +generateText ( prompt : String ) : String
+}
+
+
+class EmbeddingService {
+	{field} {static} -TIMEOUT_SECONDS : int
+	{field} -config : AlibabaEmbeddingConfig
+	{field} -httpClient : HttpClient
+	{field} {static} -log : Logger
+	{field} -objectMapper : ObjectMapper
+	{method} -buildRequestBody ( text : String ) : String
+	{method} +generateEmbedding ( text : String ) : float[]
+	{method} -parseEmbeddingResponse ( responseBody : String ) : float[]
+}
+
+
+class GlobalExceptionHandler {
+	{method} +handleAiServiceUnavailable ( ex : AiServiceUnavailableException ) : ResponseEntity
+	{method} +handleBadCredentials ( ex : BadCredentialsException ) : ResponseEntity
+	{method} +handleBusinessRuleException ( ex : BusinessRuleException ) : ResponseEntity
+	{method} -handleGenericNotFound ( exception : RuntimeException ) : ResponseEntity
+	{method} +handleSprintNotFound ( exception : SprintNotFoundException ) : ResponseEntity
+	{method} +handleTagNotFound ( exception : TagNotFoundException ) : ResponseEntity
+	{method} +handleUnreadableMessage ( ex : HttpMessageNotReadableException ) : ResponseEntity
+	{method} +handleUserNotFound ( exception : AppUserNotFoundException ) : ResponseEntity
+	{method} +handleValidationErrors ( ex : MethodArgumentNotValidException ) : ResponseEntity
+	{method} +handleWorkItemNotFound ( exception : WorkItemNotFoundException ) : ResponseEntity
+}
+
+
+class JwtService {
+	{field} {static} -BASE64_URL_DECODER : Decoder
+	{field} {static} -BASE64_URL_ENCODER : Encoder
+	{field} {static} -CLAIMS_TYPE : TypeReference
+	{field} -expirationMinutes : long
+	{field} -objectMapper : ObjectMapper
+	{field} -secret : String
+	{method} -encodeJson ( value : Map ) : String
+	{method} -ensureSecretConfigured () : void
+	{method} +extractUserId ( token : String ) : Optional
+	{method} +generateToken ( user : AppUser ) : String
+	{method} -hasNotExpired ( claims : Map ) : boolean
+	{method} -hasValidSignature ( unsignedToken : String , providedSignature : String ) : boolean
+	{method} -readClaims ( encodedPayload : String ) : Optional
+	{method} -sign ( value : String ) : String
+}
+
+
+class SemanticSearchController {
+	{field} {static} -log : Logger
+	{method} +reindex () : ResponseEntity
+	{method} +search ( request : SemanticSearchRequest ) : ResponseEntity
+}
+
+
+class SemanticSearchService {
+	{field} {static} -log : Logger
+	{field} -vectorIndex : ConcurrentHashMap
+	{field} -workItemRepository : WorkItemRepository
+	{method} +buildIndex () : void
+	{method} -buildSearchableText ( item : WorkItem ) : String
+	{method} -cosineSimilarity ( a : float[] , b : float[] ) : double
+	{method} +indexWorkItem ( item : WorkItem ) : void
+	{method} -performKeywordFallback ( query : String , maxResults : int , reason : String ) : SemanticSearchResultList
+	{method} -performSemanticSearch ( query : String , maxResults : int ) : SemanticSearchResultList
+	{method} +removeFromIndex ( workItemId : String ) : void
+	{method} +search ( query : String , maxResults : int ) : SemanticSearchResultList
+}
+
+
+class SprintController {
+	{method} +getAll () : ResponseEntity
+	{method} +getSprint ( id : String ) : ResponseEntity
+}
+
+
+class SprintService {
+	{field} {static} -log : Logger
+	{field} -sprintRepository : SprintRepository
+	{method} +findAll () : List
+	{method} +findById ( id : String ) : SprintResponse
+}
+
+
+class TagsController {
+	{field} {static} -LOGGER : Logger
+	{method} +createTag ( request : CreateTagRequest ) : ResponseEntity
+	{method} +deleteTag ( id : String ) : ResponseEntity
+	{method} +get () : ResponseEntity
+	{method} +updateTag ( id : String , request : UpdateTagRequest ) : ResponseEntity
+}
+
+
+class TagsService {
+	{field} {static} -LOGGER : Logger
+	{field} -tagsRepository : TagsRepository
+	{method} +createTag ( request : CreateTagRequest ) : TagResponse
+	{method} +deleteTagById ( id : String ) : void
+	{method} -ensureTagExistsById ( id : String ) : void
+	{method} +findAll () : List
+	{method} +replaceTags ( workItem : WorkItem , tagIds : List ) : void
+	{method} +updateTag ( id : String , request : UpdateTagRequest ) : TagResponse
+	{method} -validateTagColor ( color : String ) : void
+	{method} -validateTagNameDoesNotExist ( name : String ) : void
+	{method} -validateTagNameDoesNotExistExcludingId ( name : String , id : String ) : void
+	{method} -validateUpdateTagRequest ( request : UpdateTagRequest ) : void
+}
+
+
+class TimeEntryController {
+	{method} +logTime ( request : TimeEntryRequest ) : ResponseEntity
+}
+
+
+class TimeEntryService {
+	{field} -appUserRepository : AppUserRepository
+	{field} {static} -log : Logger
+	{field} -timeEntryRepository : TimeEntryRepository
+	{field} -workItemRepository : WorkItemRepository
+	{method} -findAppUser ( userId : String ) : AppUser
+	{method} -findWorkItem ( workItemId : String ) : WorkItem
+	{method} +logTime ( request : TimeEntryRequest ) : TimeEntryResponse
+	{method} -toResponse ( timeEntry : TimeEntry ) : TimeEntryResponse
+	{method} -toTimeEntry ( request : TimeEntryRequest ) : TimeEntry
+	{method} -validateRequest ( request : TimeEntryRequest ) : void
+}
+
+
+class WorkItemAssignmentService {
+	{field} {static} -ASSIGNEE_ROLE : String
+	{field} -appUserRepository : AppUserRepository
+	{field} -assignmentRepository : WorkItemAssignmentRepository
+	{field} {static} -log : Logger
+	{field} -workItemRepository : WorkItemRepository
+	{method} +addAssignee ( workItemId : String , userId : String ) : WorkItemAssignmentDto
+	{method} -findUser ( userId : String ) : AppUser
+	{method} -findWorkItem ( workItemId : String ) : WorkItem
+	{method} +getAssignees ( workItemId : String ) : List
+	{method} +removeAssignee ( workItemId : String , userId : String ) : void
+	{method} +replaceAssignees ( workItem : WorkItem , assigneeIds : List ) : void
+	{method} -saveAssignmentToRepository ( workItem : WorkItem , user : AppUser ) : WorkItemAssignment
+	{method} -validateNoDuplicates ( assigneeIds : List ) : void
+}
+
+
+class WorkItemController {
+	{method} +addAssignee ( id : String , userId : String ) : ResponseEntity
+	{method} +createWorkItem ( request : CreateWorkItemRequest ) : ResponseEntity
+	{method} +deleteWorkItem ( id : String ) : ResponseEntity
+	{method} +getAllWorkItems ( query : WorkItemQuery ) : ResponseEntity
+	{method} +getAssignees ( id : String ) : ResponseEntity
+	{method} +getById ( id : String ) : ResponseEntity
+	{method} +getWorkItemsByTelegramUser ( telegramUserId : String ) : ResponseEntity
+	{method} +removeAssignee ( id : String , userId : String ) : ResponseEntity
+	{method} +updateWorkItem ( id : String , request : UpdateWorkItemRequest ) : ResponseEntity
+}
+
+
+class WorkItemService {
+	{field} {static} -VALID_STATUSES : Set
+	{field} {static} -VALID_WORK_TYPES : Set
+	{field} -appUserRepository : AppUserRepository
+	{field} {static} -log : Logger
+	{field} -sprintRepository : SprintRepository
+	{field} -userRepository : AppUserRepository
+	{field} -workItemRepository : WorkItemRepository
+	{method} +createWorkItem ( request : CreateWorkItemRequest ) : WorkItemResponse
+	{method} +deleteWorkItemById ( id : String ) : void
+	{method} -ensureUserExistsByTelegramId ( id : String ) : void
+	{method} -ensureWorkItemExistsById ( id : String ) : void
+	{method} -escapeLike ( value : String ) : String
+	{method} +findAll () : List
+	{method} +findById ( id : String ) : WorkItemResponse
+	{method} +findByQuery ( query : WorkItemQuery ) : List
+	{method} +findByTelegramUserId ( userId : String ) : List
+	{method} -hasText ( value : String ) : boolean
+	{method} -normalizeIdValues ( values : List ) : List
+	{method} -normalizeStatuses ( values : List ) : List
+	{method} -normalizeUpperSnake ( value : String ) : String
+	{method} -parsePriority ( priority : String ) : WorkItemPriority
+	{method} -toSpecification ( query : WorkItemQuery , priority : WorkItemPriority , statuses : List , workType : String ) : Specification
+	{method} +updateWorkItem ( id : String , request : UpdateWorkItemRequest ) : WorkItemResponse
+	{method} -validateCreateWorkItem ( request : CreateWorkItemRequest ) : void
+	{method} -validateUpdateWorkItem ( request : UpdateWorkItemRequest , existingWorkItem : WorkItem ) : void
+}
+
+
+class WorkItemTagAssignmentService {
+	{field} {static} -LOGGER : Logger
+	{field} -entityManager : EntityManager
+	{field} -tagsRepository : TagsRepository
+	{method} +replaceTags ( workItem : WorkItem , tagIds : List ) : void
+	{method} -saveAssignmentToRepository ( workItem : WorkItem , tag : Tag ) : WorkItemTag
+}
+
+
+
+
+AnalyticsController *--  AnalyticsService : analyticsService
+AppUserController *--  AppUserService : appUserService
+AuthController *--  AuthService : authService
+AuthService *--  JwtService : jwtService
+SemanticSearchController *--  SemanticSearchService : searchService
+SemanticSearchService *--  EmbeddingService : embeddingService
+SprintController *--  SprintService : sprintService
+TagsController *--  TagsService : tagsService
+TimeEntryController *--  TimeEntryService : service
+WorkItemController *--  WorkItemAssignmentService : assignmentService
+WorkItemController *--  WorkItemService : service
+WorkItemService *--  WorkItemAssignmentService : assignmentService
+WorkItemService *--  WorkItemTagAssignmentService : tagAssignmentService
+
+hide fields
+hide methods
+
+@enduml

@@ -37,13 +37,14 @@ class AuthControllerTest {
 
     @MockitoBean
     private AuthService authService;
+    private static final String authPath = "/api/auth/";
 
     @Test
     void signupReturnsTokenAndSafeProfile() throws Exception {
         SignupRequest request = signupRequest();
         when(authService.signup(any(SignupRequest.class))).thenReturn(authResponse());
 
-        mockMvc.perform(post("/auth/signup")
+        mockMvc.perform(post(authPath + "signup")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -61,7 +62,7 @@ class AuthControllerTest {
         when(authService.login(any(LoginRequest.class)))
                 .thenThrow(new BadCredentialsException("Invalid email or password"));
 
-        mockMvc.perform(post("/auth/login")
+        mockMvc.perform(post(authPath + "/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isUnauthorized())
@@ -72,7 +73,7 @@ class AuthControllerTest {
     void meReturnsCurrentUser() throws Exception {
         when(authService.getCurrentUser("user-1")).thenReturn(userProfile());
 
-        mockMvc.perform(get("/auth/me").principal(authentication()))
+        mockMvc.perform(get(authPath + "/me").principal(authentication()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.userId").value("user-1"))
                 .andExpect(jsonPath("$.phoneNumber").value("3312345678"))
@@ -85,7 +86,7 @@ class AuthControllerTest {
         request.setName("Updated Name");
         when(authService.updateCurrentUser(eq("user-1"), any(UpdateProfileRequest.class))).thenReturn(userProfile());
 
-        mockMvc.perform(patch("/auth/me")
+        mockMvc.perform(patch(authPath + "/me")
                         .principal(authentication())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))

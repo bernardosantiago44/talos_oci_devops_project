@@ -74,6 +74,16 @@ jobs:
         else
           echo "PR detected: Skipping docker build and push."
         fi
+    - name: Commit the generated architecture diagrams
+      if: github.event_name == 'push'
+      working-directory: MtdrSpring/doc/arch/generated
+      run: |
+        git config --local user.email "github-actions[bot]@users.noreply.github.com"
+        git config --local user.name "Architecture Generator[bot]"
+        
+        git add level-3/*
+        git commit -m "Auto-generated level3 architecture docs [skip ci]"
+        git push
 
     # Generations of svg documents from plantuml with graphviz
     - name: Render PlantUML to SVG

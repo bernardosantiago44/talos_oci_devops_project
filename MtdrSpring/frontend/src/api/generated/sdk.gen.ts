@@ -112,6 +112,34 @@ export const reindex = <ThrowOnError extends boolean = false>(options?: Options<
 });
 
 /**
+ * Create account
+ *
+ * Creates an app user and returns a JWT.
+ */
+export const signup = <ThrowOnError extends boolean = false>(options: Options<SignupData, ThrowOnError>) => (options.client ?? client).post<SignupResponses, unknown, ThrowOnError>({
+    url: '/api/auth/signup',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Log in
+ *
+ * Returns a JWT for valid email/password credentials.
+ */
+export const login = <ThrowOnError extends boolean = false>(options: Options<LoginData, ThrowOnError>) => (options.client ?? client).post<LoginResponses, unknown, ThrowOnError>({
+    url: '/api/auth/login',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
  * Delete work item
  *
  * Deletes a work item by its identifier.
@@ -189,6 +217,32 @@ export const deleteTag = <ThrowOnError extends boolean = false>(options: Options
 export const updateTag = <ThrowOnError extends boolean = false>(options: Options<UpdateTagData, ThrowOnError>) => (options.client ?? client).patch<UpdateTagResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/tags/{id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Get current user
+ *
+ * Returns the authenticated user's safe profile.
+ */
+export const me = <ThrowOnError extends boolean = false>(options?: Options<MeData, ThrowOnError>) => (options?.client ?? client).get<MeResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/auth/me',
+    ...options
+});
+
+/**
+ * Update current user
+ *
+ * Updates the authenticated user's profile.
+ */
+export const updateMe = <ThrowOnError extends boolean = false>(options: Options<UpdateMeData, ThrowOnError>) => (options.client ?? client).patch<UpdateMeResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/auth/me',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -282,58 +336,4 @@ export const getDashboardData = <ThrowOnError extends boolean = false>(options?:
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/analytics/dashboard',
     ...options
-});
-
-/**
- * Create account
- *
- * Creates an app user and returns a JWT.
- */
-export const signup = <ThrowOnError extends boolean = false>(options: Options<SignupData, ThrowOnError>) => (options.client ?? client).post<SignupResponses, unknown, ThrowOnError>({
-    url: '/auth/signup',
-    ...options,
-    headers: {
-        'Content-Type': 'application/json',
-        ...options.headers
-    }
-});
-
-/**
- * Log in
- *
- * Returns a JWT for valid email/password credentials.
- */
-export const login = <ThrowOnError extends boolean = false>(options: Options<LoginData, ThrowOnError>) => (options.client ?? client).post<LoginResponses, unknown, ThrowOnError>({
-    url: '/auth/login',
-    ...options,
-    headers: {
-        'Content-Type': 'application/json',
-        ...options.headers
-    }
-});
-
-/**
- * Get current user
- *
- * Returns the authenticated user's safe profile.
- */
-export const me = <ThrowOnError extends boolean = false>(options?: Options<MeData, ThrowOnError>) => (options?.client ?? client).get<MeResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/auth/me',
-    ...options
-});
-
-/**
- * Update current user
- *
- * Updates the authenticated user's profile.
- */
-export const updateMe = <ThrowOnError extends boolean = false>(options: Options<UpdateMeData, ThrowOnError>) => (options.client ?? client).patch<UpdateMeResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/auth/me',
-    ...options,
-    headers: {
-        'Content-Type': 'application/json',
-        ...options.headers
-    }
 });
