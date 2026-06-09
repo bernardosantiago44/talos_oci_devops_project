@@ -7,6 +7,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.SessionManagementConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,13 +23,18 @@ import static org.springframework.security.config.Customizer.withDefaults;
 public class WebSecurityConfiguration {
 
     private static final String[] PUBLIC_ENDPOINTS = {
-            "/auth/signup",
-            "/auth/login",
-            "/api-docs/**",
-            "/v3/api-docs/**",
-            "/swagger-ui/**",
-            "/swagger-ui.html"
+            "/api/auth/signup",
+            "/api/auth/login",
+            "/api/api-docs/**",
+            "/api/v3/api-docs/**",
+            "/api/swagger-ui/**",
+            "/api/swagger-ui.html",
+            "/api-docs/**"
     };
+
+    private static void customize(SessionManagementConfigurer<HttpSecurity> session) {
+        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(
@@ -36,17 +43,17 @@ public class WebSecurityConfiguration {
     ) throws Exception {
         http
                 .cors(withDefaults())
-                .csrf(csrf -> csrf.disable())
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .httpBasic(httpBasic -> httpBasic.disable())
-                .formLogin(formLogin -> formLogin.disable())
+                .csrf(AbstractHttpConfigurer::disable)
+                .sessionManagement(WebSecurityConfiguration::customize)
+                .httpBasic(AbstractHttpConfigurer::disable)
+                .formLogin(AbstractHttpConfigurer::disable)
                 .exceptionHandling(exceptions -> exceptions
-                        .authenticationEntryPoint((request, response, authException) -> {
+                        .authenticationEntryPoint((_, response, _) -> {
                             response.setStatus(401);
                             response.setContentType("application/json");
                             response.getWriter().write("{\"error\":\"UNAUTHORIZED\",\"message\":\"Authentication is required\"}");
                         })
-                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                        .accessDeniedHandler((_, response, _) -> {
                             response.setStatus(403);
                             response.setContentType("application/json");
                             response.getWriter().write("{\"error\":\"FORBIDDEN\",\"message\":\"Access is denied\"}");

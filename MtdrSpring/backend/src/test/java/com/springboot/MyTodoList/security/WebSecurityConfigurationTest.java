@@ -66,7 +66,7 @@ class WebSecurityConfigurationTest {
                 new UserProfileResponse("user-1", "Ada Lovelace", "ada@example.com", null, null)
         ));
 
-        mockMvc.perform(post("/auth/signup")
+        mockMvc.perform(post("/api/auth/signup")
                         .header(HttpHeaders.AUTHORIZATION, "Bearer bad-token")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -74,6 +74,13 @@ class WebSecurityConfigurationTest {
                 .andExpect(jsonPath("$.token").value("jwt-token"));
 
         verify(jwtService, never()).extractUserId("bad-token");
+    }
+
+    @Test
+    void authProfileEndpointRemainsProtected() throws Exception {
+        mockMvc.perform(get("/api/auth/me"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.error").value("UNAUTHORIZED"));
     }
 
     @Test
