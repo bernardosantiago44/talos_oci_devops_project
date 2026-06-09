@@ -1,0 +1,331 @@
+@startuml
+
+class AnalyticsDashboard {
+	{method} +chartData () : List
+	{method} +equals ( o : Object ) : boolean
+	{method} +hashCode () : int
+	{method} +kpis () : AnalyticsKpis
+	{method} +toString () : String
+}
+
+
+class AnalyticsDebug {
+	{field} -assignments : List
+	{field} -timeEntries : List
+	{field} -workItems : List
+	{method} +assignments () : List
+	{method} +equals ( o : Object ) : boolean
+	{method} +hashCode () : int
+	{method} +timeEntries () : List
+	{method} +toString () : String
+	{method} +workItems () : List
+}
+
+
+class AnalyticsKpis {
+	{field} -avgHoursPerDev : double
+	{field} -avgTasksPerDev : double
+	{field} -totalHours : double
+	{field} -totalTasks : long
+	{method} +avgHoursPerDev () : double
+	{method} +avgTasksPerDev () : double
+	{method} +equals ( o : Object ) : boolean
+	{method} +hashCode () : int
+	{method} +toString () : String
+	{method} +totalHours () : double
+	{method} +totalTasks () : long
+}
+
+
+class AnalyticsRepository {
+	{field} {static} -DEVELOPER_SPRINT_ANALYTICS_SQL : String
+	{field} {static} -SPRINT_VELOCITY_SQL : String
+	{field} -jdbcTemplate : JdbcTemplate
+	{method} +findDebugData () : AnalyticsDebug
+	{method} +findDeveloperSprintAnalytics () : List
+	{method} +findSprintVelocityRows () : List
+	{method} -getStringOrNull ( rs : ResultSet , column : String ) : String
+	{method} -mapDeveloperSprintAnalytics ( rs : ResultSet , rowNum : int ) : DeveloperSprintAnalytics
+	{method} -mapSprintVelocityRow ( rs : ResultSet , rowNum : int ) : SprintVelocityRow
+}
+
+
+class AppUser {
+	{field} +createdAt : OffsetDateTime
+	{field} +email : String
+	{field} +name : String
+	{field} +passwordHash : String
+	{field} +phoneNumber : String
+	{field} +telegramUserId : String
+	{field} +userId : String
+	{method} +prePersist () : void
+}
+
+
+interface AppUserRepository {
+	{method}  {abstract} +existsByEmailIgnoreCase ( email : String ) : boolean
+	{method}  {abstract} +existsByTelegramUserId ( telegramUserId : String ) : boolean
+	{method}  {abstract} +existsByTelegramUserIdAndUserIdNot ( telegramUserId : String , userId : String ) : boolean
+	{method}  {abstract} +findAllByOrderByNameAsc () : List
+	{method}  {abstract} +findByEmailIgnoreCase ( email : String ) : Optional
+	{method}  {abstract} +findByTelegramUserId ( telegramUserId : String ) : Optional
+}
+
+
+class AppUserSummary {
+	{field} -email : String
+	{field} -name : String
+	{field} -telegramUserId : String
+	{field} -userId : String
+	{method} +email () : String
+	{method} +equals ( o : Object ) : boolean
+	{method} +hashCode () : int
+	{method} +name () : String
+	{method} +telegramUserId () : String
+	{method} +toString () : String
+	{method} +userId () : String
+}
+
+
+class Assignee {
+	{field} -assignmentId : String
+}
+
+
+class DeveloperSprintAnalytics {
+	{field} -developer : String
+	{field} -sprint : String
+	{field} -tasksCompleted : long
+	{field} -totalHoursWorked : double
+	{field} -userId : String
+	{method} +developer () : String
+	{method} +equals ( o : Object ) : boolean
+	{method} +hashCode () : int
+	{method} +legacyDeveloper () : String
+	{method} +legacyRealHours () : double
+	{method} +legacySprint () : String
+	{method} +legacySprintName () : String
+	{method} +legacyTasksCompleted () : long
+	{method} +legacyTotalHoursWorked () : double
+	{method} +legacyUserId () : String
+	{method} +sprint () : String
+	{method} +tasksCompleted () : long
+	{method} +toString () : String
+	{method} +totalHoursWorked () : double
+	{method} +userId () : String
+}
+
+
+class Sprint {
+	{field} +createdAt : OffsetDateTime
+	{field} +createdByUserId : String
+	{field} +endDate : LocalDate
+	{field} +goal : String
+	{field} +name : String
+	{field} +sprintId : String
+	{field} +startDate : LocalDate
+	{field} +status : String
+	{field} +teamId : String
+}
+
+
+interface SprintRepository {
+}
+
+
+class SprintVelocity {
+	{field} -completedTasks : long
+	{field} -endDate : String
+	{field} -fulfillmentPct : double
+	{field} -sprintId : String
+	{field} -sprintName : String
+	{field} -sprintStatus : String
+	{field} -startDate : String
+	{field} -totalTasks : long
+	{method} +completedTasks () : long
+	{method} +endDate () : String
+	{method} +equals ( o : Object ) : boolean
+	{method} +fulfillmentPct () : double
+	{method} +hashCode () : int
+	{method} +sprintId () : String
+	{method} +sprintName () : String
+	{method} +sprintStatus () : String
+	{method} +startDate () : String
+	{method} +toString () : String
+	{method} +totalTasks () : long
+}
+
+
+class SprintVelocityRow {
+	{field} -completedTasks : long
+	{field} -endDate : String
+	{field} -sprintId : String
+	{field} -sprintName : String
+	{field} -sprintStatus : String
+	{field} -startDate : String
+	{field} -totalTasks : long
+	{method} +completedTasks () : long
+	{method} +endDate () : String
+	{method} +equals ( o : Object ) : boolean
+	{method} +hashCode () : int
+	{method} +sprintId () : String
+	{method} +sprintName () : String
+	{method} +sprintStatus () : String
+	{method} +startDate () : String
+	{method} +toString () : String
+	{method} +totalTasks () : long
+}
+
+
+class Tag {
+	{field} +color : String
+	{field} +createdAt : OffsetDateTime
+	{field} +description : String
+	{field} +name : String
+	{field} +tagId : String
+}
+
+
+interface TagsRepository {
+	{method}  {abstract} +existsByName ( name : String ) : boolean
+	{method}  {abstract} +existsByNameAndTagIdNot ( name : String , id : String ) : boolean
+}
+
+
+class TimeEntry {
+	{field} +createdAt : OffsetDateTime
+	{field} +endedAt : OffsetDateTime
+	{field} +id : String
+	{field} +minutes : Integer
+	{field} +note : String
+	{field} +startedAt : OffsetDateTime
+}
+
+
+interface TimeEntryRepository {
+}
+
+
+class User {
+	{field} +name : String
+	{field} +phoneNumber : String
+	{field} +telegramUserId : String
+	{field} +userId : String
+	{field} +userPassword : String
+	{method} +prePersist () : void
+}
+
+
+class UserSummary {
+	{field} -id : String
+	{field} -name : String
+	{method} +equals ( o : Object ) : boolean
+	{method} +hashCode () : int
+	{method} +id () : String
+	{method} +name () : String
+	{method} +toString () : String
+}
+
+
+class VelocityAnalytics {
+	{field} -overallPct : double
+	{field} -target : double
+	{method} +equals ( o : Object ) : boolean
+	{method} +hashCode () : int
+	{method} +overallPct () : double
+	{method} +sprints () : List
+	{method} +target () : double
+	{method} +toString () : String
+}
+
+
+class WorkItem {
+	{field} +completedAt : OffsetDateTime
+	{field} +createdAt : OffsetDateTime
+	{field} +createdByUserId : String
+	{field} +description : String
+	{field} +dueDate : LocalDate
+	{field} +estimatedMinutes : Integer
+	{field} +externalLink : String
+	{field} +sprintId : String
+	{field} +status : String
+	{field} +title : String
+	{field} +updatedAt : OffsetDateTime
+	{field} +workItemId : String
+	{field} +workType : String
+}
+
+
+class WorkItemAssignment {
+	{field} +assignedAt : OffsetDateTime
+	{field} +assignmentId : String
+	{field} +assignmentRole : String
+	{field} +unassignedAt : OffsetDateTime
+}
+
+
+interface WorkItemAssignmentRepository {
+	{method}  {abstract} +deleteByWorkItem_WorkItemId ( workItemId : String ) : void
+	{method}  {abstract} +existsByWorkItem_WorkItemIdAndAssignedUser_UserId ( workItemId : String , userId : String ) : boolean
+	{method}  {abstract} +findByWorkItem_WorkItemId ( workItemId : String ) : List
+	{method}  {abstract} +findByWorkItem_WorkItemIdAndAssignedUser_UserId ( workItemId : String , userId : String ) : Optional
+}
+
+
+enum WorkItemPriority {
+	{field} +HIGH
+	{field} +LOW
+	{field} +MEDIUM
+}
+
+
+interface WorkItemRepository {
+	{method}  {abstract} +findAll () : List
+	{method}  {abstract} +findAll ( spec : Specification ) : List
+	{method}  {abstract} +findById ( id : String ) : Optional
+	{method}  {abstract} +findByTelegramUserId ( userId : String ) : List
+}
+
+
+class WorkItemTag {
+	{field} +createdAt : LocalDateTime
+	{method} #onCreate () : void
+}
+
+
+interface WorkItemTagAssignmentRepository {
+	{method}  {abstract} +deleteByWorkItem_WorkItemId ( workItemId : String ) : void
+}
+
+
+class WorkItemTagId {
+	{field} +tagId : String
+	{field} +workItemId : String
+	{method} +equals ( o : Object ) : boolean
+	{method} +hashCode () : int
+}
+
+
+
+
+AnalyticsDashboard "1" o-- "0..*"  DeveloperSprintAnalytics : chartData
+AnalyticsDashboard *--  AnalyticsKpis : kpis
+Assignee -->  User :  @OneToOne\nuser
+TimeEntry -->  AppUser :  @ManyToOne\nuser
+TimeEntry -->  WorkItem :  @ManyToOne\nworkItem
+VelocityAnalytics "1" o-- "0..*"  SprintVelocity : sprints
+WorkItem "1" o-- "0..*"  TimeEntry : timeEntries
+WorkItem "1" o-- "0..*"  WorkItemAssignment : assignments
+WorkItem "1" o-- "0..*"  WorkItemTag : tags
+WorkItem -->  WorkItemPriority :  @Column("PRIORITY")\npriority
+WorkItemAssignment -->  AppUser :  @ManyToOne\nassignedByUser
+WorkItemAssignment -->  AppUser :  @ManyToOne\nassignedUser
+WorkItemAssignment -->  WorkItem :  @ManyToOne\nworkItem
+WorkItemTag -->  Tag :  @ManyToOne\ntag
+WorkItemTag -->  WorkItem :  @ManyToOne\nworkItem
+WorkItemTag -->  WorkItemTagId : id
+
+hide fields
+hide methods
+
+@enduml

@@ -13,3 +13,10 @@
 1. Open a new terminal and navigate to frontend: `cd MtdrSpring/frontend`
    1. Install package dependencies with `npm install`
 2. Run the app with `npm start`
+
+## Sprint 5, module 5 delivery
+
+1. In updated MtdrSpring/backend/pom.xml the generation of documents is below `<!-- Start of delivery for module 5 -->`
+2. Github actions for automatic generation of architecture documents is in .github/workflows/docker-image.yaml
+3. The generated documents are present in MtdrSpring/doc/arch/generated/level-4
+4. Inclusion of level4 diagrams into C4 diagram is done in MtdrSpring/model.dsl
