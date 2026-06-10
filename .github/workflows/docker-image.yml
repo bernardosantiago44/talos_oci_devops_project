@@ -152,3 +152,4 @@ jobs:
           OCI_CLI_KEY_CONTENT: ${{ secrets.OCI_CLI_KEY_CONTENT }}
           OCI_CLI_REGION: ${{ vars.OCI_CLI_REGION }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          ALIBABA_API_KEY: ${{ secrets.ALIBABA_API_KEY }}
