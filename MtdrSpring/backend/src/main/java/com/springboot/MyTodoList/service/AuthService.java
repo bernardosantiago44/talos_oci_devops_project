@@ -10,6 +10,7 @@ import com.springboot.MyTodoList.exception.BusinessRuleException;
 import com.springboot.MyTodoList.model.AppUser;
 import com.springboot.MyTodoList.repository.AppUserRepository;
 import jakarta.transaction.Transactional;
+import java.util.Optional;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -35,8 +36,19 @@ public class AuthService {
     @Transactional
     public AuthResponse signup(SignupRequest request) {
         String email = normalizeEmail(request.getEmail());
-        if (appUserRepository.existsByEmailIgnoreCase(email)) {
-            throw new BusinessRuleException("Email is already registered");
+        Optional<AppUser> existing = appUserRepository.findByEmailIgnoreCase(email);
+
+        if (existing.isPresent()) {
+            AppUser user = existing.get();
+            // Allow activation if account has no password yet (pre-existing user)
+            if (user.getPasswordHash() != null) {
+                throw new BusinessRuleException("Email is already registered");
+            }
+            user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
+            if (request.getName() != null && !request.getName().isBlank()) {
+                user.setName(request.getName().trim());
+            }
+            return toAuthResponse(appUserRepository.save(user));
         }
 
         AppUser user = new AppUser();
