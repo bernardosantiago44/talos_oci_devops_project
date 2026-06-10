@@ -3,10 +3,17 @@ kind: Ingress
 metadata:
   name: main-ingress
   namespace: mtdrworkshop
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
 spec:
   ingressClassName: nginx
+  tls:
+  - hosts:
+    - talos.tomassladek.sk
+    secretName: mtdrworkshop-tls-secret
   rules:
-  - http:
+  - host: talos.tomassladek.sk
+    http:
       paths:
       - path: /api
         pathType: Prefix
