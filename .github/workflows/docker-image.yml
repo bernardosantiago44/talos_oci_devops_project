@@ -136,6 +136,7 @@ jobs:
           sed -i "s|%DB_URL%|${{ vars.DB_URL }}|g" ./ready-to-deploy.yaml
           sed -i "s|%DB_USERNAME%|${{ vars.DB_USERNAME }}|g" ./ready-to-deploy.yaml
           sed -i "s|%DB_PASSWORD%|${{ secrets.DB_PASSWORD }}|g" ./ready-to-deploy.yaml
+          sed -i "s|%ALIBABA_API_KEY%|${{ secrets.ALIBABA_API_KEY }}|g" ./ready-to-deploy.yaml
           kubectl create secret generic jwt-secret \
             --from-literal=JWT_SECRET="$JWT_SECRET" \
             --dry-run=client \
