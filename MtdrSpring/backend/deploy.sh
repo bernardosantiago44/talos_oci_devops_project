@@ -38,6 +38,11 @@ if [ -z "$UI_USERNAME" ]; then
     exit 1
 fi
 
+if [ -z "$JWT_SECRET" ]; then
+    echo "Error: JWT_SECRET env variable needs to be set!"
+    exit 1
+fi
+
 echo "Creating springboot deplyoment and service"
 export CURRENTTIME=$( date '+%F_%H:%M:%S' )
 echo CURRENTTIME is $CURRENTTIME  ...this will be appended to generated deployment yaml
@@ -53,6 +58,11 @@ sed -e "s|%OCI_REGION%|${OCI_REGION}|g" todolistapp-springboot-${CURRENTTIME}.ya
 mv -- /tmp/todolistapp-springboot-$CURRENTTIME.yaml todolistapp-springboot-$CURRENTTIME.yaml
 sed -e "s|%UI_USERNAME%|${UI_USERNAME}|g" todolistapp-springboot-${CURRENTTIME}.yaml > /tmp/todolistapp-springboot-$CURRENTTIME.yaml
 mv -- /tmp/todolistapp-springboot-$CURRENTTIME.yaml todolistapp-springboot-$CURRENTTIME.yaml
+kubectl create secret generic jwt-secret \
+    --from-literal=JWT_SECRET="$JWT_SECRET" \
+    --dry-run=client \
+    -o yaml \
+    -n mtdrworkshop | kubectl apply -f -
 if [ -z "$1" ]; then
     kubectl apply -f $SCRIPT_DIR/todolistapp-springboot-$CURRENTTIME.yaml -n mtdrworkshop
 else

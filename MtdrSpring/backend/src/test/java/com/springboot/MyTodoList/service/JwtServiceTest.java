@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class JwtServiceTest {
     private final JwtService jwtService = new JwtService(
@@ -33,5 +34,14 @@ class JwtServiceTest {
         String tamperedToken = token.substring(0, token.length() - 2) + "xx";
 
         assertThat(jwtService.extractUserId(tamperedToken)).isEqualTo(Optional.empty());
+    }
+
+    @Test
+    void tokenGenerationFailsClearlyWhenSecretIsMissing() {
+        JwtService misconfiguredJwtService = new JwtService(new ObjectMapper(), "", 60);
+
+        assertThatThrownBy(() -> misconfiguredJwtService.generateToken(TestDataFactory.appUser("user-1")))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("JWT secret must be configured with JWT_SECRET.");
     }
 }

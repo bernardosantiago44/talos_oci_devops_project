@@ -136,6 +136,11 @@ jobs:
           sed -i "s|%DB_URL%|${{ vars.DB_URL }}|g" ./ready-to-deploy.yaml
           sed -i "s|%DB_USERNAME%|${{ vars.DB_USERNAME }}|g" ./ready-to-deploy.yaml
           sed -i "s|%DB_PASSWORD%|${{ secrets.DB_PASSWORD }}|g" ./ready-to-deploy.yaml
+          kubectl create secret generic jwt-secret \
+            --from-literal=JWT_SECRET="$JWT_SECRET" \
+            --dry-run=client \
+            -o yaml \
+            -n mtdrworkshop | kubectl apply -f -
           kubectl apply -f ./ready-to-deploy.yaml -n mtdrworkshop
           rm ./ready-to-deploy.yaml
           kubectl rollout status deployment/todolistapp-springboot-deployment -n mtdrworkshop
@@ -145,3 +150,4 @@ jobs:
           OCI_CLI_FINGERPRINT: ${{ secrets.OCI_CLI_FINGERPRINT }}
           OCI_CLI_KEY_CONTENT: ${{ secrets.OCI_CLI_KEY_CONTENT }}
           OCI_CLI_REGION: ${{ vars.OCI_CLI_REGION }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
