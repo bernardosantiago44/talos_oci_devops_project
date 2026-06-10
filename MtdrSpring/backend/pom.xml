@@ -14,7 +14,7 @@
 	<name>MyTodoList</name>
 	<description>Demo project for Spring Boot</description>
 	<properties>
-		<java.version>25</java.version>
+		<java.version>22</java.version>
 		<version.lib.ojdbc>21.1.0.0</version.lib.ojdbc>
 		<byte-buddy-agent.version>1.17.7</byte-buddy-agent.version>
 	</properties>
@@ -109,7 +109,7 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.13.0</version>
 				<configuration>
-					<release>25</release>
+					<release>22</release>
 					<annotationProcessorPaths>
 						<path>
 							<groupId>org.projectlombok</groupId>
