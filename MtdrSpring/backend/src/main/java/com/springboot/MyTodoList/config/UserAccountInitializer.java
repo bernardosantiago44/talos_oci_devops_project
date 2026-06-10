@@ -50,7 +50,7 @@ public class UserAccountInitializer implements ApplicationRunner {
                 updated = true;
             }
 
-            if (user.getPasswordHash() == null || user.getPasswordHash().isBlank()) {
+            if (!isValidBcrypt(user.getPasswordHash())) {
                 user.setPasswordHash(hashedDefault);
                 updated = true;
             }
@@ -66,6 +66,10 @@ public class UserAccountInitializer implements ApplicationRunner {
         if (!anyUpdated) {
             logger.info("UserAccountInitializer: all accounts already initialized, nothing to do.");
         }
+    }
+
+    private boolean isValidBcrypt(String hash) {
+        return hash != null && (hash.startsWith("$2a$") || hash.startsWith("$2b$") || hash.startsWith("$2y$"));
     }
 
     private String toEmail(String name) {
