@@ -52,10 +52,7 @@ spec:
                   name: jwt-secret
                   key: JWT_SECRET
             - name: ALIBABA_API_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: ALIBABA_API_KEY
-                  key: "%ALIBABA_API_KEY%"
+              value: "%ALIBABA_API_KEY%"
             - name: dbpassword
               valueFrom:
                 secretKeyRef:
