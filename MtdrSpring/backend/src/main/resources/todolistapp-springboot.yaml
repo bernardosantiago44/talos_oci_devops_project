@@ -54,8 +54,8 @@ spec:
             - name: ALIBABA_API_KEY
               valueFrom:
                 secretKeyRef:
-                  name: alibaba-api-key
-                  key: ALIBABA_API_KEY
+                  name: ALIBABA_API_KEY
+                  key: "%ALIBABA_API_KEY%"
             - name: dbpassword
               valueFrom:
                 secretKeyRef:
