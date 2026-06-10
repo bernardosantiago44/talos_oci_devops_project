@@ -45,7 +45,7 @@ class AuthServiceTest {
     @Test
     void signupHashesPasswordAndReturnsSafeProfile() {
         SignupRequest request = signupRequest();
-        when(appUserRepository.existsByEmailIgnoreCase("user@example.com")).thenReturn(false);
+        when(appUserRepository.findByEmailIgnoreCase("user@example.com")).thenReturn(Optional.empty());
         when(appUserRepository.save(any(AppUser.class))).thenAnswer(invocation -> {
             AppUser user = invocation.getArgument(0);
             user.setUserId("user-1");
@@ -70,11 +70,30 @@ class AuthServiceTest {
     @Test
     void signupRejectsDuplicateEmail() {
         SignupRequest request = signupRequest();
-        when(appUserRepository.existsByEmailIgnoreCase("user@example.com")).thenReturn(true);
+        AppUser existingUser = TestDataFactory.appUser("user-1");
+        existingUser.setEmail("user@example.com");
+        existingUser.setPasswordHash(passwordEncoder.encode("existingPassword"));
+        when(appUserRepository.findByEmailIgnoreCase("user@example.com")).thenReturn(Optional.of(existingUser));
 
         assertThatThrownBy(() -> service.signup(request))
                 .isInstanceOf(BusinessRuleException.class)
                 .hasMessage("Email is already registered");
+    }
+
+    @Test
+    void signupActivatesExistingUserWithoutPassword() {
+        SignupRequest request = signupRequest();
+        AppUser existingUser = TestDataFactory.appUser("user-1");
+        existingUser.setEmail("user@example.com");
+        existingUser.setPasswordHash(null);
+        when(appUserRepository.findByEmailIgnoreCase("user@example.com")).thenReturn(Optional.of(existingUser));
+        when(appUserRepository.save(any(AppUser.class))).thenReturn(existingUser);
+        when(jwtService.generateToken(any(AppUser.class))).thenReturn("jwt-token");
+
+        AuthResponse response = service.signup(request);
+
+        assertThat(passwordEncoder.matches("plainPassword", existingUser.getPasswordHash())).isTrue();
+        assertThat(response.token()).isEqualTo("jwt-token");
     }
 
     @Test
